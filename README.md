@@ -11,7 +11,7 @@
 <i>your knowledge base</i> with AI
 </p>
 
-## Quick start
+## Quick preview
 
 ```python
 from evonote.ui import *
@@ -59,7 +59,7 @@ Knowledge base (KB) is the core of many intelligence-related tasks.
 - **Academic research**: Actively construct a knowledge base by asking (finding unknown in KB) / reading papers (adding to KB) / meditating (rearranging KB items) / discussing (comparing KBs) / doing experiments (changing confident level of KB items).  
 - **Paper writing**: Assuming a KB of the reader, generate a linearized text whose core is the difference between the KB of the reader and the writer.
 - **Joke writing**: Assuming a KB of the audience, make 
-a text with which the audience can draw an unexpected & reasonable relation among items in the KB. (See [humor and art](docs/philosophy/Humor and art.md))
+a text with which the audience can draw an unexpected & reasonable relation among items in the KB. (See [humor and art](./docs/philosophy/Humor and art.md))
 
 Typically, these tasks requires 
 
@@ -80,7 +80,22 @@ EvoNote is build for holding and operating knowledge bases (notebooks). EvoNote 
 
 (* means under development)
 
-## What EvoNote is note
+## What EvoNote is not
 
 - EvoNote does not aim to build large knowledge bases swiftly and search from it with low latency. Instead, EvoNote provides a more human-like approach, in which the structure of knowledge items is highly non-trivial. With a structure, one can search the knowledge even more semantically than a naive embedding-based search.
- 
+
+- The knowledge base in EvoNote is not a *knowledge graph*. We believe that knowledge graph is too rigid to hold human knowledge. Similar to what is happening in human-brain, the knowledge base in EvoNote is softer and vaguer, whose interpretation is dependent on the language model.
+
+## Installation
+
+Currently, EvoNote is not ready for production usage. Please refer to the Development section for development usage.
+
+## Development
+
+- In order to use OpenAI API, the environment variables `OPENAI_API_KEY` should be set to your API key.
+- PyCharm is recommended.
+
+Idea needed:
+- How to efficiently use the structure of the knowledge base to search for useful items?
+- How to construct knowledge base items from a paper-long text with high quality?
+- How to rearrange the knowledge base items to find new insights?
