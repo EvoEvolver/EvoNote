@@ -1,0 +1,3 @@
+numpy==1.25.0
+plotly==5.9.0
+PyHyphen==4.0.3
