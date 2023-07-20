@@ -5,10 +5,10 @@ import os
 
 import typing
 
-from evonote import EvolverInstance, evolve
+from evonote import EvolverInstance
 import openai
 
-from evonote.core.evolver import get_caller_id, show
+from evonote.core.evolver import get_caller_id, show, evolve
 
 verbose = True
 
@@ -177,19 +177,6 @@ def answer(question: str, system_message: str = None, format=None) -> ChatWriter
     """
     _, _, stack = EvolverInstance.get_context()
     return ChatWriter(question, system_message, stack[0].filename)
-
-
-if __name__ == "__main__":
-    from evonote.notebook.notebook import Note, make_root_note
-
-    root = make_root_note()
-    root.ans = answer("Just say yes!").revise("repeat yes 10 times")#.retake()
-    show(root.ans)
-    """""show
-    Yes! Yes! Yes! Yes! Yes! Yes! Yes! Yes! Yes! Yes!
-    """""
-    # print(repr(ans))
-    evolve()
 
 
 def get_prompt_for_useful_notes(notes: typing.List[Note]):
