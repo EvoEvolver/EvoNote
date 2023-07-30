@@ -1,6 +1,5 @@
 from __future__ import annotations
 import openai
-import os
 from evonote import EvolverInstance
 
 from evonote.data_type.var_types import ValueByInput
@@ -39,7 +38,7 @@ def cpl(prompt, **kwargs):
 def _cpl(prompt, options):
     return openai.Completion.create(prompt=prompt, **options).text.strip()
 
-'''
+
 
 # default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
 default_kwargs_chat_openai = {"model": "gpt-4"}
@@ -86,7 +85,7 @@ def answer(question: str, system_message: str = None, **kwargs):
     chat = init_chat(question, system_message)
     return _answer_1(chat, stack[0].filename, **kwargs)
 
-
+'''
 from evonote.data_type.chat import Chat
 
 
@@ -95,6 +94,12 @@ def init_chat(init_message: any, system_message: any = None) -> Chat:
     chat.add_user_message(init_message)
     return chat
 
+#default_kwargs_chat_openai = {"model": "gpt-4"}
+
+def complete_chat(chat: Chat, options):
+    return openai.ChatCompletion.create(
+        messages=chat.get_log_list(), **options).choices[
+        0].message.content
 
 # Embedding
 
@@ -111,7 +116,7 @@ embedding_dim_using = model_to_embedding_dim[model_for_embedding]
 
 embedding_cache = None
 
-def get_embeddings(texts: list[str]) -> list[list[float]]:
+def get_embeddings(texts: list[str], make_cache=False) -> list[list[float]]:
     global embedding_cache
     if embedding_cache is None:
         if os.path.exists(embedding_cache_path):
@@ -134,15 +139,19 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
         res = openai.Embedding.create(input=texts_without_cache,
                                       model=model_for_embedding)["data"]
         res = [r["embedding"] for r in res]
-
+        print(f"{len(res)} embeddings generated")
         for i, r in zip(index_for_eval, res):
             embedding_cache[hash_keys[i]] = r
             embeddings[i] = r
 
-    np.save(embedding_cache_path, embedding_cache)
+    if make_cache:
+        np.save(embedding_cache_path, embedding_cache)
 
     return embeddings
 
+def cache_embeddings():
+    global embedding_cache
+    np.save(embedding_cache_path, embedding_cache)
 
 def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
                             weighting=None):
@@ -152,3 +161,6 @@ def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
     content_embeddings = np.dot(weighting, embedding_for_context_lines)
     scores = np.dot(content_embeddings, embedding_to_search.T) / n_lines
     return scores
+
+
+

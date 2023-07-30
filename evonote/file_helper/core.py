@@ -6,8 +6,8 @@ import json
 import os
 from typing import Dict, Optional, Tuple, List
 
-from evonote.core.src_manager import SrcManager
-from evonote.core.src_manager import comment_delimiter
+from evonote.file_helper.src_manager import SrcManager
+from evonote.file_helper.src_manager import comment_delimiter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from evonote.data_type.var_types import ValueByInput

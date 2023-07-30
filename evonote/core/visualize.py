@@ -1,7 +1,10 @@
-from evonote.notebook.notebook import Note
+
 import plotly.graph_objects as go
 from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
+
+from evonote.core.note import Note
+
 h_en = Hyphenator('en_US')
 
 def draw_treemap(note: Note):

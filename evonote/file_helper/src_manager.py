@@ -1,6 +1,6 @@
 from typing import Optional
 
-from evonote.core.utils import escape_multi_quote
+from evonote.file_helper.utils import escape_multi_quote
 
 comment_delimiter_len = 5
 comment_delimiter = '"' * comment_delimiter_len

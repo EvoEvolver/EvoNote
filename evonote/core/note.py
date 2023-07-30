@@ -1,33 +1,50 @@
 from __future__ import annotations
-
 import ast
-import json
 from typing import Dict
-
 from evonote import EvolverInstance
-from evonote.core.core import delete_old_comment_output
-from evonote.core.evolver import get_caller_id, check_if_stand_alone_call
-from evonote.model.openai import get_embeddings
-from evonote.notebook.writer import Writer
+from evonote.file_helper.core import delete_old_comment_output
+from evonote.file_helper.evolver import get_caller_id
+from evonote.model.llm import get_embeddings
+from evonote.core.knowledge import KnowledgeItem, RootKnowledgeItem
+from evonote.core.writer import Writer
 
 
-class Note:
+
+class Note(KnowledgeItem):
+    """
+    A tree-like data structure that stores core
+    usually for the direct summary of paragraphs
+
+    The relation of the items are mainly represented by the tree structure
+    It is like a book that AI can read
+    """
     def __init__(self):
+        super().__init__()
+
         self._is_note = True
+        # _note_path looks like /a/b/c
         self._note_path: str = ""
+        # _content is string no matter what _content_type is
         self._content: str = ""
+        # _content_type helps deserialize _content
         self._content_type = None
 
         self._children: Dict[str, Note] = {}
-        self._root: RootNote | None = None
+        # The root note helps merge two core bases
+        self._root: Notebook | None = None
 
-        self._tag_vectors = {}
-        self._tag_keys = {}
-
+        # The parents of this note
         self._parents = None
+        # The related notes of this note
+        # crawling through the related notes can help us find the relevant notes
         self._related_notes = []
 
     def be(self, writer: Writer | str) -> Note:
+        """
+        Assign the note with a writer (generator)
+        :param writer:
+        :return: The note itself
+        """
         if isinstance(writer, str):
             self._content = writer
         elif "_is_writer" in writer.__dict__:
@@ -40,6 +57,11 @@ class Note:
         return self
 
     def cite(self, note: Note, *args) -> Note:
+        """
+        Adding related notes to the note
+        Usage: note.cite(note1, note2, ...)
+        :return:
+        """
         self._related_notes.append(note)
         self._related_notes.extend(args)
         return self
@@ -69,6 +91,11 @@ class Note:
         return res
 
     def s(self, key) -> Note:
+        """
+        Creating a new child note or addressing an existing child note
+        :param key: the key of the child note
+        :return:
+        """
         if isinstance(key, int) or isinstance(key, str):
             if key not in self._children:
                 return init_child_note(self, key)
@@ -77,6 +104,10 @@ class Note:
             raise NotImplementedError()
 
     def obj(self, index=None):
+        """
+        Parse the content as an object. Return the object or the value on the index
+        :return:
+        """
         obj = ast.literal_eval(self._content)
         if index is not None:
             return obj[index]
@@ -112,7 +143,11 @@ class Note:
         else:
             raise NotImplementedError()
 
-def get_all_descendants(note: Note):
+
+#def get_relevance_score(note: Note, query_vector: np.ndarray):
+
+
+def get_all_descendants(note: Note | Notebook):
     descendants = []
     for child in note._children.values():
         descendants.append(child)
@@ -126,16 +161,21 @@ def get_children_and_embeddings(note: Note):
     embeddings = get_embeddings(children_content)
     for i, child in enumerate(children_with_content):
         child._tag_keys["content"] = children_content[i]
-        child._tag_vectors["content"] = embeddings[i]
+        child._attention_vectors["content"] = embeddings[i]
     return children_with_content, embeddings
 
 
-class RootNote(Note):
+class Notebook(RootKnowledgeItem):
     def __init__(self, path_born):
         super().__init__()
         self._note_path = ""
         self._root = self
         self._path_born = path_born
+        self._is_root = True
+        self._children: Dict[str, Note] = {}
+
+    def get_items(self):
+        return get_all_descendants(self)
 
 
 def init_child_note(note: Note, key: str):
@@ -150,5 +190,5 @@ def init_child_note(note: Note, key: str):
 def make_root_note():
     _, _, stacks = EvolverInstance.get_context()
     path_born = stacks[0].filename
-    note = RootNote(path_born)
+    note = Notebook(path_born)
     return note

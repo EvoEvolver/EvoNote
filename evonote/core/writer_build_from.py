@@ -4,10 +4,11 @@ import ast
 
 from evonote import EvolverInstance
 from evonote.data_type.chat import Chat
-from evonote.notebook.notebook import Note
-from evonote.notebook.writer import Writer, get_notes_by_linage, \
-    complete_chat, default_kwargs_chat_openai, \
+from evonote.core.note import Note
+from evonote.core.writer import Writer, get_notes_by_linage, \
+    default_kwargs_chat_openai, \
     verbose, get_prompt_for_useful_notes, get_nearby_paths_in_prompt
+from evonote.model.llm import complete_chat
 
 
 class BuildFromWriter(Writer):
@@ -16,7 +17,7 @@ class BuildFromWriter(Writer):
         super().__init__("build_from", ["paragraph"], caller_path)
 
     def _write(self, note: Note) -> str:
-        chat = Chat(system_message="""You are a helpful assistant for arranging knowledge to a knowledge base. You should output merely JSON.""")
+        chat = Chat(system_message="""You are a helpful assistant for arranging core to a core base. You should output merely JSON.""")
         chat.add_user_message(self.paragraph)
         chat.add_user_message("""Summarize the above paragraph into a tree. Give the result in JSON with the keys being "subject", "statement", "subtopics".""")
         res = complete_chat(chat, default_kwargs_chat_openai)
@@ -46,4 +47,3 @@ def iter_and_assign(note: Note, tree: dict):
 def build_from(paragraph: str) -> Writer:
     _, _, stack = EvolverInstance.get_context()
     return BuildFromWriter(paragraph, stack[0].filename)
-

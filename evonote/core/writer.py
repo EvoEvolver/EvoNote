@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 import json
-import os
 
 import typing
 
 from evonote import EvolverInstance
-import openai
 
-from evonote.core.evolver import get_caller_id, show, evolve
+from evonote.file_helper.evolver import get_caller_id
+from evonote.model.llm import complete_chat
 
 verbose = True
 
 if typing.TYPE_CHECKING:
-    from evonote.notebook.notebook import Note
+    from evonote.core.note import Note
 
 
 class Writer:
@@ -113,10 +112,6 @@ def _to_here(note: Note, manager, line_i, stacks):
 
 default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
 
-def complete_chat(chat: Chat, options):
-    return openai.ChatCompletion.create(
-        messages=chat.get_log_list(), **options).choices[
-        0].message.content
 
 class ChatWriter(Writer):
     def __init__(self, user_message, system_message, caller_path: str):

@@ -2,16 +2,17 @@ from __future__ import annotations
 
 from evonote import EvolverInstance
 from evonote.data_type.chat import Chat
-from evonote.notebook.notebook import Note
-from evonote.notebook.writer import Writer, get_notes_by_linage, \
-    complete_chat, default_kwargs_chat_openai, \
+from evonote.core.note import Note
+from evonote.core.writer import Writer, get_notes_by_linage, \
+    default_kwargs_chat_openai, \
     verbose, get_prompt_for_useful_notes, get_nearby_paths_in_prompt
+from evonote.model.llm import complete_chat
 
 
-class RetrievalWriter(Writer):
+class RetrieveWriter(Writer):
     def __init__(self, objective, caller_path: str):
         self.objective = objective
-        super().__init__("auto", ["objective"], caller_path)
+        super().__init__("retrieve", ["objective"], caller_path)
 
     def _write(self, note: Note) -> str:
 
@@ -21,7 +22,11 @@ class RetrievalWriter(Writer):
         if len(self._revise_comments) > 0 and self._revise_comments[-1].type == "set":
             return self._revise_comments[-1].content
 
-        nearby_notes = get_notes_by_linage(note)
+        nearby_notes = get_notes_by_linage(note, depth=100)
+        # Filter notes by embedding
+
+
+
         nearby_paths_in_prompt = get_nearby_paths_in_prompt(nearby_notes)
 
         revise_prompt = self.get_revise_prompt()
@@ -102,6 +107,15 @@ Here are some potentially useful notes:
         res = complete_chat(chat, default_kwargs_chat_openai)
         return res
 
+
+def retrieve(objective: str):
+    """
+    Retrieve useful notes to achieve the objective
+    :param objective:
+    :return:
+    """
+    _, _, stack = EvolverInstance.get_context()
+    return RetrieveWriter(objective, stack[0].filename)
 
 def auto(objective: str):
     """

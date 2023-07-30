@@ -2,7 +2,7 @@ import ast
 import inspect
 import warnings
 
-from evonote.core.core import delete_old_comment_output
+from evonote.file_helper.core import delete_old_comment_output
 from evonote import EvolverInstance
 
 def inline(func, **kwargs):

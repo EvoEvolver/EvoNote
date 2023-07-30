@@ -15,7 +15,7 @@
 
 ```python
 from evonote.ui import *
-# Build a knowledge base from a text
+# Build a core base from a text
 root_note.s("Introduction to M. Foucault").be(
     writer.build_from(
         """
@@ -24,7 +24,7 @@ root_note.s("Introduction to M. Foucault").be(
         """
     )
 )
-# Generate a text from the knowledge base
+# Generate a text from the core base
 root_note.s("Example of philosopher").be(
     writer.auto("Give an example of French philosopher")
 ).show()
