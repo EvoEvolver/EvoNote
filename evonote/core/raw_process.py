@@ -16,11 +16,15 @@ def latex_to_markdown(latex: str):
     res = re.sub(r"\\(begin|end){(enumerate|iterate)}", "\n", res)
     # remove \label{xxx}
     res = re.sub(r"\\label{.+?}", "", res)
+    # remove lines starting with %
+    res = re.sub(r"\n%.*", "", res)
+    # replace more than two \n to two \n
+    res = re.sub(r"\n{3,}", "\n\n", res)
     return res
 
 
 def divide_text_into_section(section_level, tex):
-    searched = r"\\"+("sub"*section_level)+"section"+r"\*?{(.+?)}"
+    searched = r"((\\"+("sub"*section_level)+"section)|paragraph)"+r"\*?{(.+?)}"
     # find first section
     m = re.search(searched, tex)
     if m:
@@ -31,7 +35,7 @@ def divide_text_into_section(section_level, tex):
     sections = []
     for m in re.finditer(searched, tex):
         # get the section title
-        section_title = m.group(1)
+        section_title = m.group(3)
         # get the section content
         section_content = tex[m.end():]
         # find the end of the section content
@@ -58,9 +62,13 @@ def process_section_level(section_level, curr_level, doc):
             process_section_level(section_level, curr_level+1, section)
 
 
-def process_latex_sections(tex: str, title: str):
+def process_latex_sections(tex: str):
     abs = re.findall(r"\\begin{abstract}(.+?)\\end{abstract}", tex, re.DOTALL)[0].strip()
-    title = re.findall(r"\\title{(.+?)}", tex, re.DOTALL)[0].strip()
+    title = re.findall(r"\\title{(.+?)}", tex, re.DOTALL)
+    if len(title) > 0:
+        title = title[0].strip()
+    else:
+        title = ""
     doc = {
         "title": title,
         "content": tex,
@@ -68,6 +76,9 @@ def process_latex_sections(tex: str, title: str):
     }
     for i in range(0,4):
         process_section_level(i, 0, doc)
+    # delete the content before first section in the root
+    # because it's usually irrelevant
+    doc["content"] = ""
     return doc, {"abstract": abs, "title": title}
 
 def process_latex(latex: str):
@@ -111,8 +122,13 @@ def process_latex_into_standard(tex: str):
     #doc_dict = {"section_tree": doc, "meta": meta}
     return doc, meta
 
+import markdownify
+
+
+
 if __name__ == "__main__":
     from pprint import pprint
-    from evonote.core.sample_paper import sample_paper
-    tex = sample_paper
-
+    from evonote.core.sample_paper import sample_paper_2
+    tex = sample_paper_2
+    doc, meta = process_latex_into_standard(tex)
+    pprint(doc)

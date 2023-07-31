@@ -135,7 +135,6 @@ def evolve(output_path=None):
     EvolverInstance.save_all_output_to_file()
 
 def save_cache():
-    EvolverInstance.apply_cache_update()
     EvolverInstance.save_all_cache_to_file()
 
 def discard_cache():

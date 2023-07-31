@@ -137,10 +137,13 @@ class EvoCore:
         self.pending_cache.append((cache, filepath))
 
     def apply_cache_update(self):
+        remaining_cache = []
         for cache, filepath in self.pending_cache:
             if cache.is_valid():
                 self.cache_table_map[filepath].map[cache._hash] = cache
-        self.pending_cache = []
+            else:
+                remaining_cache.append((cache, filepath))
+        self.pending_cache = remaining_cache
 
     def discard_cache_update(self):
         self.pending_cache = []

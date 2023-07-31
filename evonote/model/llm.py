@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import List
+
 import openai
 from evonote import EvolverInstance
 
@@ -105,6 +108,19 @@ def complete_chat(chat: Chat, options=None):
     return openai.ChatCompletion.create(
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
+
+
+import concurrent.futures
+def complete_chat_parallel(chats: List[Chat], options=None):
+    def complete_chat_wrapped(chat):
+        return complete_chat(chat, options)
+    results = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(complete_chat_wrapped, chat) for chat in chats]
+        for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            results.append(result)
+    return results
 
 
 # Embedding

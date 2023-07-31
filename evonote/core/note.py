@@ -30,14 +30,29 @@ class Note(KnowledgeItem):
         self._content_type = None
 
         self._children: Dict[str, Note] = {}
+        self._children_order: Dict[str: int] = {}
+
         # The root note helps merge two core bases
         self._root: Notebook | None = None
 
         # The parents of this note
-        self._parents = None
+        self._parents = []
         # The related notes of this note
         # crawling through the related notes can help us find the relevant notes
         self._related_notes = []
+
+    def _add_child(self, key: str, note: Note):
+        self._children[key] = note
+        if len(self._children_order) > 0:
+            self._children_order[key] = max(self._children_order.values()) + 1
+        else:
+            self._children_order[key] = 0
+        note._parents.append(self)
+        if len(note._note_path) == 0:
+            note._note_path = self._note_path + "/" + key if len(
+                self._note_path) > 0 else key
+        if note._root is None:
+            note._root = self._root
 
     def be(self, writer: Writer | str) -> Note:
         """
@@ -66,12 +81,6 @@ class Note(KnowledgeItem):
         self._related_notes.extend(args)
         return self
 
-    def next_index(self):
-        i = 0
-        while str(i) in self._children:
-            i += 1
-        return self.s(str(i))
-
     def show(self):
         evolver_id = "show"
         manager, line_i, stacks = EvolverInstance.get_context()
@@ -98,7 +107,9 @@ class Note(KnowledgeItem):
         """
         if isinstance(key, int) or isinstance(key, str):
             if key not in self._children:
-                return init_child_note(self, key)
+                note = Note()
+                self._add_child(key, note)
+                return note
             return self._children[key]
         else:
             raise NotImplementedError()
@@ -143,6 +154,12 @@ class Note(KnowledgeItem):
         else:
             raise NotImplementedError()
 
+    def get_all_descendants(self: Note):
+        descendants = []
+        for child in self._children.values():
+            descendants.append(child)
+            descendants.extend(get_all_descendants(child))
+        return descendants
 
 #def get_relevance_score(note: Note, query_vector: np.ndarray):
 
@@ -165,7 +182,7 @@ def get_children_and_embeddings(note: Note):
     return children_with_content, embeddings
 
 
-class Notebook(RootKnowledgeItem):
+class Notebook(Note):
     def __init__(self, path_born):
         super().__init__()
         self._note_path = ""
@@ -176,15 +193,6 @@ class Notebook(RootKnowledgeItem):
 
     def get_items(self):
         return get_all_descendants(self)
-
-
-def init_child_note(note: Note, key: str):
-    child = Note()
-    child._note_path = note._note_path + "/" + key if len(note._note_path) > 0 else key
-    note._children[key] = child
-    child._parents = note
-    child._root = note._root
-    return child
 
 
 def make_root_note():
