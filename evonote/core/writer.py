@@ -120,9 +120,7 @@ class ChatWriter(Writer):
         super().__init__("chat", ["user_message", "system_message"], caller_path)
 
     def _write(self, note: Note) -> str:
-        chat = Chat(self.user_message)
-        chat.add_user_message(self.system_message)
-
+        chat = Chat(user_message=self.user_message, system_message=self.system_message)
         result = None
 
         for comment in self._revise_comments:

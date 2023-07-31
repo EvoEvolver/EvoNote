@@ -43,7 +43,7 @@ Select some of the paths and output a list of indices ordered in the order you w
 You should not include the indices that are irrelevant to the objective.
 You should output in the format: index_1_to_read, index_2_to_read,... (e.g. 3,2,1)
 """
-        chat = Chat(prompt)
+        chat = Chat(user_message=prompt)
         res = complete_chat(chat, default_kwargs_chat_openai)
         useful_indices = [int(item) for item in res.split(",")]
         useful_notes = [nearby_notes[i] for i in useful_indices]
@@ -91,7 +91,7 @@ Select some of the paths and output a list of indices ordered in the order you w
 You should not include the indices that are irrelevant to the objective.
 You should output in the format: index_1_to_read, index_2_to_read,... (e.g. 3,2,1)
 """
-        chat = Chat(prompt)
+        chat = Chat(user_message=prompt)
         res = complete_chat(chat, default_kwargs_chat_openai)
         useful_indices = [int(item) for item in res.split(",")]
         useful_notes = [nearby_notes[i] for i in useful_indices]
@@ -103,7 +103,7 @@ You should output in the format: index_1_to_read, index_2_to_read,... (e.g. 3,2,
 Here are some potentially useful notes:
 {useful_prompt}
 """
-        chat = Chat(prompt)
+        chat = Chat(user_message=prompt)
         res = complete_chat(chat, default_kwargs_chat_openai)
         return res
 

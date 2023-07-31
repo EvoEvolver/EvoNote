@@ -17,9 +17,10 @@ class BuildFromWriter(Writer):
         super().__init__("build_from", ["paragraph"], caller_path)
 
     def _write(self, note: Note) -> str:
-        chat = Chat(system_message="""You are a helpful assistant for arranging core to a core base. You should output merely JSON.""")
+        chat = Chat(
+            system_message="""You are a helpful assistant for arranging core to a core base. You should output merely JSON.""")
         chat.add_user_message(self.paragraph)
-        chat.add_user_message("""Summarize the above paragraph into a tree. Give the result in JSON with the keys being "subject", "statement", "subtopics".""")
+        chat.add_user_message("""Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "topic", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")
         res = complete_chat(chat, default_kwargs_chat_openai)
         try:
             parsed_res = ast.literal_eval(res)
@@ -33,10 +34,10 @@ class BuildFromWriter(Writer):
         iter_and_assign(note, parsed_res)
 
 def iter_and_assign(note: Note, tree: dict):
-    if "subject" not in tree or "statement" not in tree:
+    if "topic" not in tree or "statement" not in tree:
         raise Exception("incomplete tree node")
         return
-    node = note.s(tree["subject"]).be(tree["statement"])
+    node = note.s(tree["topic"]).be(tree["statement"])
     if "subtopics" not in tree:
         return
     for subtopic in tree["subtopics"]:

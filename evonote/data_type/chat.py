@@ -5,9 +5,10 @@ class Chat:
     Class for storing the chat history for OpenAI API call
     """
 
-    def __init__(self, system_message: any):
+    def __init__(self, user_message=None, system_message: any = None):
         self.history = []
         self.system_message = system_message
+        self.add_message(user_message, "user")
 
     def add_message(self, content: any, role: str):
         self.history.append({
@@ -25,7 +26,7 @@ class Chat:
         self.add_message(content, "assistant")
 
     def __copy__(self):
-        new_chat_log = Chat(self.system_message)
+        new_chat_log = Chat(system_message=self.system_message)
         new_chat_log.history = copy.deepcopy(self.history)
         return new_chat_log
 

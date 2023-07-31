@@ -90,16 +90,22 @@ from evonote.data_type.chat import Chat
 
 
 def init_chat(init_message: any, system_message: any = None) -> Chat:
-    chat = Chat(system_message)
+    chat = Chat(system_message=system_message)
     chat.add_user_message(init_message)
     return chat
 
-#default_kwargs_chat_openai = {"model": "gpt-4"}
 
-def complete_chat(chat: Chat, options):
+default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
+
+
+def complete_chat(chat: Chat, options=None):
+    _options = {**default_kwargs_chat_openai}
+    if options is not None:
+        _options.update(options)
     return openai.ChatCompletion.create(
-        messages=chat.get_log_list(), **options).choices[
+        messages=chat.get_log_list(), **_options).choices[
         0].message.content
+
 
 # Embedding
 
@@ -115,6 +121,7 @@ model_to_embedding_dim = {
 embedding_dim_using = model_to_embedding_dim[model_for_embedding]
 
 embedding_cache = None
+
 
 def get_embeddings(texts: list[str], make_cache=False) -> list[list[float]]:
     global embedding_cache
@@ -149,9 +156,11 @@ def get_embeddings(texts: list[str], make_cache=False) -> list[list[float]]:
 
     return embeddings
 
+
 def cache_embeddings():
     global embedding_cache
     np.save(embedding_cache_path, embedding_cache)
+
 
 def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
                             weighting=None):
@@ -161,6 +170,3 @@ def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
     content_embeddings = np.dot(weighting, embedding_for_context_lines)
     scores = np.dot(content_embeddings, embedding_to_search.T) / n_lines
     return scores
-
-
-
