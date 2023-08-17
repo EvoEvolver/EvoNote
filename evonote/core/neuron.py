@@ -1,9 +1,9 @@
 from typing import Tuple, List
 
-from evonote.core.knowledge import KnowledgeItem, RootKnowledgeItem
+from evonote.core.knowledge import KnowledgeItem
 
 
-class NeuralNetwork(RootKnowledgeItem):
+class NeuralNetwork(KnowledgeItem):
     def __init__(self):
         super().__init__()
         self._neurons = []

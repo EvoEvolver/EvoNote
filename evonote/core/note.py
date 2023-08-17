@@ -5,7 +5,7 @@ from evonote import EvolverInstance
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
 from evonote.model.llm import get_embeddings
-from evonote.core.knowledge import KnowledgeItem, RootKnowledgeItem
+from evonote.core.knowledge import KnowledgeItem
 from evonote.core.writer import Writer
 
 
@@ -17,6 +17,8 @@ class Note(KnowledgeItem):
 
     The relation of the items are mainly represented by the tree structure
     It is like a book that AI can read
+
+    Notice that Note object can be indexed by embedding vectors because its
     """
     def __init__(self):
         super().__init__()
@@ -37,11 +39,15 @@ class Note(KnowledgeItem):
 
         # The parents of this note
         self._parents = []
+
+        # Labels of the note added by the parent when build
+        # self._labels = []
+
         # The related notes of this note
         # crawling through the related notes can help us find the relevant notes
-        self._related_notes = []
+        #self._related_notes = []
 
-    def _add_child(self, key: str, note: Note):
+    def add_child(self, key: str, note: Note):
         self._children[key] = note
         if len(self._children_order) > 0:
             self._children_order[key] = max(self._children_order.values()) + 1
@@ -71,15 +77,6 @@ class Note(KnowledgeItem):
                     func(self, manager, line_i, stacks)
         return self
 
-    def cite(self, note: Note, *args) -> Note:
-        """
-        Adding related notes to the note
-        Usage: note.cite(note1, note2, ...)
-        :return:
-        """
-        self._related_notes.append(note)
-        self._related_notes.extend(args)
-        return self
 
     def show(self):
         evolver_id = "show"
@@ -108,7 +105,7 @@ class Note(KnowledgeItem):
         if isinstance(key, int) or isinstance(key, str):
             if key not in self._children:
                 note = Note()
-                self._add_child(key, note)
+                self.add_child(key, note)
                 return note
             return self._children[key]
         else:
@@ -154,23 +151,22 @@ class Note(KnowledgeItem):
         else:
             raise NotImplementedError()
 
-    def get_all_descendants(self: Note):
+    def get_descendants(self: Note):
         descendants = []
         for child in self._children.values():
             descendants.append(child)
-            descendants.extend(get_all_descendants(child))
+            descendants.extend(get_descendants_of_note(child))
         return descendants
 
-#def get_relevance_score(note: Note, query_vector: np.ndarray):
 
-
-def get_all_descendants(note: Note | Notebook):
+def get_descendants_of_note(note: Note | Notebook):
     descendants = []
     for child in note._children.values():
         descendants.append(child)
-        descendants.extend(get_all_descendants(child))
+        descendants.extend(get_descendants_of_note(child))
     return descendants
 
+"""
 def get_children_and_embeddings(note: Note):
     children = get_all_descendants(note)
     children_with_content = [child for child in children if len(child._content) > 0]
@@ -181,7 +177,7 @@ def get_children_and_embeddings(note: Note):
         child._attention_vectors["content"] = embeddings[i]
     return children_with_content, embeddings
 
-
+"""
 class Notebook(Note):
     def __init__(self, path_born):
         super().__init__()
@@ -192,7 +188,7 @@ class Notebook(Note):
         self._children: Dict[str, Note] = {}
 
     def get_items(self):
-        return get_all_descendants(self)
+        return get_descendants_of_note(self)
 
 
 def make_root_note():

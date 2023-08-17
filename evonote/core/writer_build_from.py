@@ -44,7 +44,9 @@ def digest_content(content, use_cache=False, caller_path=None):
     try:
         parsed_res = ast.literal_eval(res)
     except:
-        raise Exception("Parse failed")
+        print("failed to parse, retrying...")
+        print(res)
+        return digest_content(content, use_cache, caller_path)
 
     cache.set_cache(res)
 

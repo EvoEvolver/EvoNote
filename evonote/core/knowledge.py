@@ -1,28 +1,157 @@
 from __future__ import annotations
+
+import concurrent
+import math
 from typing import List, TYPE_CHECKING
+
+from evonote import EvolverInstance
+from evonote.file_helper.evolver import save_cache
+
 if TYPE_CHECKING:
     from evonote.core.neuron import Neuron
     from evonote.core.note import Note
-from evonote.model.llm import get_embeddings, cache_embeddings
+from evonote.model.llm import get_embeddings, cache_embeddings, complete_chat
 
 import numpy as np
+
+class VectorIndex:
+    def __init__(self, vecs, items):
+        self.vecs = vecs
+        self.items = items
+
 
 class KnowledgeItem:
     def __init__(self):
         # attention vectors for calculating similarity
         # it contains a list of attention vectors
-        # vectors from related notes can also be added
-        self._attention_vectors = []
-        self._attention_bias = []
+        #  from related notes can also be added
+        self._attention_vector = None
+        self._attention_bias = None
         self._attention_src = []
         self._is_root = False
-        
-    def add_attention_src(self, src: List[str] | str):
-        if isinstance(src, str):
-            src = (src,)
-        self._attention_src.append(src)
-        self._attention_bias.append(-0.7)
 
+        self._vector_index: VectorIndex | None = None
+
+    def index_descendants(self):
+        attention_vec_list = []
+        src_list = []
+        children_index_start = []
+        children = self.get_descendants()
+        children_non_empty = []
+        for child in children:
+            if len(child._attention_src) == 0:
+                continue
+            children_non_empty.append(child)
+            children_index_start.append(len(src_list))
+            src_list.extend(child._attention_src)
+        src_embedding_list = get_embeddings(src_list)
+
+        for i, start_index in enumerate(children_index_start[:-1]):
+            child_embedding_list = src_embedding_list[start_index: start_index + len(children_non_empty[i]._attention_src)]
+            attention_vec_list.append(np.sum(child_embedding_list, axis=0) / (len(child_embedding_list)**0.7))
+
+        self._vector_index = VectorIndex(np.array(attention_vec_list), children_non_empty)
+        cache_embeddings()
+
+    def get_similar_descendents(self, texts: List[str], weights: List[float] = None):
+        text_embedding_list = get_embeddings(texts)
+        if self._vector_index is None:
+            self.index_descendants()
+        text_embedding_list = np.array(text_embedding_list)
+        similarity = self._vector_index.vecs.dot(text_embedding_list.T).T
+
+        if weights is None:
+            similarity = np.sum(similarity, axis=0)
+        else:
+            similarity = np.sum(similarity * np.array(weights), axis=0)
+
+        rank = np.argsort(similarity, axis=0)[::-1]
+        top_30 = rank[:30]
+        top_30 = top_30.T
+        children = self._vector_index.items
+        top_30_children = []
+        for i in top_30:
+            print(i)
+            top_30_children.append(children[i])
+
+        return top_30_children
+
+    def get_similarity(self, vecs: np.ndarray):
+        if self._vector_index is None:
+            self.index_descendants()
+        return self._vector_index.vecs.dot(vecs.T)
+
+    def get_descendants(self):
+        raise NotImplementedError()
+
+
+def break_sent_into_frags(sent: str, use_cache=True, caller_path=None):
+    if caller_path is None:
+        _, _, stack = EvolverInstance.get_context()
+        caller_path = stack[0].filename
+    cache = EvolverInstance.read_cache(sent, "sent_breaking",
+                                       caller_path, True)
+    if use_cache:
+        if cache.is_valid():
+            return cache._value
+
+    system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable."
+    from evonote.data_type.chat import Chat
+    chat = Chat(user_message="Split the following sentence into smaller fragments (no more than about 8 words). Put each fragment in a new line.",
+                system_message=system_message)
+    chat.add_user_message(sent)
+    res = complete_chat(chat)
+    res = res.split('\n')
+
+    # filter out empty lines
+    res = [line for line in res if len(line.strip()) != 0]
+
+    if res[0][0] != "-":
+        cache.set_cache(res)
+        return res
+
+    for i in range(len(res)):
+        if res[i][0] == "-":
+            res[i] = res[i][1:].strip()
+
+    cache.set_cache(res)
+
+    return res
+
+def make_frag_indexing(note: Note, use_cache=True, caller_path=None):
+    if caller_path is None:
+        _, _, stack = EvolverInstance.get_context()
+        caller_path = stack[0].filename
+
+    break_sent_use_cache = lambda sent: break_sent_into_frags(sent, use_cache, caller_path)
+
+    children = note.get_descendants()
+    children_content = []
+    children_non_empty = []
+
+
+    for child in children:
+        if len(child._content) == 0:
+            continue
+        children_content.append(child._content)
+        children_non_empty.append(child)
+    n_finished = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        for child, frags in zip(children_non_empty, executor.map(break_sent_use_cache, children_content)):
+            child._attention_src.extend(frags)
+            keywords_on_path = child._note_path.split('/')[1:]
+            if len(keywords_on_path) != 0:
+                # keep last 1/3 of the keywords
+                n_keywords = math.ceil(len(keywords_on_path) / 3)
+                child._attention_src.extend(keywords_on_path[-n_keywords:])
+            child._attention_src.append(child._content)
+            #print(child._attention_src)
+            n_finished += 1
+            if n_finished % 20 == 19:
+                save_cache()
+    save_cache()
+
+'''
 class RootKnowledgeItem(KnowledgeItem):
     def __init__(self):
         super().__init__()
@@ -150,3 +279,5 @@ if __name__ == "__main__":
     vecs = get_embeddings(["Mike"], make_cache=True)
 
     knowledge_base.evolve_neurons(vecs)
+    
+'''
