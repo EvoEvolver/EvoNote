@@ -56,11 +56,11 @@ def draw_treemap(note: Note):
 
 def add_note_to_list(labels, parents, values, names, key, note: Note):
     i = 1
-    for key, child in note._children.items():
-        label = str(i) + ". " + key if len(note._children) > 1 else key
+    for key, child in note.children.items():
+        label = str(i) + ". " + key if len(note.children) > 1 else key
         labels.append(label)
-        parents.append(child._parents[0]._note_path)
+        parents.append(child.parents[0].note_path)
         values.append(child._content)
-        names.append(child._note_path)
+        names.append(child.note_path)
         add_note_to_list(labels, parents, values, names, key, child)
         i += 1

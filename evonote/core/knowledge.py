@@ -139,7 +139,7 @@ def make_frag_indexing(note: Note, use_cache=True, caller_path=None):
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         for child, frags in zip(children_non_empty, executor.map(break_sent_use_cache, children_content)):
             child._attention_src.extend(frags)
-            keywords_on_path = child._note_path.split('/')[1:]
+            keywords_on_path = child.note_path
             if len(keywords_on_path) != 0:
                 # keep last 1/3 of the keywords
                 n_keywords = math.ceil(len(keywords_on_path) / 3)

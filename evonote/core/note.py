@@ -1,6 +1,6 @@
 from __future__ import annotations
 import ast
-from typing import Dict
+from typing import Dict, List
 from evonote import EvolverInstance
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
@@ -20,45 +20,45 @@ class Note(KnowledgeItem):
 
     Notice that Note object can be indexed by embedding vectors because its
     """
-    def __init__(self):
+    def __init__(self, default_notebook: Notebook):
         super().__init__()
 
         self._is_note = True
-        # _note_path looks like /a/b/c
-        self._note_path: str = ""
         # _content is string no matter what _content_type is
         self._content: str = ""
         # _content_type helps deserialize _content
         self._content_type = None
-
-        self._children: Dict[str, Note] = {}
-        self._children_order: Dict[str: int] = {}
-
         # The root note helps merge two core bases
-        self._root: Notebook | None = None
+        self.default_notebook: Notebook = default_notebook
 
-        # The parents of this note
-        self._parents = []
+    @property
+    def note_path(self):
+        return self.get_note_path(self.default_notebook)
 
-        # Labels of the note added by the parent when build
-        # self._labels = []
+    @property
+    def parents(self):
+        return self.get_parents(self.default_notebook)
 
-        # The related notes of this note
-        # crawling through the related notes can help us find the relevant notes
-        #self._related_notes = []
+    @property
+    def children(self):
+        return self.get_children(self.default_notebook)
 
-    def add_child(self, key: str, note: Note):
-        self._children[key] = note
-        if len(self._children_order) > 0:
-            self._children_order[key] = max(self._children_order.values()) + 1
-        else:
-            self._children_order[key] = 0
-        note._parents.append(self)
-        if len(note._note_path) == 0:
-            note._note_path = self._note_path + "/" + key if len(
-                self._note_path) > 0 else key
-        if note._root is None:
-            note._root = self._root
+    def get_note_path(self, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        return notebook.get_note_path(self)
+
+    def get_parents(self, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        return notebook.get_parents(self)
+
+    def get_children(self, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        return notebook.get_children_dict(self)
+
+    def add_child(self, key: str, note: Note, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        notebook.add_child(key, self, note)
+
 
     def be(self, writer: Writer | str) -> Note:
         """
@@ -93,7 +93,7 @@ class Note(KnowledgeItem):
         return self._content
 
     def __repr__(self):
-        res = self._note_path
+        res = self.note_path
         return res
 
     def s(self, key) -> Note:
@@ -103,11 +103,11 @@ class Note(KnowledgeItem):
         :return:
         """
         if isinstance(key, int) or isinstance(key, str):
-            if key not in self._children:
-                note = Note()
+            if key not in self.children:
+                note = Note(self.default_notebook)
                 self.add_child(key, note)
                 return note
-            return self._children[key]
+            return self.children[key]
         else:
             raise NotImplementedError()
 
@@ -145,15 +145,15 @@ class Note(KnowledgeItem):
 
     def __getitem__(self, key):
         if isinstance(key, int) or isinstance(key, str):
-            if key not in self._children:
+            if key not in self.children:
                 return None
-            return self._children[key]
+            return self.children[key]
         else:
             raise NotImplementedError()
 
     def get_descendants(self: Note):
         descendants = []
-        for child in self._children.values():
+        for child in self.children.values():
             descendants.append(child)
             descendants.extend(get_descendants_of_note(child))
         return descendants
@@ -161,38 +161,46 @@ class Note(KnowledgeItem):
 
 def get_descendants_of_note(note: Note | Notebook):
     descendants = []
-    for child in note._children.values():
+    for child in note.children.values():
         descendants.append(child)
         descendants.extend(get_descendants_of_note(child))
     return descendants
 
-"""
-def get_children_and_embeddings(note: Note):
-    children = get_all_descendants(note)
-    children_with_content = [child for child in children if len(child._content) > 0]
-    children_content = [child._content for child in children_with_content]
-    embeddings = get_embeddings(children_content)
-    for i, child in enumerate(children_with_content):
-        child._tag_keys["content"] = children_content[i]
-        child._attention_vectors["content"] = embeddings[i]
-    return children_with_content, embeddings
 
-"""
-class Notebook(Note):
+class Notebook:
     def __init__(self, path_born):
-        super().__init__()
-        self._note_path = ""
-        self._root = self
         self._path_born = path_born
-        self._is_root = True
-        self._children: Dict[str, Note] = {}
+        self.children: Dict[Note, Dict[str, Note]] = {}
+        self.note_path: Dict[Note, List[str]] = {}
+        self.parents: Dict[Note, List[Note]] = {}
 
-    def get_items(self):
-        return get_descendants_of_note(self)
+    def get_note_path(self, note: Note):
+        if note not in self.note_path:
+            self.note_path[note] = []
+        return self.note_path[note]
+
+    def get_children_dict(self, note: Note):
+        if note not in self.children:
+            self.children[note] = {}
+        return self.children[note]
+
+    def get_parents(self, note: Note):
+        return self.parents[note]
+
+    def add_child(self, key: str, parent: Note, child: Note):
+        children_dict = self.get_children_dict(parent)
+        children_dict[key] = child
+        parent_note_path = self.get_note_path(parent)
+        child_note_path = parent_note_path + [key]
+        self.note_path[child] = child_note_path
+        if child not in self.parents:
+            self.parents[child] = [parent]
+        else:
+            self.parents[child].append(parent)
 
 
 def make_root_note():
     _, _, stacks = EvolverInstance.get_context()
     path_born = stacks[0].filename
-    note = Notebook(path_born)
-    return note
+    notebook = Notebook(path_born)
+    return Note(default_notebook=notebook)

@@ -40,7 +40,7 @@ class Writer:
             key: self.__dict__[key] for key in self._key_for_hash
         }
         
-        input_for_hash = (input_for_hash, note._note_path, [str(item) for item in self._revise_comments])
+        input_for_hash = (input_for_hash, note.note_path, [str(item) for item in self._revise_comments])
 
         cache = EvolverInstance.read_cache(input_for_hash,
                                            self._writer_type,
@@ -142,10 +142,10 @@ class ChatWriter(Writer):
 def get_notes_by_linage(note: Note, depth=2):
     linage = [note]
     for _ in range(depth):
-        linage.append(linage[-1]._parents)
+        linage.append(linage[-1].parents)
     nearby_notes = []
     for item in linage:
-        for key, child in item._children.items():
+        for key, child in item.children.items():
             nearby_notes.append(child)
     return nearby_notes
 
@@ -175,9 +175,9 @@ def answer(question: str, system_message: str = None, format=None) -> ChatWriter
 def get_prompt_for_useful_notes(notes: typing.List[Note]):
     prompt = []
     for i, note in enumerate(notes):
-        if note._content == "" and len(note._children) == 0:
+        if note._content == "" and len(note.children) == 0:
             continue
-        line = [note._note_path + ":"]
+        line = [note.note_path + ":"]
         line.append(note._content)
         prompt.append(" ".join(line))
     return "\n".join(prompt)
@@ -186,17 +186,17 @@ def get_prompt_for_useful_notes(notes: typing.List[Note]):
 def get_nearby_paths_in_prompt(notes: typing.List[Note], n_preview_words=10):
     lines = []
     for i, note in enumerate(notes):
-        if note._content == "" and len(note._children) == 0:
+        if note._content == "" and len(note.children) == 0:
             continue
         line = [str(i)+"."]
-        line.append(note._note_path)
+        line.append(note.note_path)
         raw_content = note._content
         if len(raw_content) > 0:
             words = raw_content.split(" ")
             preview = " ".join(words[:n_preview_words])
             line.append(": "+preview.strip())
         else:
-            if len(note._children) > 0:
+            if len(note.children) > 0:
                 line.append(": (has children)")
         lines.append(" ".join(line))
     return "\n".join(lines)
