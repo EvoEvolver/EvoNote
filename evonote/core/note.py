@@ -1,6 +1,6 @@
 from __future__ import annotations
 import ast
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Any
 
 import yaml
 
@@ -33,6 +33,8 @@ class Note:
         self._content_type = None
         # The root note helps merge two core bases
         self.default_notebook: Notebook = default_notebook
+
+        self.related_info: Dict[str, Any] = {}
 
     @property
     def note_path(self):
@@ -94,19 +96,8 @@ class Note:
         notebook = notebook if notebook is not None else self.default_notebook
         top_k_descendants = self.match_descendants(query_list, weights, notebook, top_k)
         # Make a new notebook
-        root = make_notebook_root(notebook.topic)
-        new_notebook = root.default_notebook
-        for note in top_k_descendants:
-            leaf = root
-            note_path = note.get_note_path(notebook)
-            for key in note_path[:-1]:
-                children = leaf.get_children()
-                if key not in children:
-                    leaf.add_child(key, Note(new_notebook), new_notebook)
-                leaf = children[key]
-            leaf.add_child(note_path[-1], note, new_notebook)
+        new_notebook = new_notebook_from_note_subset(top_k_descendants, notebook)
         return new_notebook
-
 
 
     def be(self, writer: Writer | str) -> Note:
@@ -276,6 +267,9 @@ class Notebook:
         self.parents[root] = []
         self.root = root
 
+    def get_all_notes(self):
+        return list(self.children.keys())
+
     def add_child(self, key: str, parent: Note, child: Note):
         if child not in self.children:
             self.children[child] = {}
@@ -319,6 +313,36 @@ class Notebook:
         assert self.root is not None
         draw_treemap(self.root, self)
         pass
+
+    def sub_notebook_by_similarity(self, query_list: List[str], weights: List[float] | None = None, top_k: int = 10):
+        if weights is None:
+            weights = [1.0] * len(query_list)
+        assert len(query_list) == len(weights)
+        assert self.indexer_class is not None
+        root = self.root
+        if root not in self.descendant_indexing:
+            root.index_descendants(self)
+        vectors = self.descendant_indexing[root]["vectors"]
+        similarity = self.indexer_class.get_similarities(query_list, vectors, weights)
+        top_k_indices = similarity.argsort()[-top_k:][::-1]
+        descendants = self.descendant_indexing[root]["descendants"]
+        top_k_descendants = [descendants[i] for i in top_k_indices]
+        new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
+        return new_notebook
+
+def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook)->Notebook:
+    root = make_notebook_root(notebook.topic)
+    new_notebook = root.default_notebook
+    for note in notes:
+        leaf = root
+        note_path = note.get_note_path(notebook)
+        for key in note_path[:-1]:
+            children = leaf.get_children(notebook=new_notebook)
+            if key not in children:
+                leaf.add_child(key, Note(new_notebook), new_notebook)
+            leaf = children[key]
+        leaf.add_child(note_path[-1], note, new_notebook)
+    return new_notebook
 
 def get_descendants(note: Note, notebook: Notebook):
     descendants = []

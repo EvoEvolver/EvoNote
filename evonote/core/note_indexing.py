@@ -43,16 +43,15 @@ def break_sent_into_frags(sent: str, use_cache=True, caller_path=None):
     return res
 
 
-def make_frag_indexing(note: Note, use_cache=True, notebook: Notebook = None,
+def make_frag_indexing(notebook: Notebook, use_cache=True,
                        caller_path=None):
     caller_path = caller_path if caller_path is not None else EvolverInstance.get_caller_path()
 
     break_sent_use_cache = lambda sent: break_sent_into_frags(sent, use_cache,
                                                               caller_path)
-    notebook = notebook if notebook is not None else note.default_notebook
     notebook.indexer_class = EmbedIndexer
 
-    children = note.get_descendants(notebook=notebook)
+    children = notebook.get_all_notes()
     children_content = []
     children_non_empty = []
     for child in children:

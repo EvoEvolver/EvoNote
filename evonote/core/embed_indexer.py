@@ -55,7 +55,7 @@ class EmbedIndexer(VectorIndexer):
             child_embedding_list = src_embedding_list[start_index: start_index + len(
                 indices[i].src_list)]
             vec_list.append(
-                np.sum(child_embedding_list, axis=0) / (len(child_embedding_list) ** 0.1))
+                np.sum(child_embedding_list, axis=0) / (len(child_embedding_list) ** 0.9))
 
         cache_embeddings()
 
@@ -71,8 +71,5 @@ class EmbedIndexer(VectorIndexer):
             weights = [1.0]*len(vecs)
 
         similarity = np.sum(similarity * np.array(weights), axis=0)
+        return similarity
 
-        rank = np.argsort(similarity, axis=0)[::-1]
-        top_30 = rank[:30]
-        top_30 = top_30.T
-        return top_30
