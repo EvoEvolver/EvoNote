@@ -1,16 +1,18 @@
 from __future__ import annotations
 import ast
-from typing import Dict, List
+from typing import Dict, List, Type
+
+import yaml
+
 from evonote import EvolverInstance
+from evonote.core.embed_indexer import VectorIndexer
+from evonote.core.visualize import draw_treemap
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
-from evonote.model.llm import get_embeddings
-from evonote.core.knowledge import KnowledgeItem
 from evonote.core.writer import Writer
 
 
-
-class Note(KnowledgeItem):
+class Note:
     """
     A tree-like data structure that stores core
     usually for the direct summary of paragraphs
@@ -20,13 +22,14 @@ class Note(KnowledgeItem):
 
     Notice that Note object can be indexed by embedding vectors because its
     """
+
     def __init__(self, default_notebook: Notebook):
         super().__init__()
 
         self._is_note = True
-        # _content is string no matter what _content_type is
-        self._content: str = ""
-        # _content_type helps deserialize _content
+        # content is string no matter what _content_type is
+        self.content: str = ""
+        # _content_type helps deserialize content
         self._content_type = None
         # The root note helps merge two core bases
         self.default_notebook: Notebook = default_notebook
@@ -55,9 +58,55 @@ class Note(KnowledgeItem):
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_children_dict(self)
 
+    def get_descendants(self: Note, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        return get_descendants(self, notebook)
+
     def add_child(self, key: str, note: Note, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
         notebook.add_child(key, self, note)
+
+    def index_descendants(self, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        descendants = get_descendants(self, notebook)
+        indexers = [notebook.get_indexer(descendant) for descendant in descendants]
+        vectors = notebook.indexer_class.get_vectors(indexers)
+        notebook.descendant_indexing[self] = {"vectors": vectors,
+                                              "descendants": descendants}
+        return
+
+    def match_descendants(self, query_list: List[str], weights: List[float] | None = None,
+                          notebook: Notebook | None = None, top_k: int = 10):
+        notebook = notebook if notebook is not None else self.default_notebook
+        weights = weights if weights is not None else [1.0] * len(query_list)
+        if self not in notebook.descendant_indexing:
+            self.index_descendants(notebook)
+        vectors = notebook.descendant_indexing[self]["vectors"]
+        similarity = notebook.indexer_class.get_similarities(query_list, vectors, weights)
+        top_k_indices = similarity.argsort()[-top_k:][::-1]
+        descendants = notebook.descendant_indexing[self]["descendants"]
+        top_k_descendants = [descendants[i] for i in top_k_indices]
+        return top_k_descendants
+
+
+    def new_notebook_by_match_descendants(self, query_list: List[str], weights: List[float] | None = None,
+                          notebook: Notebook | None = None, top_k: int = 10):
+        notebook = notebook if notebook is not None else self.default_notebook
+        top_k_descendants = self.match_descendants(query_list, weights, notebook, top_k)
+        # Make a new notebook
+        root = make_notebook_root(notebook.topic)
+        new_notebook = root.default_notebook
+        for note in top_k_descendants:
+            leaf = root
+            note_path = note.get_note_path(notebook)
+            for key in note_path[:-1]:
+                children = leaf.get_children()
+                if key not in children:
+                    leaf.add_child(key, Note(new_notebook), new_notebook)
+                leaf = children[key]
+            leaf.add_child(note_path[-1], note, new_notebook)
+        return new_notebook
+
 
 
     def be(self, writer: Writer | str) -> Note:
@@ -67,7 +116,7 @@ class Note(KnowledgeItem):
         :return: The note itself
         """
         if isinstance(writer, str):
-            self._content = writer
+            self.content = writer
         elif "_is_writer" in writer.__dict__:
             comp_result = writer._get_comp_result(self)
             writer._set_with_comp_result(comp_result, self)
@@ -77,7 +126,6 @@ class Note(KnowledgeItem):
                     func(self, manager, line_i, stacks)
         return self
 
-
     def show(self):
         evolver_id = "show"
         manager, line_i, stacks = EvolverInstance.get_context()
@@ -85,16 +133,12 @@ class Note(KnowledgeItem):
         manager.clear_ops_for_caller(caller_id)
         code_line = manager.get_src_line(line_i)
         delete_old_comment_output(manager, caller_id, line_i, evolver_id)
-        lines_to_insert = str(self._content).splitlines()
+        lines_to_insert = str(self.content).splitlines()
         manager.insert_comment_with_same_indent_after(caller_id, line_i, lines_to_insert,
                                                       evolver_id)
 
     def __str__(self):
-        return self._content
-
-    def __repr__(self):
-        res = self.note_path
-        return res
+        return self.content
 
     def s(self, key) -> Note:
         """
@@ -116,7 +160,7 @@ class Note(KnowledgeItem):
         Parse the content as an object. Return the object or the value on the index
         :return:
         """
-        obj = ast.literal_eval(self._content)
+        obj = ast.literal_eval(self.content)
         if index is not None:
             return obj[index]
         return obj
@@ -151,12 +195,18 @@ class Note(KnowledgeItem):
         else:
             raise NotImplementedError()
 
-    def get_descendants(self: Note):
-        descendants = []
-        for child in self.children.values():
-            descendants.append(child)
-            descendants.extend(get_descendants_of_note(child))
-        return descendants
+def delete_extra_keys_for_prompt(tree):
+    for key, leaf in tree["subtopics"].items():
+        delete_extra_keys_for_prompt(leaf)
+    if "content" not in tree:
+        for key, leaf in tree["subtopics"].items():
+            tree[key] = leaf
+        del tree["subtopics"]
+    else:
+        if len(tree["subtopics"]) == 0:
+            del tree["subtopics"]
+        if len(tree["content"]) == 0:
+            del tree["content"]
 
 
 def get_descendants_of_note(note: Note | Notebook):
@@ -168,11 +218,37 @@ def get_descendants_of_note(note: Note | Notebook):
 
 
 class Notebook:
-    def __init__(self, path_born):
+    """
+    Store the information of notes contained
+    The information is mainly the relationship between notes
+    """
+
+    def __init__(self, topic, path_born):
         self._path_born = path_born
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
+
+        self.descendant_indexing: Dict[Note, Dict] = {}
+        self.indexers: Dict[Note, VectorIndexer] = {}
+        self.indexer_class: Type[VectorIndexer] | None = None
+
+        self.topic = topic
+        self.root: Note | None = None
+
+    def set_indexer(self, note: Note, indexer: VectorIndexer) -> VectorIndexer:
+        self.indexers[note] = indexer
+        return indexer
+
+    def get_indexer(self, note: Note):
+        if note in self.indexers:
+            return self.indexers[note]
+        elif self.indexer_class is not None:
+            indexer = self.indexer_class()
+            self.indexers[note] = indexer
+            return indexer
+        else:
+            raise Exception("No indexer is set")
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -187,7 +263,24 @@ class Notebook:
     def get_parents(self, note: Note):
         return self.parents[note]
 
+    def get_note_by_path(self, path: List[str]):
+        assert self.root is not None
+        leaf = self.root
+        for key in path:
+            leaf = self.children[leaf][key]
+        return leaf
+
+    def set_root(self, root: Note):
+        self.children[root] = {}
+        self.note_path[root] = []
+        self.parents[root] = []
+        self.root = root
+
     def add_child(self, key: str, parent: Note, child: Note):
+        if child not in self.children:
+            self.children[child] = {}
+        # ensure the parent is in the tree
+        assert parent in self.children
         children_dict = self.get_children_dict(parent)
         children_dict[key] = child
         parent_note_path = self.get_note_path(parent)
@@ -198,9 +291,49 @@ class Notebook:
         else:
             self.parents[child].append(parent)
 
+    def get_dict_for_prompt(self):
+        tree = {
+            "subtopics": {},
+        }
+        notes = list(self.children.keys())
+        i_note_with_content = 0
+        for i, note in enumerate(notes):
+            note_path = self.get_note_path(note)
+            leaf = tree
+            for key in note_path:
+                if key not in leaf["subtopics"]:
+                    leaf["subtopics"][key] = {"subtopics": {}}
+                leaf = leaf["subtopics"][key]
+            if len(note.content) > 0:
+                leaf["content"] = note.content
+                leaf["index"] = i_note_with_content
+                i_note_with_content += 1
+        return tree
 
-def make_root_note():
-    _, _, stacks = EvolverInstance.get_context()
-    path_born = stacks[0].filename
-    notebook = Notebook(path_born)
-    return Note(default_notebook=notebook)
+    def get_yaml_for_prompt(self):
+        tree = self.get_dict_for_prompt()
+        delete_extra_keys_for_prompt(tree)
+        return yaml.dump(tree)
+
+    def show_notebook_ui(self):
+        assert self.root is not None
+        draw_treemap(self.root, self)
+        pass
+
+def get_descendants(note: Note, notebook: Notebook):
+    descendants = []
+    for child in notebook.children[note].values():
+        descendants.append(child)
+        descendants.extend(get_descendants(child, notebook))
+    return descendants
+
+
+def make_notebook_root(topic: str = None):
+    path_born = EvolverInstance.get_caller_path()
+    if topic is None:
+        topic = ""
+    notebook = Notebook(topic, path_born)
+    root = Note(default_notebook=notebook)
+    notebook.set_root(root)
+    return root
+

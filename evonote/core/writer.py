@@ -175,10 +175,10 @@ def answer(question: str, system_message: str = None, format=None) -> ChatWriter
 def get_prompt_for_useful_notes(notes: typing.List[Note]):
     prompt = []
     for i, note in enumerate(notes):
-        if note._content == "" and len(note.children) == 0:
+        if note.content == "" and len(note.children) == 0:
             continue
         line = [note.note_path + ":"]
-        line.append(note._content)
+        line.append(note.content)
         prompt.append(" ".join(line))
     return "\n".join(prompt)
 
@@ -186,11 +186,11 @@ def get_prompt_for_useful_notes(notes: typing.List[Note]):
 def get_nearby_paths_in_prompt(notes: typing.List[Note], n_preview_words=10):
     lines = []
     for i, note in enumerate(notes):
-        if note._content == "" and len(note.children) == 0:
+        if note.content == "" and len(note.children) == 0:
             continue
         line = [str(i)+"."]
         line.append(note.note_path)
-        raw_content = note._content
+        raw_content = note.content
         if len(raw_content) > 0:
             words = raw_content.split(" ")
             preview = " ".join(words[:n_preview_words])

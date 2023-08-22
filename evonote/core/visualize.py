@@ -1,18 +1,22 @@
+from __future__ import annotations
 import plotly.graph_objects as go
 from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
-
-from evonote.core.note import Note
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from evonote.core.note import Note, Notebook
 
 h_en = Hyphenator('en_US')
 
 
-def draw_treemap(note: Note):
+def draw_treemap(root: Note, notebook: Notebook = None):
+    if notebook is None:
+        notebook = root.default_notebook
     labels = []
     parents = []
     values = []
     names = []
-    add_note_to_list(labels, parents, values, names, "", note)
+    add_note_to_list(labels, parents, values, names, root, notebook)
 
     line_width = 40
     for i in range(len(values)):
@@ -54,13 +58,15 @@ def draw_treemap(note: Note):
     fig.show()
 
 
-def add_note_to_list(labels, parents, values, names, key, note: Note):
+def add_note_to_list(labels, parents, values, names, note: Note, notebook: Notebook):
     i = 1
-    for key, child in note.children.items():
-        label = str(i) + ". " + key if len(note.children) > 1 else key
+    children = note.get_children(notebook=notebook)
+    for key, child in children.items():
+        notepath = child.get_note_path(notebook=notebook)
+        label = str(i) + ". " + key if len(children) > 1 else key
         labels.append(label)
-        parents.append(child.parents[0].note_path)
-        values.append(child._content)
-        names.append(child.note_path)
-        add_note_to_list(labels, parents, values, names, key, child)
+        parents.append("/".join(notepath[:-1]))
+        values.append(child.content)
+        names.append("/".join(notepath))
+        add_note_to_list(labels, parents, values, names, child, notebook)
         i += 1

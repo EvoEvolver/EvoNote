@@ -102,6 +102,11 @@ class EvoCore:
         manager = self.get_file_manager(filepath)
         return manager, line_i, stack
 
+    def get_caller_path(self):
+        stack = inspect.stack()[2:]
+        caller_stack = stack[0]
+        return caller_stack.filename
+
     def update_all_file(self):
         for filepath, manager in self.file_src_keeper.items():
             curr_src = manager.get_curr_src()
