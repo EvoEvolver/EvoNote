@@ -7,7 +7,7 @@ import numpy as np
 
 class VectorIndexer:
     @classmethod
-    def get_vectors(cls, indices: List[VectorIndexer]):
+    def get_vectors(cls, indices: List[VectorIndexer]) -> [np.ndarray, List[int]]:
         """
         Calculate the vectors in batch
         """
@@ -33,7 +33,7 @@ class EmbedIndexer(VectorIndexer):
         self.src_weights.append(weight)
 
     @classmethod
-    def get_vectors(cls, indices: List[EmbedIndexer]):
+    def get_vectors(cls, indices: List[EmbedIndexer]) -> [np.ndarray, List[int]]:
         vec_list = []
         src_list = []
         children_index_start = []
@@ -59,7 +59,7 @@ class EmbedIndexer(VectorIndexer):
 
         cache_embeddings()
 
-        return np.array(vec_list)
+        return np.array(vec_list), list(range(len(vec_list)))
 
     @classmethod
     def get_similarities(cls, texts: List[str], vecs: np.ndarray, weights: List[float] = None):

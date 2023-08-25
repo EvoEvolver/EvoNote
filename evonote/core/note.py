@@ -72,8 +72,9 @@ class Note:
         notebook = notebook if notebook is not None else self.default_notebook
         descendants = get_descendants(self, notebook)
         indexers = [notebook.get_indexer(descendant) for descendant in descendants]
-        vectors = notebook.indexer_class.get_vectors(indexers)
+        vectors, vector_index_to_descendants = notebook.indexer_class.get_vectors(indexers)
         notebook.descendant_indexing[self] = {"vectors": vectors,
+                                              "vector_index_to_descendants": vector_index_to_descendants,
                                               "descendants": descendants}
         return
 
@@ -84,10 +85,11 @@ class Note:
         if self not in notebook.descendant_indexing:
             self.index_descendants(notebook)
         vectors = notebook.descendant_indexing[self]["vectors"]
+        vector_index_to_descendants = notebook.descendant_indexing[self]["vector_index_to_descendants"]
         similarity = notebook.indexer_class.get_similarities(query_list, vectors, weights)
         top_k_indices = similarity.argsort()[-top_k:][::-1]
         descendants = notebook.descendant_indexing[self]["descendants"]
-        top_k_descendants = [descendants[i] for i in top_k_indices]
+        top_k_descendants = [descendants[vector_index_to_descendants[index]] for index in top_k_indices]
         return top_k_descendants
 
 

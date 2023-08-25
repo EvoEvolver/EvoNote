@@ -77,9 +77,17 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt, caller_path, use_cac
     chat.add_user_message(
         f"Output the indices of the notes that satisfies the criteria with indices saperated by comma: {criteria_prompt}.")
     res = complete_chat(chat)
+    number_start = -1
+    for i in range(len(res)):
+        if res[i] in "0123456789":
+            number_start = i
+            break
+    if number_start == -1:
+        raise ValueError(f"Invalid answer: {res}")
+    res = res[number_start:]
     try:
         useful_indices = [int(i.strip()) for i in res.split(",")]
-    except:
+    except Exception as e:
         raise ValueError(f"Invalid answer: {res}")
     cache.set_cache(useful_indices)
 
