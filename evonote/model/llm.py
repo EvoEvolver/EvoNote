@@ -109,6 +109,15 @@ def complete_chat(chat: Chat, options=None):
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
 
+def complete_chat_expensive(chat: Chat, options=None):
+    _options = {**default_kwargs_chat_openai}
+    _options["model"] = "gpt-4"
+    if options is not None:
+        _options.update(options)
+    return openai.ChatCompletion.create(
+        messages=chat.get_log_list(), **_options).choices[
+        0].message.content
+
 
 import concurrent.futures
 def complete_chat_parallel(chats: List[Chat], options=None):

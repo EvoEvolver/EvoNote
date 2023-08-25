@@ -252,8 +252,10 @@ class Notebook:
         return self.children[note]
 
     def get_parents(self, note: Note):
-        return self.parents[note]
-
+        if note in self.parents:
+            return self.parents[note]
+        else:
+            raise Exception("No parent found")
     def get_note_by_path(self, path: List[str]):
         assert self.root is not None
         leaf = self.root
@@ -285,12 +287,34 @@ class Notebook:
         else:
             self.parents[child].append(parent)
 
+    def remove_note(self, note: Note):
+        children_dict = self.get_children_dict(note)
+        for key, child in children_dict.items():
+            self.remove_note(child)
+
+        parents = self.get_parents(note)
+        for parent in parents:
+            children_dict = self.get_children_dict(parent)
+            for key, child in children_dict.items():
+                if child == note:
+                    del children_dict[key]
+                    break
+
+        del self.children[note]
+        del self.note_path[note]
+        del self.parents[note]
+        if note in self.descendant_indexing:
+            del self.descendant_indexing[note]
+        if note in self.indexers:
+            del self.indexers[note]
+
     def get_dict_for_prompt(self):
         tree = {
             "subtopics": {},
         }
-        notes = list(self.children.keys())
-        i_note_with_content = 0
+        notes = self.get_all_notes()
+        note_indexed = []
+        i_note = 0
         for i, note in enumerate(notes):
             note_path = self.get_note_path(note)
             leaf = tree
@@ -300,14 +324,15 @@ class Notebook:
                 leaf = leaf["subtopics"][key]
             if len(note.content) > 0:
                 leaf["content"] = note.content
-                leaf["index"] = i_note_with_content
-                i_note_with_content += 1
-        return tree
+                leaf["index"] = i_note
+                note_indexed.append(note)
+                i_note += 1
+        return tree, note_indexed
 
     def get_yaml_for_prompt(self):
-        tree = self.get_dict_for_prompt()
+        tree, note_indexed = self.get_dict_for_prompt()
         delete_extra_keys_for_prompt(tree)
-        return yaml.dump(tree)
+        return yaml.dump(tree), note_indexed
 
     def show_notebook_gui(self):
         assert self.root is not None
@@ -329,6 +354,8 @@ class Notebook:
         top_k_descendants = [descendants[i] for i in top_k_indices]
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
+
+
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook)->Notebook:
     root = make_notebook_root(notebook.topic)

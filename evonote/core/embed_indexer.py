@@ -55,7 +55,7 @@ class EmbedIndexer(VectorIndexer):
             child_embedding_list = src_embedding_list[start_index: start_index + len(
                 indices[i].src_list)]
             vec_list.append(
-                np.sum(child_embedding_list, axis=0) / (len(child_embedding_list) ** 0.9))
+                np.sum(child_embedding_list, axis=0) / (len(child_embedding_list) ** 0.8))
 
         cache_embeddings()
 
