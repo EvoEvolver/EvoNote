@@ -74,7 +74,7 @@ def default_indexing(notebook: Notebook, use_cache=True,
         keywords_on_path = child.get_note_path(notebook)
         if len(keywords_on_path) != 0:
             # keep last 1/3 of the keywords
-            n_keywords = math.ceil(len(keywords_on_path) / 3)
+            n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3), len(keywords_on_path))
             indexer.src_list.extend(keywords_on_path[-n_keywords:])
             weight = np.array([i+1 for i in range(len(indexer.src_list))])
             weight = weight / np.sum(weight)
@@ -87,13 +87,7 @@ def default_indexing(notebook: Notebook, use_cache=True,
                                 executor.map(break_sent_use_cache, children_content)):
             indexer: EmbedIndexer = notebook.get_indexer(child)
             indexer.src_list.extend(frags)
-            """
-            keywords_on_path = child.get_note_path(notebook)
-            if len(keywords_on_path) != 0:
-                # keep last 1/3 of the keywords
-                n_keywords = math.ceil(len(keywords_on_path) / 3)
-                indexer.src_list.extend(keywords_on_path[-n_keywords:])
-            """
+            indexer.src_list.append(child.get_note_path(notebook)[-1])
             indexer.src_list.append(child.content)
 
             n_finished += 1

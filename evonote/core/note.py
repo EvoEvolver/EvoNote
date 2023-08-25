@@ -72,7 +72,8 @@ class Note:
         notebook = notebook if notebook is not None else self.default_notebook
         descendants = get_descendants(self, notebook)
         indexers = [notebook.get_indexer(descendant) for descendant in descendants]
-        vectors, vector_index_to_descendants = notebook.indexer_class.get_vectors(indexers)
+        vectors, vector_index_to_descendants = notebook.indexer_class.get_vectors(
+            indexers)
         notebook.descendant_indexing[self] = {"vectors": vectors,
                                               "vector_index_to_descendants": vector_index_to_descendants,
                                               "descendants": descendants}
@@ -85,22 +86,24 @@ class Note:
         if self not in notebook.descendant_indexing:
             self.index_descendants(notebook)
         vectors = notebook.descendant_indexing[self]["vectors"]
-        vector_index_to_descendants = notebook.descendant_indexing[self]["vector_index_to_descendants"]
+        vector_index_to_descendants = notebook.descendant_indexing[self][
+            "vector_index_to_descendants"]
         similarity = notebook.indexer_class.get_similarities(query_list, vectors, weights)
         top_k_indices = similarity.argsort()[-top_k:][::-1]
         descendants = notebook.descendant_indexing[self]["descendants"]
-        top_k_descendants = [descendants[vector_index_to_descendants[index]] for index in top_k_indices]
+        top_k_descendants = [descendants[vector_index_to_descendants[index]] for index in
+                             top_k_indices]
         return top_k_descendants
 
-
-    def new_notebook_by_match_descendants(self, query_list: List[str], weights: List[float] | None = None,
-                          notebook: Notebook | None = None, top_k: int = 10):
+    def new_notebook_by_match_descendants(self, query_list: List[str],
+                                          weights: List[float] | None = None,
+                                          notebook: Notebook | None = None,
+                                          top_k: int = 10):
         notebook = notebook if notebook is not None else self.default_notebook
         top_k_descendants = self.match_descendants(query_list, weights, notebook, top_k)
         # Make a new notebook
         new_notebook = new_notebook_from_note_subset(top_k_descendants, notebook)
         return new_notebook
-
 
     def be(self, writer: Writer | str) -> Note:
         """
@@ -131,6 +134,8 @@ class Note:
                                                       evolver_id)
 
     def __str__(self):
+        if len(self.content) == 0:
+            return "Path" + str(self.note_path)
         return self.content
 
     def s(self, key) -> Note:
@@ -188,6 +193,7 @@ class Note:
         else:
             raise NotImplementedError()
 
+
 def delete_extra_keys_for_prompt(tree):
     for key, leaf in tree["subtopics"].items():
         delete_extra_keys_for_prompt(leaf)
@@ -217,7 +223,7 @@ class Notebook:
     """
 
     def __init__(self, topic, path_born):
-        self._path_born = path_born
+        self.path_born = path_born
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
@@ -258,6 +264,7 @@ class Notebook:
             return self.parents[note]
         else:
             raise Exception("No parent found")
+
     def get_note_by_path(self, path: List[str]):
         assert self.root is not None
         leaf = self.root
@@ -298,7 +305,7 @@ class Notebook:
         for parent in parents:
             children_dict = self.get_children_dict(parent)
             for key, child in children_dict.items():
-                if child == note:
+                if child is note:
                     del children_dict[key]
                     break
 
@@ -341,7 +348,8 @@ class Notebook:
         draw_treemap(self.root, self)
         pass
 
-    def sub_notebook_by_similarity(self, query_list: List[str], weights: List[float] | None = None, top_k: int = 10):
+    def sub_notebook_by_similarity(self, query_list: List[str],
+                                   weights: List[float] | None = None, top_k: int = 10):
         if weights is None:
             weights = [1.0] * len(query_list)
         assert len(query_list) == len(weights)
@@ -358,20 +366,21 @@ class Notebook:
         return new_notebook
 
 
-
-def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook)->Notebook:
-    root = make_notebook_root(notebook.topic)
-    new_notebook = root.default_notebook
+def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
+    new_notebook = Notebook(topic=notebook.topic, path_born=notebook.path_born)
+    new_notebook.root = notebook.root
+    root = new_notebook.root
     for note in notes:
         leaf = root
         note_path = note.get_note_path(notebook)
         for key in note_path[:-1]:
             children = leaf.get_children(notebook=new_notebook)
             if key not in children:
-                leaf.add_child(key, Note(new_notebook), new_notebook)
+                leaf.add_child(key, notebook.get_children_dict(leaf)[key], new_notebook)
             leaf = children[key]
         leaf.add_child(note_path[-1], note, new_notebook)
     return new_notebook
+
 
 def get_descendants(note: Note, notebook: Notebook):
     descendants = []
@@ -389,4 +398,3 @@ def make_notebook_root(topic: str = None):
     root = Note(default_notebook=notebook)
     notebook.set_root(root)
     return root
-

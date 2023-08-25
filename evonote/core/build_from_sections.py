@@ -36,7 +36,7 @@ def digest_all_descendants(notebook: Notebook, caller_path=None):
             note.related_info["original text"] = note.content
             note.content = ""
             finished += 1
-            print("received ", finished, "/", len(all_notes))
         if finished % 5 == 4:
+            print("digest received ", finished, "/", len(all_notes))
             save_cache()
     save_cache()
