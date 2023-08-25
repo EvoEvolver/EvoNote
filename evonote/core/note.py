@@ -233,6 +233,8 @@ class Notebook:
         self.indexers: Dict[Note, VectorIndexer] = {}
         self.indexer_class: Type[VectorIndexer] | None = None
 
+        self.notes_without_indexer: List[Note] = []
+
         self.topic = topic
         self.root: Note | None = None
 
@@ -291,6 +293,7 @@ class Notebook:
         self.note_path[root] = []
         self.parents[root] = []
         self.root = root
+        self.notes_without_indexer.append(root)
 
     def get_all_notes(self):
         return list(self.children.keys())
@@ -309,6 +312,7 @@ class Notebook:
             self.parents[child] = [parent]
         else:
             self.parents[child].append(parent)
+        self.notes_without_indexer.append(child)
 
     def remove_note(self, note: Note):
         children_dict = self.get_children_dict(note)
@@ -330,6 +334,10 @@ class Notebook:
             del self.descendant_indexing[note]
         if note in self.indexers:
             del self.indexers[note]
+        try:
+            self.notes_without_indexer.remove(note)
+        except ValueError:
+            pass
 
     def get_dict_for_prompt(self):
         tree = {
