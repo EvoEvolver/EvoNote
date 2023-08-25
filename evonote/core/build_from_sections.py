@@ -8,6 +8,7 @@ from evonote.file_helper.evolver import save_cache
 def notebook_from_doc(doc, meta)->Notebook:
     root = make_notebook_root(meta["title"])
     build_from_sections(doc, root)
+    root.related_info["annotation"] = "This is a notebook of the paper \""+meta["title"]+"\"."
     return root.default_notebook
 
 
@@ -22,7 +23,7 @@ def digest_all_descendants(notebook: Notebook, caller_path=None):
         caller_path = EvolverInstance.get_caller_path()
     all_notes = notebook.get_all_notes()
     all_notes = [note for note in all_notes if len(note.content) > 0]
-    digests = []
+    #digests = []
     digest_content_with_cache = lambda x: digest_content(x, use_cache=True,
                                                          caller_path=caller_path)
     finished = 0
@@ -30,10 +31,10 @@ def digest_all_descendants(notebook: Notebook, caller_path=None):
         for note, digest in zip(all_notes, executor.map(digest_content_with_cache,
                                                         [note.content for note in
                                                          all_notes])):
-            digests.append(digest)
+            #digests.append(digest)
             set_notes_by_digest(note, digest)
+            note.related_info["original text"] = note.content
             note.content = ""
-            set_notes_by_digest(note, digest)
             finished += 1
             print("received ", finished, "/", len(all_notes))
         if finished % 5 == 4:

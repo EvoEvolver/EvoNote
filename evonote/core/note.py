@@ -309,7 +309,7 @@ class Notebook:
         delete_extra_keys_for_prompt(tree)
         return yaml.dump(tree)
 
-    def show_notebook_ui(self):
+    def show_notebook_gui(self):
         assert self.root is not None
         draw_treemap(self.root, self)
         pass
