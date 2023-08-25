@@ -70,9 +70,12 @@ class EmbedIndexer(VectorIndexer):
         if weights is None:
             weights = [1.0]*len(vecs)
 
-        similarity = similarity.T * np.array(weights)
+        average_similarity = np.average(similarity, axis=0)
+        similarity = similarity - average_similarity - 0.05
         # add non-linearity to similarity
-        similarity = np.exp(similarity-0.7)
+        similarity = np.exp(similarity*2)
+        similarity = similarity.T * weights
+
         similarity = np.sum(similarity, axis=1)
         cache_embeddings()
         return similarity

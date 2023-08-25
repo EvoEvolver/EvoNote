@@ -82,7 +82,8 @@ List[int]:
         system_message=system_message)
     chat.add_user_message("The database: \n" + notebook_yaml)
     chat.add_user_message(
-        f"Output the indices of the notes that satisfies the criteria with indices saperated by comma: {criteria_prompt}.")
+        f"Output the indices of the notes that satisfies the criteria with indices "
+        f"separated by comma: {criteria_prompt}.")
     res = complete_chat(chat)
     original_res = res
     number_start = -1
@@ -92,12 +93,12 @@ List[int]:
             break
     if number_start == -1:
         raise ValueError(f"Invalid answer: {res}")
-    number_end = len(res) - 1
+    number_end = len(res)
     for i in range(number_start, len(res)):
         if res[i] not in "0123456789, ":
             number_end = i
             break
-    res = res[number_start:number_end+1]
+    res = res[number_start:number_end]
     try:
         useful_indices = [int(i.strip()) for i in res.split(",")]
     except Exception as e:
