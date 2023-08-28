@@ -6,10 +6,10 @@ from evonote.file_helper.evolver import save_cache
 
 
 def notebook_from_doc(doc, meta)->Notebook:
-    root = make_notebook_root(meta["title"])
+    root, notebook = make_notebook_root(meta["title"])
     build_from_sections(doc, root)
     root.related_info["annotation"] = "This is a notebook of the paper \""+meta["title"]+"\"."
-    return root.default_notebook
+    return notebook
 
 
 def build_from_sections(doc, root: Note):

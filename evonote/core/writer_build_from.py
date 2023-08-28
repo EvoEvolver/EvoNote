@@ -31,7 +31,7 @@ def digest_content(content, use_cache=False, caller_path=None):
             return cache._value
 
     chat = Chat(
-        system_message="""You are a helpful assistant for arranging core to a core base. You should output merely JSON.""")
+        system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")
     chat.add_user_message(content)
     chat.add_user_message(
         """Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "topic", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")

@@ -34,6 +34,8 @@ class Note:
         # The root note helps merge two core bases
         self.default_notebook: Notebook = default_notebook
 
+        self.type = "text"
+
         self.related_info: Dict[str, Any] = {}
 
     @property
@@ -417,11 +419,11 @@ def get_descendants(note: Note, notebook: Notebook):
     return descendants
 
 
-def make_notebook_root(topic: str = None):
+def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     path_born = EvolverInstance.get_caller_path()
     if topic is None:
         topic = ""
     notebook = Notebook(topic, path_born)
     root = Note(default_notebook=notebook)
     notebook.set_root(root)
-    return root
+    return root, notebook
