@@ -395,6 +395,12 @@ class Notebook:
         return new_notebook
 
 
+    def flush_notes_without_indexer(self):
+        notes = self.notes_without_indexer
+        self.notes_without_indexer = []
+        return notes
+
+
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
     new_notebook = Notebook(topic=notebook.topic, path_born=notebook.path_born)
     new_notebook.root = notebook.root

@@ -14,6 +14,8 @@ class ModuleManager:
         self.doc_parser = doc_parser if doc_parser is not None else parse_pycharm_doc
         self.tree: Dict = {}
 
+        self.get_module_members()
+
     def get_module_members(self):
         new_tree_root = {}
         tree = {"type": "module", "obj": self.root_module, "children": new_tree_root,
@@ -45,11 +47,14 @@ def build_notebook_for_module(leaf, root_note: Note, doc_parser):
     root_note.add_child(leaf["type"]+": "+leaf["name"], child_note)
     child_note.type = "code:"+leaf["type"]
     child_note.related_info["object"] = leaf["obj"]
+    doc = inspect.getdoc(leaf["obj"])
+    if doc is not None:
+        child_note.be(doc)
     for name, child in leaf["children"].items():
         if child["type"] == "function":
             doc = inspect.getdoc(child["obj"])
             if doc is None:
-                doc = ""
+                doc = " ".join(name.split("_"))
             doc_tuple = doc_parser(doc)
             child_note.s("function: "+name).be(get_doc_in_prompt(doc_tuple))
             if len(doc_tuple[0])>0:
@@ -131,9 +136,14 @@ def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_pat
     return
 
 
+def get_notebook_for_module(module):
+    manager = ModuleManager(module)
+    notebook = manager.build_notebook()
+    return notebook
+
+
 if __name__ == "__main__":
     from evonote.testing import v_lab
     manager = ModuleManager(v_lab)
-    manager.get_module_members()
     notebook = manager.build_notebook()
     notebook.show_notebook_gui()

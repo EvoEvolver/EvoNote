@@ -58,8 +58,7 @@ def default_indexing(notebook: Notebook, use_cache=True,
                                                                 caller_path)
     notebook.indexer_class = EmbedIndexer
 
-    #children = notebook.get_all_notes()
-    children = notebook.notes_without_indexer
+    children = notebook.flush_notes_without_indexer()
     children_content = []
     children_non_empty = []
     children_empty = []
@@ -96,4 +95,3 @@ def default_indexing(notebook: Notebook, use_cache=True,
                 save_cache()
     save_cache()
 
-    notebook.notes_without_indexer = []
