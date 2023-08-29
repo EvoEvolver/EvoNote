@@ -64,19 +64,21 @@ class EmbedIndexer(VectorIndexer):
     @classmethod
     def get_similarities(cls, texts: List[str], vecs: np.ndarray, weights: List[float] = None):
         text_embedding_list = get_embeddings(texts)
+        cache_embeddings()
+
         text_embedding_list = np.array(text_embedding_list)
         similarity = vecs.dot(text_embedding_list.T).T
 
         if weights is None:
             weights = [1.0]*len(vecs)
 
-        average_similarity = np.average(similarity, axis=0)
+        average_similarity = np.average(similarity, axis=1)
         similarity = similarity - average_similarity - 0.05
         # add non-linearity to similarity
         similarity = np.exp(similarity*2)
         similarity = similarity.T * weights
 
         similarity = np.sum(similarity, axis=1)
-        cache_embeddings()
+
         return similarity
 

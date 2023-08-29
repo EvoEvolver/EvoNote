@@ -168,8 +168,13 @@ def get_embeddings(texts: list[str], make_cache=False) -> list[list[float]]:
         else:
             embeddings.append(embedding_cache[hash_keys[i]])
     if len(texts_without_cache) > 0:
-        res = openai.Embedding.create(input=texts_without_cache,
-                                      model=model_for_embedding)["data"]
+        try:
+            res = openai.Embedding.create(input=texts_without_cache,
+                                          model=model_for_embedding)["data"]
+        except Exception as e:
+            print(e)
+            print(texts_without_cache)
+            raise e
         res = [r["embedding"] for r in res]
         print(f"{len(res)} embeddings generated")
         for i, r in zip(index_for_eval, res):

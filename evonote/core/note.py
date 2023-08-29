@@ -50,6 +50,13 @@ class Note:
     def children(self):
         return self.get_children(self.default_notebook)
 
+    @property
+    def indexer(self):
+        if self in self.default_notebook.indexers:
+            return self.default_notebook.indexers[self]
+        else:
+            return None
+
     def get_note_path(self, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_note_path(self)
@@ -254,6 +261,8 @@ class Notebook:
         else:
             raise Exception("No indexer is set")
 
+
+
     def get_note_path(self, note: Note):
         if note not in self.note_path:
             self.note_path[note] = []
@@ -386,6 +395,9 @@ class Notebook:
         top_k_indices = similarity.argsort()[-top_k:][::-1]
         descendants = self.descendant_indexing[root]["descendants"]
         top_k_descendants = [descendants[i] for i in top_k_indices]
+
+
+
         return top_k_descendants
 
     def sub_notebook_by_similarity(self, query_list: List[str],

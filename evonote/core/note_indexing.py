@@ -10,8 +10,8 @@ from evonote.model.llm import complete_chat
 import numpy as np
 
 prompt_for_splitting = "Split the following sentence into smaller fragments (no more than about 8 words). Put each fragment in a new line."
-prompt_for_extracting = "Give some key phrases for the following sentence to be searched (no more than about 8 words). Put each key phrase in a new line."
-def process_sent_into_frags(sent: str, use_cache=True, caller_path=None, prompt=prompt_for_splitting):
+prompt_for_extracting = "Give some phrases that summarize the following sentence. The phrases should be no more than 8 words and represents what the sentence is describing. Put each phrase in a new line."
+def process_sent_into_frags(sent: str, use_cache=True, caller_path=None, prompt=prompt_for_extracting):
     if caller_path is None:
         caller_path = EvolverInstance.get_caller_path()
     cache = EvolverInstance.read_cache(sent, "sent_breaking",
@@ -64,10 +64,10 @@ def default_indexing(notebook: Notebook, use_cache=True,
     children_empty = []
     for child in children:
         if len(child.content) == 0:
+            children_empty.append(child)
             continue
         children_content.append(child.content)
         children_non_empty.append(child)
-        children_empty.append(child)
 
     for child in children_empty:
         indexer: EmbedIndexer = notebook.get_indexer(child)
@@ -79,7 +79,6 @@ def default_indexing(notebook: Notebook, use_cache=True,
             weight = np.array([i+1 for i in range(len(indexer.src_list))])
             weight = weight / np.sum(weight)
             indexer.src_weight = weight
-        indexer.src_list.append(child.content)
 
     n_finished = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -93,5 +92,6 @@ def default_indexing(notebook: Notebook, use_cache=True,
             n_finished += 1
             if n_finished % 20 == 19:
                 save_cache()
+
     save_cache()
 
