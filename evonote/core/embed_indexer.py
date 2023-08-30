@@ -73,10 +73,10 @@ class EmbedIndexer(VectorIndexer):
             weights = [1.0]*len(vecs)
 
         average_similarity = np.average(similarity, axis=1)
-        similarity = similarity - average_similarity - 0.05
+        similarity = similarity.T - average_similarity - 0.05
         # add non-linearity to similarity
         similarity = np.exp(similarity*2)
-        similarity = similarity.T * weights
+        similarity = similarity * weights
 
         similarity = np.sum(similarity, axis=1)
 
