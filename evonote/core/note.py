@@ -225,6 +225,13 @@ def get_descendants_of_note(note: Note | Notebook):
         descendants.extend(get_descendants_of_note(child))
     return descendants
 
+class Indexing:
+    def __init__(self, notes: List[Note], indexer_class: Type[VectorIndexer]):
+        self.notes_without_indexer: List[Note] = notes[:]
+        self.indexers: Dict[Note, VectorIndexer] = {}
+        self.indexer_class: Type[VectorIndexer] = indexer_class
+        self.data: Any = None
+
 
 class Notebook:
     """
@@ -238,10 +245,12 @@ class Notebook:
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
 
+        self.indexings: Dict[str, Indexing] = {}
+
         self.descendant_indexing: Dict[Note, Dict] = {}
+
         self.indexers: Dict[Note, VectorIndexer] = {}
         self.indexer_class: Type[VectorIndexer] | None = None
-
         self.notes_without_indexer: List[Note] = []
 
         self.topic = topic
@@ -260,8 +269,6 @@ class Notebook:
             return indexer
         else:
             raise Exception("No indexer is set")
-
-
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -382,7 +389,10 @@ class Notebook:
         pass
 
     def get_descendant_by_similarity(self, query_list: List[str],
-                                     weights: List[float] | None = None, top_k: int = 10):
+                                     weights: List[float] | None = None,
+                                     top_k: int = 10,
+                                     type_filter: str | None = None,
+                                     ) -> List[Note]:
         if weights is None:
             weights = [1.0] * len(query_list)
         assert len(query_list) == len(weights)
@@ -392,20 +402,29 @@ class Notebook:
             root.index_descendants(self)
         vectors = self.descendant_indexing[root]["vectors"]
         similarity = self.indexer_class.get_similarities(query_list, vectors, weights)
-        top_k_indices = similarity.argsort()[-top_k:][::-1]
+        top_indices = similarity.argsort()[::-1]
         descendants = self.descendant_indexing[root]["descendants"]
-        top_k_descendants = [descendants[i] for i in top_k_indices]
-
-
-
+        top_k_descendants = []
+        if type_filter is None:
+            top_k_indices = top_indices[:top_k]
+            top_k_descendants = [descendants[i] for i in top_k_indices]
+        else:
+            for i in top_indices:
+                if descendants[i].type == type_filter:
+                    top_k_descendants.append(descendants[i])
+                    if len(top_k_descendants) == top_k:
+                        break
         return top_k_descendants
 
     def sub_notebook_by_similarity(self, query_list: List[str],
-                                   weights: List[float] | None = None, top_k: int = 10):
-        top_k_descendants = self.get_descendant_by_similarity(query_list, weights, top_k)
+                                   weights: List[float] | None = None,
+                                   top_k: int = 10,
+                                   type_filter: str | None = None,
+                                   ) -> Notebook:
+        top_k_descendants = self.get_descendant_by_similarity(query_list, weights, top_k,
+                                                              type_filter)
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
-
 
     def flush_notes_without_indexer(self):
         notes = self.notes_without_indexer
