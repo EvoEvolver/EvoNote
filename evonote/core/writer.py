@@ -7,7 +7,7 @@ import typing
 from evonote import EvolverInstance
 
 from evonote.file_helper.evolver import get_caller_id
-from evonote.model.llm import complete_chat
+
 
 verbose = True
 
@@ -128,13 +128,13 @@ class ChatWriter(Writer):
                 result = comment.content
             elif comment.type == "revise":
                 if result is None:
-                    result = complete_chat(chat, default_kwargs_chat_openai)
+                    result = chat.complete_chat()
                 chat.add_assistant_message(result)
                 chat.add_user_message(comment.content)
                 result = None
 
         if result is None:
-            result = complete_chat(chat, default_kwargs_chat_openai)
+            result = chat.complete_chat()
 
         return result
 
@@ -150,7 +150,7 @@ def get_notes_by_linage(note: Note, depth=2):
     return nearby_notes
 
 
-from evonote.data_type.chat import Chat
+from evonote.model.chat import Chat
 
 
 def answer_simple(question: str):

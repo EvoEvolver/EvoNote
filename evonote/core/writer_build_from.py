@@ -3,10 +3,10 @@ from __future__ import annotations
 import ast
 
 from evonote import EvolverInstance
-from evonote.data_type.chat import Chat
+from evonote.core.writer import Writer
+from evonote.model.chat import Chat
 from evonote.core.note import Note
-from evonote.core.writer import Writer, default_kwargs_chat_openai
-from evonote.model.llm import complete_chat
+
 
 
 class BuildFromWriter(Writer):
@@ -36,7 +36,7 @@ def digest_content(content, use_cache=False, caller_path=None):
     chat.add_user_message(
         """Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "topic", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")
 
-    res = complete_chat(chat, default_kwargs_chat_openai)
+    res = chat.complete_chat()
     if res[0] == "`":
         lines = res.split("\n")
         lines = lines[1:-1]

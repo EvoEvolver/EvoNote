@@ -5,11 +5,11 @@ from typing import Dict, List, Any, Callable, Type
 import yaml
 
 from evonote import EvolverInstance
-from evonote.core.indexing.indexing import Indexing, Indexer
-from evonote.core.visualize import draw_treemap
+from evonote.core.writer import Writer
+from evonote.gui.notebook import draw_treemap
+from evonote.indexing.indexing import Indexing, Indexer
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
-from evonote.core.writer import Writer
 
 
 class Note:

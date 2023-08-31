@@ -2,8 +2,8 @@ from typing import List
 
 from evonote import EvolverInstance
 from evonote.core.note import Notebook, Note, new_notebook_from_note_subset
-from evonote.data_type.chat import Chat
-from evonote.model.llm import complete_chat, complete_chat_expensive
+from evonote.model.chat import Chat
+from evonote.model.llm import complete_chat
 
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
 
@@ -29,7 +29,7 @@ def filter_note(note: Note, notebook: Notebook, criteria_prompt: str, caller_pat
     asking_prompt = f" \n {criteria_prompt} \n Answer just Yes or No."
     chat.add_user_message(asking_prompt)
 
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     if "Yes" in res or "yes" in res:
         res = True
     elif "No" in res or "no" in res:
@@ -84,7 +84,7 @@ List[int]:
     chat.add_user_message(
         f"Output the indices of the notes that satisfies the criteria with indices "
         f"separated by comma: {criteria_prompt}.")
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     original_res = res
     number_start = -1
     for i in range(len(res)):

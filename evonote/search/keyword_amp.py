@@ -1,7 +1,7 @@
 from typing import List
 
 from evonote import EvolverInstance
-from evonote.data_type.chat import Chat
+from evonote.model.chat import Chat
 from evonote.model.llm import complete_chat
 
 system_message = "You should output everything concisely as if you are a computer " \
@@ -21,7 +21,7 @@ def keyword_amplify(keywords: List[str], n_limit=3, caller_path=None, use_cache=
     prompt += "\nExisting keywords: " + "\n".join(keywords)
     chat = Chat(user_message=prompt, system_message=system_message)
     chat.add_user_message(f"Output at most {n_limit} related keywords. Separate each keyword by newline.")
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]

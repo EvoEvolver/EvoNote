@@ -1,5 +1,5 @@
 from evonote.core.note import Notebook
-from evonote.data_type.chat import Chat
+from evonote.model.chat import Chat
 from evonote.model.llm import complete_chat
 
 system_message = "You should output everything concisely as if you are a computer program"
@@ -11,7 +11,7 @@ def possible_function_names(description: str):
     chat.add_user_message("Description:\n" + description)
     chat.add_user_message(
         "Give the names with the underscore naming convention. Use newline to separate each name")
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]
@@ -24,7 +24,7 @@ def possible_docstring(description: str):
     chat = Chat(user_message=prompt, system_message=system_message)
     chat.add_user_message("Description:\n" + description)
     chat.add_user_message("Start the answer with Docstring:")
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     ans_start = res.find(":")
     res = res[ans_start + 1:]
     return res

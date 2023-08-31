@@ -2,8 +2,7 @@ from typing import List
 
 from evonote.core.note import Note, Notebook
 from evonote.core.utils import robust_json_parse
-from evonote.data_type.chat import Chat
-from evonote.model.llm import complete_chat, complete_chat_expensive
+from evonote.model.chat import Chat
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."
 
@@ -15,7 +14,7 @@ def generate_possible_keywords(content: str, context: str):
         prompt += f"\nContext: {context}"
     chat = Chat(user_message=prompt, system_message=system_message)
     chat.add_user_message("Output 2 keywords that are important and independent. Separate each keyword by newline.")
-    res = complete_chat_expensive(chat)
+    res = chat.complete_chat_expensive()
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]
@@ -41,7 +40,7 @@ def conceive_path(content: str, context: str, similar_paths: List[List[str]]):
     path_prompt.append("Output a path that is proper to put the note. You can create new path, but you should avoid it with possible. Start with `Path:`")
     path_prompt = "\n".join(path_prompt)
     chat.add_user_message(path_prompt)
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     start = res.find(":")
     res = res[start+1:].strip()
     res = res.split("/")
@@ -76,7 +75,7 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put, notebook:
     prompt_confirm += "\nOutput `current` or `parent`"
     chat.add_user_message(prompt_confirm)
 
-    res = complete_chat(chat)
+    res = chat.complete_chat()
 
 
     # TODO not finished
@@ -106,7 +105,7 @@ def put_content_to_notebook(content: str, context: str, path_to_put, notebook: N
 
     chat.add_user_message(prompt_asking)
 
-    res = complete_chat(chat)
+    res = chat.complete_chat()
 
     res = robust_json_parse(res)
 

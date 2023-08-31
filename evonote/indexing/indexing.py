@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import concurrent
 import math
-from typing import List, Type, Any, Dict, Callable, TYPE_CHECKING
+from typing import List, Type, Any, Callable, TYPE_CHECKING
 
 from evonote.core.utils import get_main_path
 
@@ -14,7 +14,7 @@ from evonote import EvolverInstance
 
 
 from evonote.file_helper.evolver import save_cache
-from evonote.model.llm import get_embeddings, cache_embeddings, complete_chat
+from evonote.model.llm import get_embeddings, complete_chat
 
 
 class Indexer:
@@ -256,12 +256,12 @@ def process_sent_into_frags(sent: str, use_cache=True, caller_path=None,
             return cache._value
 
     system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."
-    from evonote.data_type.chat import Chat
+    from evonote.model.chat import Chat
     chat = Chat(
         user_message=prompt,
         system_message=system_message)
     chat.add_user_message(sent)
-    res = complete_chat(chat)
+    res = chat.complete_chat()
     res = res.split('\n')
 
     # filter out empty lines

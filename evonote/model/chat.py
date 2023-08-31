@@ -1,5 +1,8 @@
 import copy
 
+from evonote.model.llm import complete_chat, complete_chat_expensive
+
+
 class Chat:
     """
     Class for storing the chat history for OpenAI API call
@@ -54,3 +57,9 @@ class Chat:
             res.append(f"{entry['role']}: {entry['content']}")
         return "\n".join(res)
 
+
+    def complete_chat(self, options=None):
+        complete_chat(self, options=options)
+
+    def complete_chat_expensive(self, options=None):
+        complete_chat_expensive(self, options=options)
