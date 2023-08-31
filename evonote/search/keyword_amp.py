@@ -7,6 +7,7 @@ from evonote.model.llm import complete_chat
 system_message = "You should output everything concisely as if you are a computer " \
                  "program. "
 
+
 def keyword_amplify(keywords: List[str], n_limit=3, caller_path=None, use_cache=True):
     """Return a list of keywords that are similar to the given keyword."""
     if caller_path is None:
@@ -20,7 +21,8 @@ def keyword_amplify(keywords: List[str], n_limit=3, caller_path=None, use_cache=
              "to help the search engine find related logs. "
     prompt += "\nExisting keywords: " + "\n".join(keywords)
     chat = Chat(user_message=prompt, system_message=system_message)
-    chat.add_user_message(f"Output at most {n_limit} related keywords. Separate each keyword by newline.")
+    chat.add_user_message(
+        f"Output at most {n_limit} related keywords. Separate each keyword by newline.")
     res = chat.complete_chat()
     res = res.split("\n")
     res = [r.strip() for r in res]

@@ -48,7 +48,8 @@ class SrcManager:
         return self.src_list[line_i]
 
     def get_indent(self, line_idx_origin: int):
-        return len(self.src_list[line_idx_origin]) - len(self.src_list[line_idx_origin].lstrip())
+        return len(self.src_list[line_idx_origin]) - len(
+            self.src_list[line_idx_origin].lstrip())
 
     @property
     def src_len(self):
@@ -59,7 +60,8 @@ class SrcManager:
         :param start_line_origin: this line will be deleted
         :param end_line_origin: this line will also be deleted
         """
-        self.add_pending_op(caller_id, self.__del_origin_lines, (start_line_origin, end_line_origin))
+        self.add_pending_op(caller_id, self.__del_origin_lines,
+                            (start_line_origin, end_line_origin))
 
     def __del_origin_lines(self, start_line_origin, end_line_origin):
         for i in range(start_line_origin, end_line_origin + 1):
@@ -67,8 +69,10 @@ class SrcManager:
             # won't modify line maps
             self.curr_list[self.line_map_to_curr[i]] = None
 
-    def insert_with_same_indent_after(self, caller_id: str, line_in_origin, lines_to_insert):
-        self.add_pending_op(caller_id, self.__insert_with_same_indent_after, (line_in_origin, lines_to_insert))
+    def insert_with_same_indent_after(self, caller_id: str, line_in_origin,
+                                      lines_to_insert):
+        self.add_pending_op(caller_id, self.__insert_with_same_indent_after,
+                            (line_in_origin, lines_to_insert))
 
     def __insert_with_same_indent_after(self, line_in_origin, lines_to_insert):
         indent = self.get_indent(line_in_origin)
@@ -80,15 +84,15 @@ class SrcManager:
         for i in range(line_in_origin + 1, len(self.line_map_to_curr)):
             self.line_map_to_curr[i] += len(lines_to_insert)
 
-    def insert_comment_with_same_indent_after(self, caller_id: str, line_in_origin, lines_to_insert, evolver_id):
+    def insert_comment_with_same_indent_after(self, caller_id: str, line_in_origin,
+                                              lines_to_insert, evolver_id):
         self.add_pending_op(caller_id, self.__insert_comment_with_same_indent_after,
                             (line_in_origin, lines_to_insert, evolver_id))
 
-    def __insert_comment_with_same_indent_after(self, line_in_origin, lines_to_insert, evolver_id):
+    def __insert_comment_with_same_indent_after(self, line_in_origin, lines_to_insert,
+                                                evolver_id):
         comment_lines = [comment_delimiter + evolver_id]
         for line in lines_to_insert:
             comment_lines.append(escape_multi_quote(line))
         comment_lines.append(comment_delimiter)
         self.__insert_with_same_indent_after(line_in_origin, comment_lines)
-
-

@@ -27,6 +27,7 @@ class Stream:
     def go_to_beginning(self):
         self.index = 0
 
+
 def read(file_path) -> Stream:
     """
     :param file_path: The path to the file to read.
@@ -40,7 +41,9 @@ def read(file_path) -> Stream:
 
 
 _supported_langs = ["JSON"]
-def parse(src: ValueByInput | str, lang: str="JSON"):
+
+
+def parse(src: ValueByInput | str, lang: str = "JSON"):
     """
     :param src: The source code to parse.
     :param lang: The language of the source code.
@@ -62,4 +65,3 @@ def parse(src: ValueByInput | str, lang: str="JSON"):
         print("Parse failed on:\n" + str(_src))
         print("Error: " + str(e))
         return None
-

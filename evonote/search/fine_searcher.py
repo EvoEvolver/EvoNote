@@ -67,7 +67,7 @@ def filter_notebook_0(notebook: Notebook, criteria_prompt: str, caller_path=None
 
 
 def filter_notebook_indices(notebook_yaml, criteria_prompt, caller_path, use_cache) -> \
-List[int]:
+        List[int]:
     cache_key = f"\n{notebook_yaml}\n{criteria_prompt}"
     cache = EvolverInstance.read_cache(cache_key, "notebook_filtering",
                                        caller_path, True)
@@ -119,6 +119,7 @@ def filter_notebook_1(notebook: Notebook, criteria_prompt: str, caller_path=None
     filtered = new_notebook_from_note_subset(useful_notes, notebook)
     return filtered
 
+
 def keyword_filter(notebook: Notebook, keywords: List[str], caller_path=None,
                    use_cache=True):
     if caller_path is None:
@@ -129,6 +130,6 @@ def keyword_filter(notebook: Notebook, keywords: List[str], caller_path=None,
     else:
         prompt = "The note is related to the following keyword: " + keywords[0]
     return filter_notebook_1(notebook,
-                      prompt,
-                      caller_path=caller_path,
-                      use_cache=use_cache)
+                             prompt,
+                             caller_path=caller_path,
+                             use_cache=use_cache)

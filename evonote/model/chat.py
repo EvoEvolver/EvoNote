@@ -57,7 +57,6 @@ class Chat:
             res.append(f"{entry['role']}: {entry['content']}")
         return "\n".join(res)
 
-
     def complete_chat(self, options=None):
         complete_chat(self, options=options)
 

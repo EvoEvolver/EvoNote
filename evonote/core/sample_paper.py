@@ -1,4 +1,4 @@
-sample_paper= r"""
+sample_paper = r"""
 \title{On scientific understanding with artificial intelligence}
 
 \begin{abstract}

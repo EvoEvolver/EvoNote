@@ -30,9 +30,11 @@ def out(content):
 def _out(content, out_path):
     EvolverInstance.append_output(out_path, content)
 
+
 def new_out_file(out_path):
     caller_path = EvolverInstance.get_context()[2][0].filename
     return OutputFile(get_abs_path(out_path, caller_path))
+
 
 class OutputFile:
     def __init__(self, abs_path: str):

@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 
 from evonote import EvolverInstance
 
-
-
 from evonote.file_helper.evolver import save_cache
 from evonote.model.llm import get_embeddings, complete_chat
 
@@ -24,6 +22,7 @@ class Indexer:
 
     Indexer is stateless and its state is stored in the Indexing object.
     """
+
     @classmethod
     def make_data(cls, notes: List[Note], indexing: Indexing, use_cache: bool = True):
         raise NotImplementedError
@@ -54,17 +53,16 @@ class Indexing:
         if note in self.notes_without_indexer:
             self.notes_without_indexer.remove(note)
 
-
     def make_data(self):
         self.indexer.make_data(self.notes_without_indexer, self)
 
     def get_similarities(self, query: List[str], weights: List[float] = None) -> (
-    List[float], List[Note]):
+            List[float], List[Note]):
         if len(self.notes_without_indexer) > 0:
             self.make_data()
         return self.indexer.get_similarities(query, self, weights)
 
-    def get_top_k_notes(self, query: List[str], weights: List[float] = None, k: int=10,
+    def get_top_k_notes(self, query: List[str], weights: List[float] = None, k: int = 10,
                         note_filter: Callable[[Note], bool] = None) -> List[Note]:
         similarities, notes = self.get_similarities(query, weights)
         note_rank = np.argsort(similarities)[::-1]
@@ -87,7 +85,8 @@ import numpy as np
 class AbsEmbeddingIndexer(Indexer):
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
-                                use_cache: bool)-> (List[List[str]], List[List[float]], List[Note]):
+                                use_cache: bool) -> (
+    List[List[str]], List[List[float]], List[Note]):
         raise NotImplementedError
 
     @classmethod
@@ -102,8 +101,8 @@ class AbsEmbeddingIndexer(Indexer):
             }
 
         new_srcs, new_weights, new_index_to_note = cls.prepare_src_weight_list(new_notes,
-                                                                                indexing,
-                                                                                use_cache)
+                                                                               indexing,
+                                                                               use_cache)
         indexing.data["srcs_list"].extend(new_srcs)
         indexing.data["index_to_note"].extend(new_index_to_note)
         indexing.data["weights_list"].extend(new_weights)

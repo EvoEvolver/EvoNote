@@ -25,27 +25,29 @@ class ModuleManager:
         return self
 
     def build_notebook(self):
-        note_root, notebook = make_notebook_root("Notebook of module: " + self.root_module_name)
+        note_root, notebook = make_notebook_root(
+            "Notebook of module: " + self.root_module_name)
         build_notebook_for_module(self.tree, note_root, self.doc_parser)
         return notebook
 
 
 def get_doc_in_prompt(doc_tuple):
     general, params, returns = doc_tuple
-    if len(general)>0:
+    if len(general) > 0:
         doc = general + "\n"
     else:
         doc = ""
     for param_name, param_doc in params.items():
         doc += "Parameter " + param_name + ": " + param_doc + "\n"
-    if len(returns)>0:
+    if len(returns) > 0:
         doc += "Return value: " + returns + "\n"
     return doc
 
+
 def build_notebook_for_module(leaf, root_note: Note, doc_parser):
     child_note = Note(root_note.default_notebook)
-    root_note.add_child(leaf["type"]+": "+leaf["name"], child_note)
-    child_note.type = "code:"+leaf["type"]
+    root_note.add_child(leaf["type"] + ": " + leaf["name"], child_note)
+    child_note.type = "code:" + leaf["type"]
     child_note.related_info["object"] = leaf["obj"]
     doc = inspect.getdoc(leaf["obj"])
     if doc is not None:
@@ -56,14 +58,14 @@ def build_notebook_for_module(leaf, root_note: Note, doc_parser):
             if doc is None:
                 doc = " ".join(name.split("_"))
             doc_tuple = doc_parser(doc)
-            function_note = child_note.s("function: "+name)
+            function_note = child_note.s("function: " + name)
             function_note.be(get_doc_in_prompt(doc_tuple))
             function_note.type = "code:function"
-            if len(doc_tuple[0])>0:
+            if len(doc_tuple[0]) > 0:
                 child_note.related_info["annotation"] = doc_tuple[0]
-            if len(doc_tuple[1])>0:
+            if len(doc_tuple[1]) > 0:
                 child_note.related_info["parameter annotation"] = doc_tuple[1]
-            if len(doc_tuple[2])>0:
+            if len(doc_tuple[2]) > 0:
                 child_note.related_info["return value annotation"] = doc_tuple[2]
         elif child["type"] == "module":
             build_notebook_for_module(child, child_note, doc_parser)
@@ -138,7 +140,7 @@ def parse_vscode_doc(doc: str):
                 state = "param"
                 content_start = next_colon + 1
                 new_content = line[content_start:]
-            params[param_name] = params.get(param_name, "") +" "+ new_content.strip()
+            params[param_name] = params.get(param_name, "") + " " + new_content.strip()
         elif state == "return":
             returns += content.strip()
         else:
@@ -146,10 +148,10 @@ def parse_vscode_doc(doc: str):
     return general, params, returns
 
 
-
 def get_class_members(cls, tree_root: Dict):
     for name, member in inspect.getmembers(cls, predicate=inspect.isfunction):
         tree_root[name] = {"type": "function", "obj": member}
+
 
 def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_path: str):
     for name, member in inspect.getmembers(module):
@@ -170,11 +172,13 @@ def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_pat
                 continue
             manager.modules[key] = member
             new_tree_root = {}
-            tree_root[name] = {"type": "module", "children": new_tree_root, "obj": member, "name": name}
+            tree_root[name] = {"type": "module", "children": new_tree_root, "obj": member,
+                               "name": name}
             get_module_members(member, manager, new_tree_root, member_path)
         elif inspect.isclass(member):
             manager.classes[key] = member
-            tree_root[name] = {"type": "class", "obj": member, "name": name, "children": {}}
+            tree_root[name] = {"type": "class", "obj": member, "name": name,
+                               "children": {}}
             get_class_members(member, tree_root[name]["children"])
         elif inspect.isfunction(member):
             manager.functions[key] = member
@@ -196,6 +200,7 @@ def get_notebook_for_module(module, doc_parser_type="pycharm"):
 
 if __name__ == "__main__":
     from evonote.testing import v_lab
+
     manager = ModuleManager(v_lab)
     notebook = manager.build_notebook()
     notebook.show_notebook_gui()

@@ -1,10 +1,9 @@
-
-
 class Beaker:
     """
     A beaker is a container that can hold a certain volume of liquid.
     This class is used to represent the beaker in the virtual lab.
     """
+
     def __init__(self, max_volume: float):
         """
         Create a beaker with a maximum volume.

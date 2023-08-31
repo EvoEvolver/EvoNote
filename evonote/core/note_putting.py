@@ -6,6 +6,7 @@ from evonote.model.chat import Chat
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."
 
+
 def generate_possible_keywords(content: str, context: str):
     prompt = "You are managing a database of notes."
     prompt += "You are trying to find a path to put a new note based on its content and context."
@@ -13,7 +14,8 @@ def generate_possible_keywords(content: str, context: str):
     if len(context) > 0:
         prompt += f"\nContext: {context}"
     chat = Chat(user_message=prompt, system_message=system_message)
-    chat.add_user_message("Output 2 keywords that are important and independent. Separate each keyword by newline.")
+    chat.add_user_message(
+        "Output 2 keywords that are important and independent. Separate each keyword by newline.")
     res = chat.complete_chat_expensive()
     res = res.split("\n")
     res = [r.strip() for r in res]
@@ -26,6 +28,7 @@ def search_similar_paths(keywords, notebook: Notebook):
     similar_paths = [note.get_note_path(notebook) for note in notes]
     return similar_paths
 
+
 def conceive_path(content: str, context: str, similar_paths: List[List[str]]):
     prompt = "You are managing a database of notes."
     prompt += "You are trying to find a path to put a new note based on its content and context."
@@ -37,16 +40,19 @@ def conceive_path(content: str, context: str, similar_paths: List[List[str]]):
     for i, path in enumerate(similar_paths):
         path_prompt.append("/".join(path))
     path_prompt.append("")
-    path_prompt.append("Output a path that is proper to put the note. You can create new path, but you should avoid it with possible. Start with `Path:`")
+    path_prompt.append(
+        "Output a path that is proper to put the note. You can create new path, but you should avoid it with possible. Start with `Path:`")
     path_prompt = "\n".join(path_prompt)
     chat.add_user_message(path_prompt)
     res = chat.complete_chat()
     start = res.find(":")
-    res = res[start+1:].strip()
+    res = res[start + 1:].strip()
     res = res.split("/")
     return res
 
-def put_content_to_notebook_1(content: str, context: str, path_to_put, notebook: Notebook):
+
+def put_content_to_notebook_1(content: str, context: str, path_to_put,
+                              notebook: Notebook):
     chat = Chat(system_message=system_message)
 
     prompt = "You are managing a database of notes."
@@ -77,8 +83,9 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put, notebook:
 
     res = chat.complete_chat()
 
-
     # TODO not finished
+
+
 def put_content_to_notebook(content: str, context: str, path_to_put, notebook: Notebook):
     chat = Chat(system_message=system_message)
 
@@ -100,7 +107,7 @@ def put_content_to_notebook(content: str, context: str, path_to_put, notebook: N
 
     prompt_asking = "Considering the context might have been included in the parent paths. " \
                     "Give a title for the content to be stored in the current path." \
-                    "Based on the filename, give the altered content to be stored in the current path."\
+                    "Based on the filename, give the altered content to be stored in the current path." \
                     "\n Output the result in JSON with key `title` and `new content`"
 
     chat.add_user_message(prompt_asking)
@@ -128,7 +135,6 @@ def add_content_to_notebook(content: str, context: str, notebook: Notebook):
     conceived_path = conceive_path(content, context, similar_paths)
     print(conceived_path)
     put_content_to_notebook(content, context, conceived_path, notebook)
-
 
 
 if __name__ == "__main__":

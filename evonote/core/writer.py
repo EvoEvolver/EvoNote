@@ -8,7 +8,6 @@ from evonote import EvolverInstance
 
 from evonote.file_helper.evolver import get_caller_id
 
-
 verbose = True
 
 if typing.TYPE_CHECKING:
@@ -39,8 +38,9 @@ class Writer:
         input_for_hash = {
             key: self.__dict__[key] for key in self._key_for_hash
         }
-        
-        input_for_hash = (input_for_hash, note.note_path, [str(item) for item in self._revise_comments])
+
+        input_for_hash = (
+        input_for_hash, note.note_path, [str(item) for item in self._revise_comments])
 
         cache = EvolverInstance.read_cache(input_for_hash,
                                            self._writer_type,
@@ -79,6 +79,7 @@ class Writer:
         self._after_assign.append(_to_here)
         return self
 
+
 class ReviseLog:
     def __init__(self, type, content, options=None):
         self.type = type
@@ -92,8 +93,9 @@ class ReviseLog:
             "options": self.options
         })
 
+
 def _to_here(note: Note, manager, line_i, stacks):
-    #manager, line_i, stacks = EvolverInstance.get_context()
+    # manager, line_i, stacks = EvolverInstance.get_context()
     code_line = manager.get_src_line(line_i)
     while "to_here()" not in code_line:
         line_i += 1
@@ -156,8 +158,10 @@ from evonote.model.chat import Chat
 def answer_simple(question: str):
     return answer(question, system_message="Answer everything succinctly")
 
+
 def answer_list(question: str):
-    return answer(question, system_message='Answer EVERYTHING with a JSON list such as ["1","2","3"]')
+    return answer(question,
+                  system_message='Answer EVERYTHING with a JSON list such as ["1","2","3"]')
 
 
 def answer(question: str, system_message: str = None, format=None) -> ChatWriter | str:
@@ -188,13 +192,13 @@ def get_nearby_paths_in_prompt(notes: typing.List[Note], n_preview_words=10):
     for i, note in enumerate(notes):
         if note.content == "" and len(note.children) == 0:
             continue
-        line = [str(i)+"."]
+        line = [str(i) + "."]
         line.append(note.note_path)
         raw_content = note.content
         if len(raw_content) > 0:
             words = raw_content.split(" ")
             preview = " ".join(words[:n_preview_words])
-            line.append(": "+preview.strip())
+            line.append(": " + preview.strip())
         else:
             if len(note.children) > 0:
                 line.append(": (has children)")

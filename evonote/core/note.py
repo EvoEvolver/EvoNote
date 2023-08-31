@@ -219,8 +219,6 @@ def get_descendants_of_note(note: Note | Notebook):
     return descendants
 
 
-
-
 class Notebook:
     """
     Store the information of notes contained

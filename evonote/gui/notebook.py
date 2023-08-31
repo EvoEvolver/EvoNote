@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from evonote.core.note import Note, Notebook
 

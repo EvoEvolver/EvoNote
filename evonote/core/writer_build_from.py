@@ -8,7 +8,6 @@ from evonote.model.chat import Chat
 from evonote.core.note import Note
 
 
-
 class BuildFromWriter(Writer):
     def __init__(self, paragraph, caller_path: str):
         self.paragraph = paragraph
@@ -19,6 +18,7 @@ class BuildFromWriter(Writer):
 
     def _set_with_comp_result(self, comp_result, note: Note):
         set_notes_by_digest(note, comp_result)
+
 
 def digest_content(content, use_cache=False, caller_path=None):
     if caller_path is None:
@@ -52,9 +52,11 @@ def digest_content(content, use_cache=False, caller_path=None):
 
     return res
 
+
 def set_notes_by_digest(note: Note, digest: str):
     parsed_res = ast.literal_eval(digest)
     iter_and_assign(note, parsed_res)
+
 
 def iter_and_assign(note: Note, tree: dict):
     if "topic" not in tree or "statement" not in tree:
