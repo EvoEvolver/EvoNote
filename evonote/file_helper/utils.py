@@ -1,3 +1,6 @@
+import os
+
+
 def get_stringified_string(s):
     return '"""' + escape_multi_quote(s) + '"""'
 
@@ -35,3 +38,12 @@ def get_stringified_string_with_indent(s: str, indent):
     res.append(escape_multi_quote(split[-1]))
     res.append('"""')
     return "".join(res)
+
+
+def get_abs_path(out_path, caller_path):
+    if os.path.isabs(out_path):
+        abs_path = out_path
+    else:
+        abs_path = os.path.join(os.path.dirname(caller_path), out_path)
+    abs_path = os.path.normpath(abs_path)
+    return abs_path

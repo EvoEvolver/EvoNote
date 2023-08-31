@@ -4,7 +4,7 @@ The file handles the output of the script.
 import os
 
 from evonote import EvolverInstance
-from evonote.io.utils import get_abs_path
+from evonote.file_helper.utils import get_abs_path
 
 
 def set_out_path(out_path):

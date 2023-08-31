@@ -10,7 +10,7 @@ from evonote.file_helper.src_manager import SrcManager
 from evonote.file_helper.src_manager import comment_delimiter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from evonote.data_type.var_types import ValueByInput
+    from evonote.file_helper.var_types import ValueByInput
 
 def get_hash(input: any, type: str) -> str:
     return hashlib.sha1(json.dumps([input, type]).encode("utf-8")).hexdigest()

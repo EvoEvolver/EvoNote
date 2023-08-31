@@ -1,8 +1,9 @@
 import ast
 
 from evonote import EvolverInstance
-from evonote.data_type.var_types import ValueByInput
-from evonote.io.utils import get_abs_path
+from evonote.file_helper.var_types import ValueByInput
+from evonote.file_helper.utils import get_abs_path
+
 
 class Stream:
     def __init__(self, contents: list):
@@ -37,7 +38,7 @@ def read(file_path) -> Stream:
     paragraphs = src.split("\n\n")
     return Stream(paragraphs)
 
-import json
+
 _supported_langs = ["JSON"]
 def parse(src: ValueByInput | str, lang: str="JSON"):
     """
