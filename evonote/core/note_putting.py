@@ -23,7 +23,7 @@ def generate_possible_keywords(content: str, context: str):
 
 
 def search_similar_paths(keywords, notebook: Notebook):
-    notes = notebook.get_descendant_by_similarity(keywords, top_k=5)
+    notes = notebook.get_notes_by_similarity(keywords, top_k=5)
     similar_paths = [note.get_note_path(notebook) for note in notes]
     return similar_paths
 

@@ -15,8 +15,11 @@ def robust_json_parse(src: str):
     return res
 
 
-import sys
+import sys, os
 
 def debugger_is_active() -> bool:
     """Return if the debugger is currently active"""
     return hasattr(sys, 'gettrace') and sys.gettrace() is not None
+
+def get_main_path():
+    return os.path.dirname(os.path.abspath(sys.argv[0]))

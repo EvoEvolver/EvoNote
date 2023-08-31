@@ -1,11 +1,11 @@
 from __future__ import annotations
 import ast
-from typing import Dict, List, Type, Any
+from typing import Dict, List, Any, Callable, Type
 
 import yaml
 
 from evonote import EvolverInstance
-from evonote.core.embed_indexer import VectorIndexer
+from evonote.core.indexing.indexing import Indexing, Indexer
 from evonote.core.visualize import draw_treemap
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
@@ -49,13 +49,6 @@ class Note:
     @property
     def children(self):
         return self.get_children(self.default_notebook)
-
-    @property
-    def indexer(self):
-        if self in self.default_notebook.indexers:
-            return self.default_notebook.indexers[self]
-        else:
-            return None
 
     def get_note_path(self, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
@@ -225,12 +218,7 @@ def get_descendants_of_note(note: Note | Notebook):
         descendants.extend(get_descendants_of_note(child))
     return descendants
 
-class Indexing:
-    def __init__(self, notes: List[Note], indexer_class: Type[VectorIndexer]):
-        self.notes_without_indexer: List[Note] = notes[:]
-        self.indexers: Dict[Note, VectorIndexer] = {}
-        self.indexer_class: Type[VectorIndexer] = indexer_class
-        self.data: Any = None
+
 
 
 class Notebook:
@@ -245,30 +233,14 @@ class Notebook:
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
 
-        self.indexings: Dict[str, Indexing] = {}
-
-        self.descendant_indexing: Dict[Note, Dict] = {}
-
-        self.indexers: Dict[Note, VectorIndexer] = {}
-        self.indexer_class: Type[VectorIndexer] | None = None
-        self.notes_without_indexer: List[Note] = []
+        self.indexings: List[Indexing] = []
 
         self.topic = topic
         self.root: Note | None = None
 
-    def set_indexer(self, note: Note, indexer: VectorIndexer) -> VectorIndexer:
-        self.indexers[note] = indexer
-        return indexer
-
-    def get_indexer(self, note: Note):
-        if note in self.indexers:
-            return self.indexers[note]
-        elif self.indexer_class is not None:
-            indexer = self.indexer_class()
-            self.indexers[note] = indexer
-            return indexer
-        else:
-            raise Exception("No indexer is set")
+    def add_indexing(self, indexer_class: Type[Indexer]):
+        new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
+        self.indexings.append(new_indexing)
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -311,7 +283,6 @@ class Notebook:
         self.note_path[root] = []
         self.parents[root] = []
         self.root = root
-        self.notes_without_indexer.append(root)
 
     def get_all_notes(self):
         return list(self.children.keys())
@@ -330,9 +301,18 @@ class Notebook:
             self.parents[child] = [parent]
         else:
             self.parents[child].append(parent)
-        self.notes_without_indexer.append(child)
+
+        for indexing in self.indexings:
+            indexing.add_new_note(child)
 
     def remove_note(self, note: Note):
+        """
+        Remove a note from the tree
+        This will remove all the indexing data of the notebook
+        It is better to create another
+        :param note:
+        :return:
+        """
         children_dict = self.get_children_dict(note)
         for key, child in children_dict.items():
             self.remove_note(child)
@@ -348,14 +328,8 @@ class Notebook:
         del self.children[note]
         del self.note_path[note]
         del self.parents[note]
-        if note in self.descendant_indexing:
-            del self.descendant_indexing[note]
-        if note in self.indexers:
-            del self.indexers[note]
-        try:
-            self.notes_without_indexer.remove(note)
-        except ValueError:
-            pass
+        for indexing in self.indexings:
+            indexing.remove_note(note)
 
     def get_dict_for_prompt(self):
         tree = {
@@ -388,48 +362,31 @@ class Notebook:
         draw_treemap(self.root, self)
         pass
 
-    def get_descendant_by_similarity(self, query_list: List[str],
-                                     weights: List[float] | None = None,
-                                     top_k: int = 10,
-                                     type_filter: str | None = None,
-                                     ) -> List[Note]:
+    def get_notes_by_similarity(self, query_list: List[str],
+                                weights: List[float] | None = None,
+                                top_k: int = 10,
+                                note_filter: Callable[[Note], bool] = None
+                                ) -> List[Note]:
         if weights is None:
             weights = [1.0] * len(query_list)
         assert len(query_list) == len(weights)
-        assert self.indexer_class is not None
-        root = self.root
-        if root not in self.descendant_indexing:
-            root.index_descendants(self)
-        vectors = self.descendant_indexing[root]["vectors"]
-        similarity = self.indexer_class.get_similarities(query_list, vectors, weights)
-        top_indices = similarity.argsort()[::-1]
-        descendants = self.descendant_indexing[root]["descendants"]
-        top_k_descendants = []
-        if type_filter is None:
-            top_k_indices = top_indices[:top_k]
-            top_k_descendants = [descendants[i] for i in top_k_indices]
-        else:
-            for i in top_indices:
-                if descendants[i].type == type_filter:
-                    top_k_descendants.append(descendants[i])
-                    if len(top_k_descendants) == top_k:
-                        break
-        return top_k_descendants
 
-    def sub_notebook_by_similarity(self, query_list: List[str],
-                                   weights: List[float] | None = None,
-                                   top_k: int = 10,
-                                   type_filter: str | None = None,
-                                   ) -> Notebook:
-        top_k_descendants = self.get_descendant_by_similarity(query_list, weights, top_k,
-                                                              type_filter)
+        # Use the default indexing
+        indexing = self.indexings[0]
+
+        top_k_notes = indexing.get_top_k_notes(query_list, weights, top_k, note_filter)
+
+        return top_k_notes
+
+    def get_sub_notebook_by_similarity(self, query_list: List[str],
+                                       weights: List[float] | None = None,
+                                       top_k: int = 10,
+                                       note_filter: Callable[[Note], bool] = None
+                                       ) -> Notebook:
+        top_k_descendants = self.get_notes_by_similarity(query_list, weights, top_k,
+                                                         note_filter)
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
-
-    def flush_notes_without_indexer(self):
-        notes = self.notes_without_indexer
-        self.notes_without_indexer = []
-        return notes
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:

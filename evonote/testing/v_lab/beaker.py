@@ -26,6 +26,7 @@ class Beaker:
 
     def add_solid(self, solid_type: str, weight: float) -> bool:
         """
+        :keyword: solid, add
         :param solid_type: The type of solid, e.g. salt, sugar, etc.
         :param weight: The weight of the solid added.
         :return: whether the solid was successfully added.
