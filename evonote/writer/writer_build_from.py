@@ -21,10 +21,9 @@ class BuildFromWriter(Writer):
 
 
 def digest_content(content, use_cache=False):
-    cache = EvolverInstance.read_cache(content, "digest_content", True)
-    if use_cache:
-        if cache.is_valid():
-            return cache._value
+    cache = EvolverInstance.read_cache(content, "digest_content")
+    if use_cache and cache.is_valid():
+        return cache._value
 
     chat = Chat(
         system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")
@@ -45,7 +44,6 @@ def digest_content(content, use_cache=False):
         return digest_content(content, use_cache)
 
     cache.set_cache(res)
-
     return res
 
 

@@ -247,10 +247,9 @@ prompt_for_extracting = "Give some phrases that summarize the following sentence
 
 def process_sent_into_frags(sent: str, use_cache=True,
                             prompt=prompt_for_extracting):
-    cache = EvolverInstance.read_cache(sent, "sent_breaking", True)
-    if use_cache:
-        if cache.is_valid():
-            return cache._value
+    cache = EvolverInstance.read_cache(sent, "sent_breaking")
+    if use_cache and cache.is_valid():
+        return cache._value
 
     system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."
     from evonote.model.chat import Chat

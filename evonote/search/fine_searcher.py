@@ -13,10 +13,9 @@ def filter_note(note: Note, notebook: Notebook, criteria_prompt: str,
                 use_cache=True):
     note_path = note.get_note_path(notebook)
     cache_key = f"\nPath: {note_path}\nContent: {note.content}\n{criteria_prompt}"
-    cache = EvolverInstance.read_cache(cache_key, "note_filtering", True)
-    if use_cache:
-        if cache.is_valid():
-            return cache._value
+    cache = EvolverInstance.read_cache(cache_key, "note_filtering")
+    if use_cache and cache.is_valid():
+        return cache._value
 
     if len(note.content) > 0:
         prompt = f"You are working on filtering notes in a database according to its content and the path it is stored."
@@ -68,10 +67,9 @@ def filter_notebook_0(notebook: Notebook, criteria_prompt: str,
 def filter_notebook_indices(notebook_yaml, criteria_prompt, use_cache) -> \
         List[int]:
     cache_key = f"\n{notebook_yaml}\n{criteria_prompt}"
-    cache = EvolverInstance.read_cache(cache_key, "notebook_filtering", True)
-    if use_cache:
-        if cache.is_valid():
-            return cache._value
+    cache = EvolverInstance.read_cache(cache_key, "notebook_filtering")
+    if use_cache and cache.is_valid():
+        return cache._value
 
     prompt = f"You are working on filtering notes in a database according to its content and the path it is stored. The databased is stored in a YAML file, with each note labelled by an index." \
              f"\n{criteria_prompt}"
