@@ -99,7 +99,7 @@ class CacheManager:
             # Create file if not exists
             with open(self.cache_path, "w") as f:
                 f.write("[]")
-            return CacheTable()
+            return {}
         with open(self.cache_path, "r") as f:
             cache_list = json.load(f)
         cache_table = {}
