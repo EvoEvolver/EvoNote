@@ -82,6 +82,9 @@ class Indexing:
 
 import numpy as np
 
+indexing_debug_config = {
+    "show_src_similarity_gui": False,
+}
 
 class AbsEmbeddingIndexer(Indexer):
     @classmethod
@@ -168,7 +171,7 @@ class AbsEmbeddingIndexer(Indexer):
 
         similarity = np.sum(similarity, axis=1)
 
-        if debugger_is_active() and False:
+        if indexing_debug_config["show_src_similarity_gui"]:
             show_src_similarity_gui(similarity, indexing.data, query, weights)
             pass
 
@@ -236,7 +239,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
                 new_src.append(note.content)
 
                 new_src_list_2.append(new_src)
-                weight = np.ones(len(new_src)) / (len(new_src) ** 0.8)
+                weight = np.ones(len(new_src)) / (len(new_src) ** 0.9)
                 new_weights_2.append(weight)
 
                 n_finished += 1

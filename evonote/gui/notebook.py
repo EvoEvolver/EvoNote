@@ -4,6 +4,8 @@ from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
 from typing import TYPE_CHECKING
 
+from evonote.gui.utlis import hypenate_texts
+
 if TYPE_CHECKING:
     from evonote.core.note import Note
     from evonote.core.notebook import Notebook
@@ -24,20 +26,8 @@ def draw_treemap(root: Note, notebook: Notebook = None):
     for i in range(len(values)):
         if len(values[i].strip()) == 0:
             continue
-        if "\\" in values[i]:
-            hyphenator = False
-        else:
-            hyphenator = h_en
-        try:
-            values[i] = fill(values[i], width=line_width, use_hyphenator=hyphenator)
-            values[i] = values[i].replace("\n", "<br>")
-            labels[i] = fill(labels[i], width=line_width, use_hyphenator=hyphenator)
-            labels[i] = labels[i].replace("\n", "<br>")
-        except:
-            values[i] = fill(values[i], width=line_width, use_hyphenator=False)
-            values[i] = values[i].replace("\n", "<br>")
-            labels[i] = fill(labels[i], width=line_width, use_hyphenator=False)
-            labels[i] = labels[i].replace("\n", "<br>")
+        values[i] = hypenate_texts(values[i], line_width)
+        labels[i] = hypenate_texts(labels[i], line_width)
 
     fig = go.Figure(go.Treemap(
         labels=labels,

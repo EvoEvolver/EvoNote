@@ -2,6 +2,8 @@
 
 import plotly.graph_objects as go
 import numpy as np
+
+from evonote.gui.utlis import hypenate_texts
 from evonote.model.llm import get_embeddings, flatten_nested_list
 
 # see https://plotly.com/python/heatmaps/
@@ -70,7 +72,7 @@ def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5
             else:
                 score = matched_query_score_list[i][j]
                 new_score = (score - min_score) / (max_score - min_score)
-                text = "content: " + content_list[i] + "<br>"
+                text = "content: " + hypenate_texts(content_list[i], line_width=100) + "<br>"
                 text += "src: " + src_list_for_display[i][j] + "<br>"
                 # round score to 3 decimal places
                 text += "query: " + matched_query_list[i][j] + "<br>" + "score: " + str(round(new_score, 3))
