@@ -86,11 +86,12 @@ indexing_debug_config = {
     "show_src_similarity_gui": False,
 }
 
+
 class AbsEmbeddingIndexer(Indexer):
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
                                 use_cache: bool) -> (
-    List[List[str]], List[List[float]], List[Note]):
+            List[List[str]], List[List[float]], List[Note]):
         raise NotImplementedError
 
     @classmethod
@@ -177,6 +178,17 @@ class AbsEmbeddingIndexer(Indexer):
 
         return similarity, indexing.data["index_to_note"]
 
+    @classmethod
+    def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
+                                  use_cache: bool):
+        raise NotImplementedError
+
+    @classmethod
+    def process_note_without_content(cls, notes: List[Note], indexing: Indexing,
+                                     use_cache: bool):
+        raise NotImplementedError
+
+
 def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
     from evonote.gui.similarity_search import draw_similarity_gui
     top_note_index = np.argsort(similarity)[::-1][:top_k]
@@ -187,7 +199,61 @@ def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
     src_list = [src_list[i] for i in top_note_index]
     draw_similarity_gui(src_list, weights, query, contents)
 
+
 class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
+    @classmethod
+    def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
+                                  use_cache: bool):
+        break_sent_use_cache = lambda sent: process_sent_into_frags(sent, use_cache,
+                                                                    get_main_path())
+        notes_content = [note.content for note in notes]
+        notebook = indexing.notebook
+
+        new_src_list_2 = []
+        new_weights_2 = []
+        n_finished = 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            for note, frags in zip(notes,
+                                   executor.map(break_sent_use_cache, notes_content)):
+                new_src = []
+                new_src.extend(frags)
+                note_path = note.get_note_path(notebook)
+                if len(note_path) > 0:
+                    new_src.append(note.get_note_path(notebook)[-1])
+                new_src.append(note.content)
+
+                new_src_list_2.append(new_src)
+                # TODO Handle when there are too many fragments. Maybe we should group
+                #  them by clustering
+                weight = np.ones(len(new_src)) / (len(new_src) ** 0.95)
+                new_weights_2.append(weight)
+
+                n_finished += 1
+                if n_finished % 20 == 19:
+                    save_cache()
+
+        save_cache()
+        return new_src_list_2, new_weights_2
+
+    @classmethod
+    def process_note_without_content(cls, notes: List[Note], indexing: Indexing,
+                                     use_cache: bool):
+        new_src_list_1 = []
+        new_weights_1 = []
+
+        for note in notes:
+            keywords_on_path = note.get_note_path(indexing.notebook)
+            # keep last 1/3 of the keywords
+            n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3),
+                             len(keywords_on_path))
+            new_src = keywords_on_path[-n_keywords:]
+            new_src_list_1.append(new_src)
+            weight = np.array([i + 1 for i in range(len(new_src))])
+            weight = weight / np.sum(weight)
+            new_weights_1.append(weight)
+
+        return new_src_list_1, new_weights_1
+
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
                                 use_cache: bool):
@@ -208,45 +274,11 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
             notes_with_content.append(note)
             notes_content.append(note.content)
 
-        new_src_list_1 = []
-        new_weights_1 = []
+        new_src_list_1, new_weights_1 = cls.process_note_without_content(
+            notes_without_content, indexing, use_cache)
 
-        for note in notes_without_content:
-            keywords_on_path = note.get_note_path(notebook)
-            # keep last 1/3 of the keywords
-            n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3),
-                             len(keywords_on_path))
-            new_src = keywords_on_path[-n_keywords:]
-            new_src_list_1.append(new_src)
-            weight = np.array([i + 1 for i in range(len(new_src))])
-            weight = weight / np.sum(weight)
-            new_weights_1.append(weight)
-
-        break_sent_use_cache = lambda sent: process_sent_into_frags(sent, use_cache,
-                                                                    get_main_path())
-
-        new_src_list_2 = []
-        new_weights_2 = []
-        n_finished = 0
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            for note, frags in zip(notes_with_content,
-                                   executor.map(break_sent_use_cache, notes_content)):
-                new_src = []
-                new_src.extend(frags)
-                note_path = note.get_note_path(notebook)
-                if len(note_path) > 0:
-                    new_src.append(note.get_note_path(notebook)[-1])
-                new_src.append(note.content)
-
-                new_src_list_2.append(new_src)
-                weight = np.ones(len(new_src)) / (len(new_src) ** 0.9)
-                new_weights_2.append(weight)
-
-                n_finished += 1
-                if n_finished % 20 == 19:
-                    save_cache()
-
-        save_cache()
+        new_src_list_2, new_weights_2 = cls.process_note_with_content(
+            notes_with_content, indexing, use_cache)
 
         new_src_list = new_src_list_1 + new_src_list_2
         new_weights = new_weights_1 + new_weights_2
