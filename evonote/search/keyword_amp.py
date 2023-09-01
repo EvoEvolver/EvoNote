@@ -8,12 +8,10 @@ system_message = "You should output everything concisely as if you are a compute
                  "program. "
 
 
-def keyword_amplify(keywords: List[str], n_limit=3, caller_path=None, use_cache=True):
+def keyword_amplify(keywords: List[str], n_limit=3, use_cache=True):
     """Return a list of keywords that are similar to the given keyword."""
-    if caller_path is None:
-        caller_path = EvolverInstance.get_caller_path()
     cache_key = str(keywords)
-    cache = EvolverInstance.read_cache(cache_key, "keyword_amplify", caller_path, True)
+    cache = EvolverInstance.read_cache(cache_key, "keyword_amplify", True)
     if use_cache:
         if cache.is_valid():
             return cache._value

@@ -19,14 +19,11 @@ def build_from_sections(doc, root: Note):
         build_from_sections(section, root.s(section["title"]))
 
 
-def digest_all_descendants(notebook: Notebook, caller_path=None):
-    if caller_path is None:
-        caller_path = EvolverInstance.get_caller_path()
+def digest_all_descendants(notebook: Notebook):
     all_notes = notebook.get_all_notes()
     all_notes = [note for note in all_notes if len(note.content) > 0]
     # digests = []
-    digest_content_with_cache = lambda x: digest_content(x, use_cache=True,
-                                                         caller_path=caller_path)
+    digest_content_with_cache = lambda x: digest_content(x, use_cache=True)
     finished = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         for note, digest in zip(all_notes, executor.map(digest_content_with_cache,

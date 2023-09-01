@@ -20,12 +20,8 @@ class BuildFromWriter(Writer):
         set_notes_by_digest(note, comp_result)
 
 
-def digest_content(content, use_cache=False, caller_path=None):
-    if caller_path is None:
-        _, _, stack = EvolverInstance.get_context()
-        caller_path = stack[0].filename
-    cache = EvolverInstance.read_cache(content, "digest_content",
-                                       caller_path, True)
+def digest_content(content, use_cache=False):
+    cache = EvolverInstance.read_cache(content, "digest_content", True)
     if use_cache:
         if cache.is_valid():
             return cache._value

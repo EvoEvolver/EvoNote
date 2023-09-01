@@ -225,8 +225,7 @@ class Notebook:
     The information is mainly the relationship between notes
     """
 
-    def __init__(self, topic, path_born):
-        self.path_born = path_born
+    def __init__(self, topic):
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
@@ -388,7 +387,7 @@ class Notebook:
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
-    new_notebook = Notebook(topic=notebook.topic, path_born=notebook.path_born)
+    new_notebook = Notebook(topic=notebook.topic)
     new_notebook.root = notebook.root
     root = new_notebook.root
     for note in notes:
@@ -412,10 +411,9 @@ def get_descendants(note: Note, notebook: Notebook):
 
 
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
-    path_born = EvolverInstance.get_caller_path()
     if topic is None:
         topic = ""
-    notebook = Notebook(topic, path_born)
+    notebook = Notebook(topic)
     root = Note(default_notebook=notebook)
     notebook.set_root(root)
     return root, notebook

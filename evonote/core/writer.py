@@ -42,9 +42,7 @@ class Writer:
         input_for_hash = (
         input_for_hash, note.note_path, [str(item) for item in self._revise_comments])
 
-        cache = EvolverInstance.read_cache(input_for_hash,
-                                           self._writer_type,
-                                           self._caller_path, True)
+        cache = EvolverInstance.read_cache(input_for_hash, self._writer_type, True)
 
         if cache.is_valid() and not self._need_retake:
             return cache._value

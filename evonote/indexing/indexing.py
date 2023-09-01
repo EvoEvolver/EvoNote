@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from evonote import EvolverInstance
 
 from evonote.file_helper.evolver import save_cache
-from evonote.model.llm import get_embeddings, complete_chat
+from evonote.model.llm import get_embeddings
 
 
 class Indexer:
@@ -244,12 +244,9 @@ prompt_for_splitting = "Split the following sentence into smaller fragments (no 
 prompt_for_extracting = "Give some phrases that summarize the following sentence. The phrases should be no more than 8 words and represents what the sentence is describing. Put each phrase in a new line."
 
 
-def process_sent_into_frags(sent: str, use_cache=True, caller_path=None,
+def process_sent_into_frags(sent: str, use_cache=True,
                             prompt=prompt_for_extracting):
-    if caller_path is None:
-        caller_path = EvolverInstance.get_caller_path()
-    cache = EvolverInstance.read_cache(sent, "sent_breaking",
-                                       caller_path, True)
+    cache = EvolverInstance.read_cache(sent, "sent_breaking", True)
     if use_cache:
         if cache.is_valid():
             return cache._value

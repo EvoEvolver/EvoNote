@@ -6,6 +6,7 @@ import json
 import os
 from typing import Dict, Optional, Tuple, List
 
+from evonote.core.utils import get_main_path
 from evonote.file_helper.src_manager import SrcManager
 from evonote.file_helper.src_manager import comment_delimiter
 from typing import TYPE_CHECKING
@@ -124,8 +125,8 @@ class EvoCore:
             with open(filepath + ".ec.json", "w") as f:
                 f.write(serialize_cache_table(cache_table.map))
 
-    def read_cache(self, input: any, type: str, filepath: str,
-                   create_cache=True) -> Cache | None:
+    def read_cache(self, input: any, type: str, create_cache=True) -> Cache | None:
+        filepath = get_main_path()
         hash = get_hash(input, type)
         if filepath not in self.cache_table_map:
             self.cache_table_map[filepath] = load_cache_table(filepath)

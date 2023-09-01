@@ -24,4 +24,4 @@ def debugger_is_active() -> bool:
 
 
 def get_main_path():
-    return os.path.dirname(os.path.abspath(sys.argv[0]))
+    return os.path.abspath(sys.argv[0])
