@@ -1,5 +1,5 @@
-from evonote.core.note import Note, make_notebook_root
-from evonote.core.notebook import Notebook
+from evonote.core.note import Note
+from evonote.core.notebook import Notebook, make_notebook_root
 from evonote.writer.writer_build_from import digest_content, set_notes_by_digest
 import concurrent.futures
 from evonote.file_helper.evolver import save_cache

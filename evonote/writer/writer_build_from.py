@@ -42,7 +42,7 @@ def digest_content(content, use_cache=False):
     except:
         print("failed to parse, retrying...")
         print(res)
-        return digest_content(content, use_cache, caller_path)
+        return digest_content(content, use_cache)
 
     cache.set_cache(res)
 

@@ -1,8 +1,8 @@
 from typing import List
 
 from evonote import EvolverInstance
-from evonote.core.note import Note, new_notebook_from_note_subset
-from evonote.core.notebook import Notebook
+from evonote.core.note import Note
+from evonote.core.notebook import Notebook, new_notebook_from_note_subset
 from evonote.model.chat import Chat
 from evonote.model.llm import complete_chat
 

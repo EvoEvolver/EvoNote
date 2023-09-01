@@ -4,8 +4,7 @@ from typing import Dict, List, Type, Callable
 
 import yaml
 
-from evonote.core.note import Note, delete_extra_keys_for_prompt, \
-    new_notebook_from_note_subset
+from evonote.core.note import Note
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.indexing import Indexing, Indexer
 
@@ -175,3 +174,42 @@ class Notebook:
                                                          note_filter)
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
+
+
+def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
+    if topic is None:
+        topic = ""
+    notebook = Notebook(topic)
+    root = Note(default_notebook=notebook)
+    notebook.set_root(root)
+    return root, notebook
+
+
+def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
+    new_notebook = Notebook(topic=notebook.topic)
+    new_notebook.root = notebook.root
+    root = new_notebook.root
+    for note in notes:
+        leaf = root
+        note_path = note.get_note_path(notebook)
+        for key in note_path[:-1]:
+            children = leaf.get_children(notebook=new_notebook)
+            if key not in children:
+                leaf.add_child(key, notebook.get_children_dict(leaf)[key], new_notebook)
+            leaf = children[key]
+        leaf.add_child(note_path[-1], note, new_notebook)
+    return new_notebook
+
+
+def delete_extra_keys_for_prompt(tree):
+    for key, leaf in tree["subtopics"].items():
+        delete_extra_keys_for_prompt(leaf)
+    if "content" not in tree:
+        for key, leaf in tree["subtopics"].items():
+            tree[key] = leaf
+        del tree["subtopics"]
+    else:
+        if len(tree["subtopics"]) == 0:
+            del tree["subtopics"]
+        if len(tree["content"]) == 0:
+            del tree["content"]

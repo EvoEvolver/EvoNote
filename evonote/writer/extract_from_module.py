@@ -1,5 +1,6 @@
 from typing import Dict
-from evonote.core.note import make_notebook_root, Note
+from evonote.core.note import Note
+from evonote.core.notebook import make_notebook_root
 import inspect
 
 
