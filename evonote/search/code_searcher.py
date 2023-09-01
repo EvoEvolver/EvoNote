@@ -1,6 +1,5 @@
 from evonote.core.notebook import Notebook
 from evonote.model.chat import Chat
-from evonote.model.llm import complete_chat
 
 system_message = "You should output everything concisely as if you are a computer program"
 

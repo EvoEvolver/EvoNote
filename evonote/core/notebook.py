@@ -6,7 +6,7 @@ import yaml
 
 from evonote.core.note import Note
 from evonote.gui.notebook import draw_treemap
-from evonote.indexing.indexing import Indexing, Indexer
+from evonote.indexing.core import Indexing, Indexer
 
 
 class Notebook:

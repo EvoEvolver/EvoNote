@@ -1,12 +1,14 @@
 from __future__ import annotations
 import ast
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
 
 from evonote import EvolverInstance
-from evonote.core.notebook import Notebook
 from evonote.writer.writer import Writer
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
+
+if TYPE_CHECKING:
+    from evonote.core.notebook import Notebook
 
 
 class Note:
@@ -101,7 +103,7 @@ class Note:
             return "Path" + str(self.note_path)
         return self.content
 
-    def s(self, key, notebook: Notebook | None) -> Note:
+    def s(self, key, notebook: Notebook | None = None) -> Note:
         """
         Creating a new child note or addressing an existing child note
         :param key: the key of the child note
@@ -127,6 +129,7 @@ class Note:
         else:
             raise NotImplementedError()
     """
+
 
 def get_descendants(note: Note, notebook: Notebook):
     descendants = []

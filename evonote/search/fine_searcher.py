@@ -4,7 +4,6 @@ from evonote import EvolverInstance
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook, new_notebook_from_note_subset
 from evonote.model.chat import Chat
-from evonote.model.llm import complete_chat
 
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
 

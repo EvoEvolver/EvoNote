@@ -4,7 +4,7 @@ import concurrent
 import math
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
-from evonote.core.utils import get_main_path
+from evonote.core.utils import get_main_path, debugger_is_active
 
 if TYPE_CHECKING:
     from evonote.core.note import Note
@@ -168,8 +168,21 @@ class AbsEmbeddingIndexer(Indexer):
 
         similarity = np.sum(similarity, axis=1)
 
+        if debugger_is_active() and False:
+            show_src_similarity_gui(similarity, indexing.data, query, weights)
+            pass
+
         return similarity, indexing.data["index_to_note"]
 
+def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
+    from evonote.gui.similarity_search import draw_similarity_gui
+    top_note_index = np.argsort(similarity)[::-1][:top_k]
+    notes = data["index_to_note"]
+    top_notes = [notes[i] for i in top_note_index]
+    contents = [note.content for note in top_notes]
+    src_list = data["srcs_list"]
+    src_list = [src_list[i] for i in top_note_index]
+    draw_similarity_gui(src_list, weights, query, contents)
 
 class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     @classmethod
