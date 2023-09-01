@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import ast
 
-from evonote import EvolverInstance
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook, make_notebook_root
 from evonote.model.chat import Chat
 import concurrent.futures
-from evonote.file_helper.evolver import save_cache
+from evonote.file_helper.cache_manage import save_cache, cache_manager
 
 
 def notebook_from_doc(doc, meta) -> Notebook:
@@ -46,9 +45,9 @@ def digest_all_descendants(notebook: Notebook):
 
 
 def digest_content(content, use_cache=False):
-    cache = EvolverInstance.read_cache(content, "digest_content")
+    cache = cache_manager.read_cache(content, "digest_content")
     if use_cache and cache.is_valid():
-        return cache._value
+        return cache.value
 
     chat = Chat(
         system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")

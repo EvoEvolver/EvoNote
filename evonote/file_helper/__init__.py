@@ -1,1 +1,1 @@
-from evonote.file_helper.core import EvoCore
+from evonote.file_helper.cache_manage import CacheManager

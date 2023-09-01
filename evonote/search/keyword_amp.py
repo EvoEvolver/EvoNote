@@ -1,6 +1,6 @@
 from typing import List
 
-from evonote import EvolverInstance
+from evonote.file_helper.cache_manage import cache_manager
 from evonote.model.chat import Chat
 
 system_message = "You should output everything concisely as if you are a computer " \
@@ -10,9 +10,9 @@ system_message = "You should output everything concisely as if you are a compute
 def keyword_amplify(keywords: List[str], n_limit=3, use_cache=True):
     """Return a list of keywords that are similar to the given keyword."""
     cache_key = str(keywords)
-    cache = EvolverInstance.read_cache(cache_key, "keyword_amplify")
+    cache = cache_manager.read_cache(cache_key, "keyword_amplify")
     if use_cache and cache.is_valid():
-        return cache._value
+        return cache.value
 
     prompt = "You are a program that generates related keywords based on given keywords " \
              "to help the search engine find related logs. "

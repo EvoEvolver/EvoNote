@@ -10,9 +10,7 @@ if TYPE_CHECKING:
     from evonote.core.note import Note
     from evonote.core.notebook import Notebook
 
-from evonote import EvolverInstance
-
-from evonote.file_helper.evolver import save_cache
+from evonote.file_helper.cache_manage import save_cache, cache_manager
 from evonote.model.llm import get_embeddings
 
 
@@ -292,9 +290,9 @@ prompt_for_extracting = "Give some phrases that summarize the following sentence
 
 def process_sent_into_frags(sent: str, use_cache=True,
                             prompt=prompt_for_extracting):
-    cache = EvolverInstance.read_cache(sent, "sent_breaking")
+    cache = cache_manager.read_cache(sent, "sent_breaking")
     if use_cache and cache.is_valid():
-        return cache._value
+        return cache.value
 
     system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."
     from evonote.model.chat import Chat
