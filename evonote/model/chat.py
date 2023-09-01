@@ -58,7 +58,11 @@ class Chat:
         return "\n".join(res)
 
     def complete_chat(self, options=None):
-        complete_chat(self, options=options)
+        res = complete_chat(self, options=options)
+        self.add_assistant_message(res)
+        return res
 
     def complete_chat_expensive(self, options=None):
-        complete_chat_expensive(self, options=options)
+        res = complete_chat_expensive(self, options=options)
+        self.add_assistant_message(res)
+        return res
