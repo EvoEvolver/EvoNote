@@ -2,7 +2,7 @@ from typing import List
 
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook
-from evonote.core.utils import robust_json_parse
+from evonote.utils import robust_json_parse
 from evonote.model.chat import Chat
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."

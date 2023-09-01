@@ -1,14 +1,8 @@
 from __future__ import annotations
-import ast
 from typing import Dict, Any, TYPE_CHECKING
-
-from evonote import EvolverInstance
-from evonote.file_helper.core import delete_old_comment_output
-from evonote.file_helper.evolver import get_caller_id
 
 if TYPE_CHECKING:
     from evonote.core.notebook import Notebook
-
 
 class Note:
     """
@@ -77,17 +71,6 @@ class Note:
         """
         self.content = content
         return self
-
-    def show(self):
-        evolver_id = "show"
-        manager, line_i, stacks = EvolverInstance.get_context()
-        caller_id = get_caller_id(stacks[0])
-        manager.clear_ops_for_caller(caller_id)
-        code_line = manager.get_src_line(line_i)
-        delete_old_comment_output(manager, caller_id, line_i, evolver_id)
-        lines_to_insert = str(self.content).splitlines()
-        manager.insert_comment_with_same_indent_after(caller_id, line_i, lines_to_insert,
-                                                      evolver_id)
 
     def __str__(self):
         if len(self.content) == 0:

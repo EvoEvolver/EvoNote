@@ -4,7 +4,7 @@ import concurrent
 import math
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
-from evonote.core.utils import get_main_path, debugger_is_active
+from evonote.utils import get_main_path
 
 if TYPE_CHECKING:
     from evonote.core.note import Note
