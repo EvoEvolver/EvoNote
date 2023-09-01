@@ -1,6 +1,7 @@
 from typing import List
 
-from evonote.core.note import Note, Notebook
+from evonote.core.note import Note
+from evonote.core.notebook import Notebook
 from evonote.core.utils import robust_json_parse
 from evonote.model.chat import Chat
 

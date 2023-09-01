@@ -5,7 +5,8 @@ from hyphen import Hyphenator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evonote.core.note import Note, Notebook
+    from evonote.core.note import Note
+    from evonote.core.notebook import Notebook
 
 h_en = Hyphenator('en_US')
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 
 from evonote import EvolverInstance
-from evonote.core.writer import Writer
+from evonote.writer.writer import Writer
 from evonote.model.chat import Chat
 from evonote.core.note import Note
 

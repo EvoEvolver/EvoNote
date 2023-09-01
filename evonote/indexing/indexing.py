@@ -7,7 +7,8 @@ from typing import List, Type, Any, Callable, TYPE_CHECKING
 from evonote.core.utils import get_main_path
 
 if TYPE_CHECKING:
-    from evonote.core.note import Note, Notebook
+    from evonote.core.note import Note
+    from evonote.core.notebook import Notebook
 
 from evonote import EvolverInstance
 

@@ -1,6 +1,6 @@
 from typing import List
 
-from evonote.core.note import Notebook
+from evonote.core.notebook import Notebook
 
 
 class Bookshelf:
