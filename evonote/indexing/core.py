@@ -101,15 +101,15 @@ class AbsEmbeddingIndexer(Indexer):
             indexing.data = {
                 "vecs": None,
                 "srcs_list": [],
-                "index_to_note": [],
+                "note_of_vecs": [],
                 "weights_list": [],
             }
 
-        new_srcs, new_weights, new_index_to_note = cls.prepare_src_weight_list(new_notes,
+        new_srcs, new_weights, new_note_of_vecs = cls.prepare_src_weight_list(new_notes,
                                                                                indexing,
                                                                                use_cache)
         indexing.data["srcs_list"].extend(new_srcs)
-        indexing.data["index_to_note"].extend(new_index_to_note)
+        indexing.data["note_of_vecs"].extend(new_note_of_vecs)
         indexing.data["weights_list"].extend(new_weights)
 
         new_vecs = []
@@ -176,7 +176,7 @@ class AbsEmbeddingIndexer(Indexer):
             show_src_similarity_gui(similarity, indexing.data, query, weights)
             pass
 
-        return similarity, indexing.data["index_to_note"]
+        return similarity, indexing.data["note_of_vecs"]
 
     @classmethod
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
@@ -192,7 +192,7 @@ class AbsEmbeddingIndexer(Indexer):
 def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
     from evonote.gui.similarity_search import draw_similarity_gui
     top_note_index = np.argsort(similarity)[::-1][:top_k]
-    notes = data["index_to_note"]
+    notes = data["note_of_vecs"]
     top_notes = [notes[i] for i in top_note_index]
     contents = [note.content for note in top_notes]
     src_list = data["srcs_list"]
@@ -209,8 +209,8 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
         notes_content = [note.content for note in notes]
         notebook = indexing.notebook
 
-        new_src_list_2 = []
-        new_weights_2 = []
+        new_src_list = []
+        new_weights = []
         n_finished = 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             for note, frags in zip(notes,
@@ -222,24 +222,24 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
                     new_src.append(note.get_note_path(notebook)[-1])
                 new_src.append(note.content)
 
-                new_src_list_2.append(new_src)
+                new_src_list.append(new_src)
                 # TODO Handle when there are too many fragments. Maybe we should group
                 #  them by clustering
                 weight = np.ones(len(new_src)) / (len(new_src) ** 0.95)
-                new_weights_2.append(weight)
+                new_weights.append(weight)
 
                 n_finished += 1
                 if n_finished % 20 == 19:
                     save_cache()
 
         save_cache()
-        return new_src_list_2, new_weights_2
+        return new_src_list, new_weights
 
     @classmethod
     def process_note_without_content(cls, notes: List[Note], indexing: Indexing,
                                      use_cache: bool):
-        new_src_list_1 = []
-        new_weights_1 = []
+        new_src_list = []
+        new_weights = []
 
         for note in notes:
             keywords_on_path = note.get_note_path(indexing.notebook)
@@ -247,21 +247,18 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
             n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3),
                              len(keywords_on_path))
             new_src = keywords_on_path[-n_keywords:]
-            new_src_list_1.append(new_src)
+            new_src_list.append(new_src)
             weight = np.array([i + 1 for i in range(len(new_src))])
             weight = weight / np.sum(weight)
-            new_weights_1.append(weight)
+            new_weights.append(weight)
 
-        return new_src_list_1, new_weights_1
+        return new_src_list, new_weights
 
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
                                 use_cache: bool):
 
         notebook = indexing.notebook
-
-        index_to_note = []
-
         notes_with_content = []
         notes_content = []
         notes_without_content = []

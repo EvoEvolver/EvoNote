@@ -13,7 +13,7 @@ def possible_function_names(description: str):
     res = chat.complete_chat()
     res = res.split("\n")
     res = [r.strip() for r in res]
-    res = [r for r in res if len(r) > 0]
+    res = [" ".join(r.split("_")) for r in res if len(r) > 0]
     return res
 
 
