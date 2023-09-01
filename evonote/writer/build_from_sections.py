@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+import ast
+
+from evonote import EvolverInstance
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook, make_notebook_root
-from evonote.writer.writer_build_from import digest_content, set_notes_by_digest
+from evonote.model.chat import Chat
 import concurrent.futures
 from evonote.file_helper.evolver import save_cache
 
@@ -38,3 +43,46 @@ def digest_all_descendants(notebook: Notebook):
             print("digest received ", finished, "/", len(all_notes))
             save_cache()
     save_cache()
+
+
+def digest_content(content, use_cache=False):
+    cache = EvolverInstance.read_cache(content, "digest_content")
+    if use_cache and cache.is_valid():
+        return cache._value
+
+    chat = Chat(
+        system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")
+    chat.add_user_message(content)
+    chat.add_user_message(
+        """Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "topic", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")
+
+    res = chat.complete_chat()
+    if res[0] == "`":
+        lines = res.split("\n")
+        lines = lines[1:-1]
+        res = "\n".join(lines)
+    try:
+        parsed_res = ast.literal_eval(res)
+    except:
+        print("failed to parse, retrying...")
+        print(res)
+        return digest_content(content, use_cache)
+
+    cache.set_cache(res)
+    return res
+
+
+def set_notes_by_digest(note: Note, digest: str):
+    parsed_res = ast.literal_eval(digest)
+    iter_and_assign(note, parsed_res)
+
+
+def iter_and_assign(note: Note, tree: dict):
+    if "topic" not in tree or "statement" not in tree:
+        raise Exception("incomplete tree node")
+        return
+    node = note.s(tree["topic"]).be(tree["statement"])
+    if "subtopics" not in tree:
+        return
+    for subtopic in tree["subtopics"]:
+        iter_and_assign(node, subtopic)

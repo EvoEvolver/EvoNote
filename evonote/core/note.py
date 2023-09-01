@@ -3,7 +3,6 @@ import ast
 from typing import Dict, Any, TYPE_CHECKING
 
 from evonote import EvolverInstance
-from evonote.writer.writer import Writer
 from evonote.file_helper.core import delete_old_comment_output
 from evonote.file_helper.evolver import get_caller_id
 
@@ -70,21 +69,13 @@ class Note:
         notebook.add_child(key, self, note)
         return note
 
-    def be(self, writer: Writer | str) -> Note:
+    def be(self, content: str) -> Note:
         """
         Assign the note with a writer (generator)
         :param writer:
         :return: The note itself
         """
-        if isinstance(writer, str):
-            self.content = writer
-        elif "_is_writer" in writer.__dict__:
-            comp_result = writer._get_comp_result(self)
-            writer._set_with_comp_result(comp_result, self)
-            if len(writer._after_assign) > 0:
-                manager, line_i, stacks = EvolverInstance.get_context()
-                for func in writer._after_assign:
-                    func(self, manager, line_i, stacks)
+        self.content = content
         return self
 
     def show(self):
