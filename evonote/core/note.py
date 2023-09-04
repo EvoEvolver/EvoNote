@@ -21,14 +21,10 @@ class Note:
         self._is_note = True
         # content is string no matter what _content_type is
         self.content: str = ""
-        # _content_type helps deserialize content
-        self._content_type = None
         # The root note helps merge two core bases
         self.default_notebook: Notebook = default_notebook
-
-        self.type = "text"
-
-        self.related_info: Dict[str, Any] = {}
+        # The resource is the data that is indicated by the note
+        self.resource: NoteResource = NoteResource()
 
     @property
     def note_path(self):
@@ -94,16 +90,6 @@ class Note:
         else:
             raise NotImplementedError()
 
-    """
-    def __getitem__(self, key):
-        if isinstance(key, int) or isinstance(key, str):
-            if key not in self.children:
-                return None
-            return self.children[key]
-        else:
-            raise NotImplementedError()
-    """
-
 
 def get_descendants(note: Note, notebook: Notebook):
     descendants = []
@@ -111,3 +97,19 @@ def get_descendants(note: Note, notebook: Notebook):
         descendants.append(child)
         descendants.extend(get_descendants(child, notebook))
     return descendants
+
+
+class NoteResource:
+    def __init__(self):
+        self.resource = []
+        # Possible types: Notebook, Note, Function, Class, Module
+        self.resource_type = []
+        self.resource_docs = []
+
+    def add_resource(self, resource, resource_type, resource_doc):
+        self.resource.append(resource)
+        self.resource_type.append(resource_type)
+        self.resource_docs.append(resource_doc)
+
+    def get_resource_types(self):
+        return self.resource_type
