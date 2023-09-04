@@ -11,27 +11,6 @@
 <i>your knowledge base</i> with AI
 </p>
 
-## Quick preview
-
-```python
-from evonote.ui import *
-# Build a core base from a text
-root_note.s("Introduction to M. Foucault").be(
-    writer.build_from(
-        """
-        Michel Foucault (1926–1984) was a French historian and philosopher,
-        associated with the structuralist and post-structuralist movements.
-        """
-    )
-)
-# Generate a text from the core base
-root_note.s("Example of philosopher").be(
-    writer.auto("Give an example of French philosopher")
-).show()
-"""""show
-Michel Foucault
-"""""
-```
 
 ## Why knowledge base?
 
@@ -40,8 +19,8 @@ Because **non-parametric** knowledge is the **last piece** towards artificial ge
 Characteristics of parametric knowledge (e.g. LLM):
 
 - Fast and efficient
-- Understanding and reasoning
-- Hard to train & hard to forget
+- Good at understanding and reasoning
+- Hard to learn & hard to forget
 - Hallucination-prone (Like a **drunk person**)
 
 Characteristics of non-parametric knowledge (e.g. notebook):
@@ -55,11 +34,11 @@ Characteristics of non-parametric knowledge (e.g. notebook):
 
 Knowledge base (KB) is the core of many intelligence-related tasks.
 
-- **Paper reading**: Based on the text, update the reader's KB by adding/removing/modifying items in it.
+- **Paper reading**: Based on the text, update the reader's KB by adding / removing / modifying items in it.
 - **Academic research**: Actively construct a knowledge base by asking (finding unknown in KB) / reading papers (adding to KB) / meditating (rearranging KB items) / discussing (comparing KBs) / doing experiments (changing confident level of KB items).  
 - **Paper writing**: Assuming a KB of the reader, generate a linearized text whose core is the difference between the KB of the reader and the writer.
 - **Joke writing**: Assuming a KB of the audience, make 
-a text with which the audience can draw an unexpected & reasonable relation among items in the KB. (See [humor and art](./docs/philosophy/Humor and art.md))
+a text with which the audience can draw an unexpected & reasonable relation among items in the KB.
 
 Typically, these tasks requires 
 
@@ -71,11 +50,11 @@ Typically, these tasks requires
 
 EvoNote is build for holding and operating knowledge bases (notebooks). EvoNote offers
 
-- A graph-based knowledge base framework
+- A tree-based knowledge base framework
 - Convenient tools for 
   - constructing knowledge bases from texts
   - generating texts from knowledge bases
-- Tools for auto-exploration to find new insights in knowledge bases (*)
+- Tools for exploration to find new insights in knowledge bases (*)
 - Tools for export and import knowledge bases to facilitate collaboration (*)
 
 (* means under development)
