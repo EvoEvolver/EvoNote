@@ -1,3 +1,6 @@
+import importlib
+import os
+import pkgutil
 from typing import Dict
 from evonote.core.note import Note
 from evonote.core.notebook import make_notebook_root
@@ -150,15 +153,34 @@ def parse_vscode_doc(doc: str):
 
 
 def get_class_members(cls, tree_root: Dict):
-    for name, member in inspect.getmembers(cls, predicate=inspect.isfunction):
-        tree_root[name] = {"type": "function", "obj": member}
-
+    for name, member in inspect.getmembers(cls):
+        if isinstance(member, classmethod):
+            continue
+        type_str = str(type(member))
+        # check whether member is a function
+        if type_str == "<class 'function'>":
+            tree_root[name] = {"type": "function", "obj": member}
+        # Add classmethods
+        elif type_str == "<class 'mappingproxy'>":
+            for sub_name, sub_member in member.items():
+                if isinstance(sub_member, classmethod):
+                    tree_root[sub_name] = {"type": "function", "obj": sub_member}
 
 def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_path: str):
-    for name, member in inspect.getmembers(module):
+    module_dir = os.path.dirname(inspect.getfile(module))
+    sub_modules = []
+    is_pkg = hasattr(module, "__path__")
+    if is_pkg:
+        for sub_module_info in pkgutil.iter_modules([module_dir]):
+            sub_module = importlib.import_module(
+                module.__name__ + "." + sub_module_info.name)
+            sub_modules.append(sub_module)
+
+    for name in dir(module):
+        member = module.__dict__[name]
         # check the type of the member is in module, class, method, function
-        if str(type(member)) not in ["<class 'module'>", "<class 'type'>",
-                                     "<class 'function'>"]:
+        if (str(type(member)) not in ["<class 'type'>",
+                                      "<class 'function'>"]):
             continue
         # skip the members defined outside the root path
         try:
@@ -168,15 +190,7 @@ def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_pat
         if not member_path.startswith(root_path):
             continue
         key = (member_path, name)
-        if inspect.ismodule(member):
-            if key in manager.modules:
-                continue
-            manager.modules[key] = member
-            new_tree_root = {}
-            tree_root[name] = {"type": "module", "children": new_tree_root, "obj": member,
-                               "name": name}
-            get_module_members(member, manager, new_tree_root, member_path)
-        elif inspect.isclass(member):
+        if inspect.isclass(member):
             manager.classes[key] = member
             tree_root[name] = {"type": "class", "obj": member, "name": name,
                                "children": {}}
@@ -184,6 +198,20 @@ def get_module_members(module, manager: ModuleManager, tree_root: Dict, root_pat
         elif inspect.isfunction(member):
             manager.functions[key] = member
             tree_root[name] = {"type": "function", "obj": member, "name": name}
+
+    for i, sub_module in enumerate(sub_modules):
+        name = sub_module.__name__.split(".")[-1]
+        member = sub_module
+        member_path = inspect.getfile(member)
+        key = (member_path, name)
+        if key in manager.modules:
+            continue
+        manager.modules[key] = member
+        new_tree_root = {}
+        tree_root[name] = {"type": "module", "children": new_tree_root, "obj": member,
+                           "name": name}
+        get_module_members(member, manager, new_tree_root, member_path)
+
     return
 
 
