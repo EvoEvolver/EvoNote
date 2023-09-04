@@ -126,12 +126,10 @@ def process_latex_into_standard(tex: str):
     return doc, meta
 
 
-import markdownify
-
 if __name__ == "__main__":
     from pprint import pprint
-    from evonote.core.sample_paper import sample_paper_2
+    from evonote.testing.sample_paper import sample_paper
 
-    tex = sample_paper_2
+    tex = sample_paper
     doc, meta = process_latex_into_standard(tex)
     pprint(doc)
