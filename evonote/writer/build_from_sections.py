@@ -12,8 +12,6 @@ from evonote.file_helper.cache_manage import save_cache, cache_manager
 def notebook_from_doc(doc, meta) -> Notebook:
     root, notebook = make_notebook_root(meta["title"])
     build_from_sections(doc, root)
-    root.related_info["annotation"] = "This is a notebook of the paper \"" + meta[
-        "title"] + "\"."
     return notebook
 
 
@@ -33,9 +31,9 @@ def digest_all_descendants(notebook: Notebook):
         for note, digest in zip(all_notes, executor.map(digest_content_with_cache,
                                                         [note.content for note in
                                                          all_notes])):
-            # digests.append(digest)
+            note: Note
             set_notes_by_digest(note, digest)
-            note.related_info["original text"] = note.content
+            note.resource.add_text(note.content, "original_content")
             note.content = ""
             finished += 1
         if finished % 5 == 4:
