@@ -106,10 +106,28 @@ class NoteResource:
         self.resource_type = []
         self.resource_docs = []
 
-    def add_resource(self, resource, resource_type, resource_doc):
+    def add_resource(self, resource, resource_type, resource_docs):
         self.resource.append(resource)
         self.resource_type.append(resource_type)
-        self.resource_docs.append(resource_doc)
+        self.resource_docs.append(resource_docs)
 
     def get_resource_types(self):
         return self.resource_type
+
+    def add_text(self, text, text_docs):
+        self.add_resource(text, "text", text_docs)
+
+    def add_notebook(self, notebook, notebook_docs):
+        self.add_resource(notebook, "notebook", notebook_docs)
+
+    def add_function(self, function, function_docs):
+        self.add_resource(function, "function", function_docs)
+
+    def add_module(self, module, module_docs):
+        self.add_resource(module, "module", module_docs)
+
+    def add_class(self, class_, class_docs):
+        self.add_resource(class_, "class", class_docs)
+
+    def add_note(self, note, note_docs):
+        self.add_resource(note, "note", note_docs)
