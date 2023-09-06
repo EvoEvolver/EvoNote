@@ -30,22 +30,28 @@ def search_similar_paths(keywords, notebook: Notebook):
     return similar_paths
 
 
-def conceive_path(content: str, context: str, similar_paths: List[List[str]]):
-    prompt = "You are managing a database of notes."
+def conceive_path(content: str, context: str, similar_paths: List[List[str]], notebook:Notebook):
+    prompt = "You are managing a notebook."
+    prompt += "Here is a description of the notebook:"+notebook.topic+"\n\n"
     prompt += "You are trying to find a path to put a new note based on its content and context."
     prompt += f"\nContent: {content}"
     if len(context) > 0:
         prompt += f"\nContext: {context}"
     chat = Chat(user_message=prompt, system_message=system_message)
-    path_prompt = ["Here are some related paths to put the note.\n"]
-    for i, path in enumerate(similar_paths):
-        path_prompt.append("/".join(path))
-    path_prompt.append("")
+    path_prompt = []
+    if notebook.rule_of_path is not None:
+        path_prompt.append("The notebook has a rule of path:")
+        path_prompt.append(notebook.rule_of_path)
+    if len(similar_paths) > 0:
+        path_prompt.append("Here are some related paths to put the note.")
+        for i, path in enumerate(similar_paths):
+            path_prompt.append("/".join(path))
+        path_prompt.append("")
     path_prompt.append(
-        "Output a path that is proper to put the note. You can create new path, but you should avoid it with possible. Start with `Path:`")
+        "Output a path that is proper to put the note. You are allowed create new path from the root. You should make the new path in the same style with existing paths. Start with `Path:`")
     path_prompt = "\n".join(path_prompt)
     chat.add_user_message(path_prompt)
-    res = chat.complete_chat()
+    res = chat.complete_chat_expensive()
     start = res.find(":")
     res = res[start + 1:].strip()
     res = res.split("/")
@@ -87,13 +93,13 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put,
     # TODO not finished
 
 
-def put_content_to_notebook(content: str, context: str, path_to_put, notebook: Notebook):
+def put_content_to_notebook(content: str, context: str, conceived_path, notebook: Notebook):
     chat = Chat(system_message=system_message)
 
     prompt_adding = "You are managing a database of notes."
     prompt_adding += "\nYou want to add the a note to the following path."
-    prompt_adding += f"\nCurrent Path: {'/'.join(path_to_put)}"
-    note_in_path = notebook.get_note_by_path(path_to_put)
+    prompt_adding += f"\nCurrent Path: {'/'.join(conceived_path)}"
+    note_in_path = notebook.get_note_by_path(conceived_path)
 
     if note_in_path is not None and len(note_in_path.content) > 0:
         prompt_adding += f"\nContent in current path: {note_in_path.content}"
@@ -119,7 +125,7 @@ def put_content_to_notebook(content: str, context: str, path_to_put, notebook: N
 
     filename = res["title"]
     new_content = res["new content"]
-    path_for_new_note = path_to_put + [filename]
+    path_for_new_note = conceived_path + [filename]
     new_note = Note(notebook)
     new_note.content = new_content
     print(filename, new_content, path_for_new_note)
@@ -133,7 +139,7 @@ def add_content_to_notebook(content: str, context: str, notebook: Notebook):
     # step 3: decide a path to put content
     keywords = generate_possible_keywords(content, context)
     similar_paths = search_similar_paths(keywords, notebook)
-    conceived_path = conceive_path(content, context, similar_paths)
+    conceived_path = conceive_path(content, context, similar_paths, notebook)
     print(conceived_path)
     put_content_to_notebook(content, context, conceived_path, notebook)
 

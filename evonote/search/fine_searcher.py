@@ -1,5 +1,7 @@
 from typing import List
 
+import yaml
+
 from evonote.file_helper.cache_manage import cache_manager
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook, new_notebook_from_note_subset
@@ -8,8 +10,8 @@ from evonote.model.chat import Chat
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
 
 
-def filter_note(note: Note, notebook: Notebook, criteria_prompt: str,
-                use_cache=True):
+def filter_note_by_note(note: Note, notebook: Notebook, criteria_prompt: str,
+                        use_cache=True):
     note_path = note.get_note_path(notebook)
     cache_key = f"\nPath: {note_path}\nContent: {note.content}\n{criteria_prompt}"
     cache = cache_manager.read_cache(cache_key, "note_filtering")
@@ -41,13 +43,13 @@ def filter_note(note: Note, notebook: Notebook, criteria_prompt: str,
     return res
 
 
-def filter_notebook_0(notebook: Notebook, criteria_prompt: str,
-                      use_cache=True) -> None:
+def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str,
+                                 use_cache=True) -> None:
     notes = notebook.get_all_notes()
     useless_notes = []
     for note in notes:
-        if not filter_note(note, notebook, criteria_prompt,
-                           use_cache=use_cache):
+        if not filter_note_by_note(note, notebook, criteria_prompt,
+                                   use_cache=use_cache):
             useless_notes.append(note)
 
     remove_happened = True
@@ -78,9 +80,11 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt, use_cache) -> \
     chat.add_user_message("The database: \n" + notebook_yaml)
     chat.add_user_message(
         f"Output the indices of the notes that satisfies the criteria with indices "
-        f"separated by comma: {criteria_prompt}.")
-    res = chat.complete_chat()
+        f"separated by comma (output none when none matches): {criteria_prompt}.")
+    res = chat.complete_chat_expensive()
     original_res = res
+    if "none" in res or "None" in res:
+        return []
     number_start = -1
     for i in range(len(res)):
         if res[i] in "0123456789":
@@ -103,10 +107,11 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt, use_cache) -> \
     return useful_indices
 
 
-def filter_notebook_1(notebook: Notebook, criteria_prompt: str,
-                      use_cache=True) -> Notebook:
-    yaml, note_indexed = notebook.get_yaml_for_prompt()
-    useful_indices = filter_notebook_indices(yaml, criteria_prompt,
+def filter_notebook_in_group(notebook: Notebook, criteria_prompt: str,
+                             use_cache=True) -> Notebook:
+    tree_with_indices, note_indexed = notebook.get_tree_with_indices_for_prompt()
+    tree_in_yaml = yaml.dump(tree_with_indices)
+    useful_indices = filter_notebook_indices(tree_in_yaml, criteria_prompt,
                                              use_cache)
     useful_notes = [note_indexed[i] for i in useful_indices]
     filtered = new_notebook_from_note_subset(useful_notes, notebook)
@@ -120,6 +125,6 @@ def keyword_filter(notebook: Notebook, keywords: List[str],
             keywords)
     else:
         prompt = "The note is related to the following keyword: " + keywords[0]
-    return filter_notebook_1(notebook,
-                             prompt,
-                             use_cache=use_cache)
+    return filter_notebook_in_group(notebook,
+                                    prompt,
+                                    use_cache=use_cache)

@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Dict, List, Type, Callable
 
-import yaml
-
 from evonote.core.note import Note
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.core import Indexing, Indexer
@@ -15,7 +13,7 @@ class Notebook:
     The information is mainly the relationship between notes
     """
 
-    def __init__(self, topic):
+    def __init__(self, topic, root: Note = None, rule_of_path: str = None):
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
@@ -23,7 +21,13 @@ class Notebook:
         self.indexings: List[Indexing] = []
 
         self.topic = topic
-        self.root: Note | None = None
+        self.root: Note
+        if root is None:
+            root = Note(self)
+            root.be(topic)
+        self.set_root(root)
+
+        self.rule_of_path = rule_of_path
 
     def add_indexing(self, indexer_class: Type[Indexer]):
         new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
@@ -55,7 +59,8 @@ class Notebook:
         return leaf
 
     def add_note_by_path(self, path: List[str], note: Note) -> Note:
-        assert self.root is not None
+        if self.root is None:
+            self.set_root(Note(self))
         leaf = self.root
         for key in path[:-1]:
             children = self.children[leaf]
@@ -139,10 +144,10 @@ class Notebook:
                 i_note += 1
         return tree, note_indexed
 
-    def get_yaml_for_prompt(self):
-        tree, note_indexed = self.get_dict_for_prompt()
-        delete_extra_keys_for_prompt(tree)
-        return yaml.dump(tree), note_indexed
+    def get_tree_with_indices_for_prompt(self):
+        tree_with_indices, note_indexed = self.get_dict_for_prompt()
+        delete_extra_keys_for_prompt(tree_with_indices)
+        return tree_with_indices, note_indexed
 
     def show_notebook_gui(self):
         assert self.root is not None
@@ -186,8 +191,7 @@ def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
-    new_notebook = Notebook(topic=notebook.topic)
-    new_notebook.root = notebook.root
+    new_notebook = Notebook(topic=notebook.topic, root=notebook.root)
     root = new_notebook.root
     for note in notes:
         leaf = root

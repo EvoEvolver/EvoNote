@@ -46,7 +46,7 @@ class Indexing:
 
     def add_new_note(self, note: Note):
         self.notes_without_indexer.append(note)
-        self.indexer.remove_note(note)
+#        self.indexer.remove_note(note)
 
     def remove_note(self, note: Note):
         if note in self.notes_without_indexer:
@@ -155,6 +155,8 @@ class AbsEmbeddingIndexer(Indexer):
 
         text_embedding_list = get_embeddings(query, make_cache=True)
         vecs = indexing.data["vecs"]
+        if len(vecs) == 0:
+            return [], []
 
         text_embedding_list = np.array(text_embedding_list)
         similarity = vecs.dot(text_embedding_list.T).T

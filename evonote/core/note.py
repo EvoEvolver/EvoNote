@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from evonote.core.notebook import Notebook
@@ -103,16 +103,30 @@ class NoteResource:
     def __init__(self):
         self.resource = []
         # Possible types: Notebook, Note, Function, Class, Module
-        self.resource_type = []
-        self.resource_docs = []
+        self.resource_type: List[str] = []
+        self.resource_docs: List[str] = []
 
-    def add_resource(self, resource, resource_type, resource_docs):
+    def add_resource(self, resource, resource_type: str, resource_docs: str):
         self.resource.append(resource)
         self.resource_type.append(resource_type)
         self.resource_docs.append(resource_docs)
 
+    def get_resource_by_type(self, resource_type):
+        """
+        Return the first resource of the given type
+        :param resource_type:
+        :return:
+        """
+        for i in range(len(self.resource_type)):
+            if self.resource_type[i] == resource_type:
+                return self.resource[i]
+        return None
+
     def get_resource_types(self):
         return self.resource_type
+
+    def has_type(self, resource_type):
+        return resource_type in self.resource_type
 
     def add_text(self, text, text_docs):
         self.add_resource(text, "text", text_docs)
@@ -131,3 +145,6 @@ class NoteResource:
 
     def add_note(self, note, note_docs):
         self.add_resource(note, "note", note_docs)
+
+
+
