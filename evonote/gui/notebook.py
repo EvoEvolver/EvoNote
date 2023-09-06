@@ -1,6 +1,5 @@
 from __future__ import annotations
 import plotly.graph_objects as go
-from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
 from typing import TYPE_CHECKING
 

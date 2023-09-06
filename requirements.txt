@@ -2,3 +2,4 @@ plotly==5.16.1
 numpy==1.25.2
 pyyaml~=6.0.1
 openai==0.28.0
+pyhyphen==4.0.3
