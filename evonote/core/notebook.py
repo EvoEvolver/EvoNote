@@ -6,6 +6,8 @@ from evonote.core.note import Note
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.core import Indexing, Indexer
 
+from evonote.indexing.core import FragmentedEmbeddingIndexer
+
 
 class Notebook:
     """
@@ -32,6 +34,9 @@ class Notebook:
     def add_indexing(self, indexer_class: Type[Indexer]):
         new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
         self.indexings.append(new_indexing)
+
+    def add_simple_indexing(self):
+        self.add_indexing(FragmentedEmbeddingIndexer)
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -164,6 +169,9 @@ class Notebook:
         assert len(query_list) == len(weights)
 
         # Use the default indexing
+        if len(self.indexings) == 0:
+            print("No indexing found. Adding simple indexing as default")
+            self.add_simple_indexing()
         indexing = self.indexings[0]
 
         top_k_notes = indexing.get_top_k_notes(query_list, weights, top_k, note_filter)

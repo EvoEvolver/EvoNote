@@ -2,6 +2,7 @@ from typing import List
 
 from evonote.core.note import Note
 from evonote.core.notebook import Notebook
+from evonote.file_helper.cache_manage import cache_manager
 from evonote.utils import robust_json_parse
 from evonote.model.chat import Chat
 
@@ -9,6 +10,9 @@ system_message = "Reply everything concisely without explaination as if you are 
 
 
 def generate_possible_keywords(content: str, context: str):
+    cache = cache_manager.read_cache((content, context), "content2keywords")
+    if cache.is_valid():
+        return cache.value
     prompt = "You are managing a database of notes."
     prompt += "You are trying to find a path to put a new note based on its content and context."
     prompt += f"\nContent: {content}"
@@ -21,6 +25,7 @@ def generate_possible_keywords(content: str, context: str):
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]
+    cache.set_cache(res)
     return res
 
 
@@ -55,6 +60,8 @@ def conceive_path(content: str, context: str, similar_paths: List[List[str]], no
     start = res.find(":")
     res = res[start + 1:].strip()
     res = res.split("/")
+    if len(res)>0 and len(res[0])==0:
+        res = res[1:]
     return res
 
 
@@ -115,7 +122,7 @@ def put_content_to_notebook(content: str, context: str, conceived_path, notebook
     prompt_asking = "Considering the context might have been included in the parent paths. " \
                     "Give a title for the content to be stored in the current path." \
                     "Based on the filename, give the altered content to be stored in the current path." \
-                    "\n Output the result in JSON with key `title` and `new content`"
+                    "\n Output the result in JSON with key `title` and `new_content`"
 
     chat.add_user_message(prompt_asking)
 
@@ -124,7 +131,7 @@ def put_content_to_notebook(content: str, context: str, conceived_path, notebook
     res = robust_json_parse(res)
 
     filename = res["title"]
-    new_content = res["new content"]
+    new_content = res["new_content"]
     path_for_new_note = conceived_path + [filename]
     new_note = Note(notebook)
     new_note.content = new_content
