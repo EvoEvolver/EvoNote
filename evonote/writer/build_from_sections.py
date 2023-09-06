@@ -20,24 +20,34 @@ def build_from_sections(doc, root: Note):
     for section in doc["sections"]:
         build_from_sections(section, root.s(section["title"]))
 
+def move_original_content_to_resource(note, notebook):
+    new_note = Note(notebook)
+    if len(note.content) > 0:
+        new_note.resource.add_text(note.content, "original_content")
+    return new_note
 
-def digest_all_descendants(notebook: Notebook):
+def digest_all_descendants(notebook: Notebook) -> Notebook:
+    notebook = notebook.duplicate_notebook_by_note_mapping(move_original_content_to_resource)
     all_notes = notebook.get_all_notes()
-    all_notes = [note for note in all_notes if len(note.content) > 0]
+    contents = [note.resource.get_resource_by_type("text") for note in all_notes]
+    non_empty_contents = []
+    non_empty_notes = []
+    for i in range(len(contents)):
+        if contents[i] is not None:
+            non_empty_contents.append(contents[i])
+            non_empty_notes.append(all_notes[i])
     finished = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        for note, digest in zip(all_notes, executor.map(digest_content,
-                                                        [note.content for note in
-                                                         all_notes])):
+        for note, digest in zip(non_empty_notes, executor.map(digest_content,
+                                                        non_empty_contents)):
             note: Note
-            set_notes_by_digest(note, digest)
-            note.resource.add_text(note.content, "original_content")
-            note.content = ""
+            set_notes_by_digest(note, digest, notebook)
             finished += 1
         if finished % 5 == 4:
             print("digest received ", finished, "/", len(all_notes))
             save_cache()
     save_cache()
+    return notebook
 
 
 def digest_content(content):
@@ -67,17 +77,17 @@ def digest_content(content):
     return res
 
 
-def set_notes_by_digest(note: Note, digest: str):
+def set_notes_by_digest(note: Note, digest: str, notebook):
     parsed_res = ast.literal_eval(digest)
-    iter_and_assign(note, parsed_res)
+    iter_and_assign(note, parsed_res, notebook)
 
 
-def iter_and_assign(note: Note, tree: dict):
+def iter_and_assign(note: Note, tree: dict, notebook: Notebook):
     if "topic" not in tree or "statement" not in tree:
         raise Exception("incomplete tree node")
         return
-    node = note.s(tree["topic"]).be(tree["statement"])
+    node = note.s(tree["topic"], notebook).be(tree["statement"])
     if "subtopics" not in tree:
         return
     for subtopic in tree["subtopics"]:
-        iter_and_assign(node, subtopic)
+        iter_and_assign(node, subtopic, notebook)

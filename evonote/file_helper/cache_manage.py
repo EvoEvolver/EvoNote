@@ -76,10 +76,13 @@ class CacheManager:
 
     def filter_unused_cache(self) -> int:
         n_removed_cache = 0
+        new_cache_table = {}
         for hash, cache in self.cache_table.items():
-            if hash not in self.active_cache_hash:
+            if hash in self.active_cache_hash:
+                new_cache_table[hash] = cache
+            else:
                 n_removed_cache += 1
-                del self.cache_table[hash]
+        self.cache_table = new_cache_table
         return n_removed_cache
 
     def read_cache(self, input: any, type: str, create_cache=True) -> Cache | None:

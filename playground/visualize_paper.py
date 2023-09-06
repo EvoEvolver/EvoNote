@@ -10,8 +10,11 @@ doc, meta = process_latex_into_standard(tex)
 
 paper_notebook = notebook_from_doc(doc, meta)
 
-digest_all_descendants(paper_notebook)
+digest_notebook = digest_all_descendants(paper_notebook)
 
-paper_notebook.show_notebook_gui()
+# paper_notebook.show_notebook_gui()
+
+digest_notebook.show_notebook_gui()
+
 
 save_used_cache()

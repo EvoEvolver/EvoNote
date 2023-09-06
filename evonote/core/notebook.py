@@ -188,14 +188,21 @@ class Notebook:
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
 
+    def duplicate_notebook_by_note_mapping(self, note_mapping: Callable[[Note, Notebook], Note]) -> Notebook:
+        new_notebook = Notebook(self.topic, rule_of_path=self.rule_of_path)
+        new_notebook.set_root(note_mapping(self.root, new_notebook))
+        for note in self.get_all_notes():
+            if note is not self.root:
+                # Here is not tested
+                new_notebook.add_note_by_path(self.get_note_path(note), note_mapping(note, new_notebook))
+        return new_notebook
+
 
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     if topic is None:
         topic = ""
     notebook = Notebook(topic)
-    root = Note(default_notebook=notebook)
-    notebook.set_root(root)
-    return root, notebook
+    return notebook.root, notebook
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
