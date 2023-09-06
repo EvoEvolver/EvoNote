@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import concurrent
 import math
+import numpy as np
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
 from evonote.utils import get_main_path
@@ -23,7 +24,7 @@ class Indexer:
     """
 
     @classmethod
-    def make_data(cls, notes: List[Note], indexing: Indexing, use_cache: bool = True):
+    def make_data(cls, notes: List[Note], indexing: Indexing):
         raise NotImplementedError
 
     @classmethod
@@ -78,7 +79,6 @@ class Indexing:
         return top_k_notes
 
 
-import numpy as np
 
 indexing_debug_config = {
     "show_src_similarity_gui": False,
@@ -88,13 +88,12 @@ indexing_debug_config = {
 class AbsEmbeddingIndexer(Indexer):
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
-                                use_cache: bool) -> (
+                                ) -> (
             List[List[str]], List[List[float]], List[Note]):
         raise NotImplementedError
 
     @classmethod
-    def make_data(cls, new_notes: List[Note], indexing: Indexing,
-                  use_cache: bool = True):
+    def make_data(cls, new_notes: List[Note], indexing: Indexing):
         if indexing.data is None:
             indexing.data = {
                 "vecs": None,
@@ -104,8 +103,7 @@ class AbsEmbeddingIndexer(Indexer):
             }
 
         new_srcs, new_weights, new_note_of_vecs = cls.prepare_src_weight_list(new_notes,
-                                                                               indexing,
-                                                                               use_cache)
+                                                                               indexing)
         indexing.data["srcs_list"].extend(new_srcs)
         indexing.data["note_of_vecs"].extend(new_note_of_vecs)
         indexing.data["weights_list"].extend(new_weights)
@@ -180,12 +178,12 @@ class AbsEmbeddingIndexer(Indexer):
 
     @classmethod
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
-                                  use_cache: bool):
+                                  ):
         raise NotImplementedError
 
     @classmethod
     def process_note_without_content(cls, notes: List[Note], indexing: Indexing,
-                                     use_cache: bool):
+                                     ):
         raise NotImplementedError
 
 
@@ -203,8 +201,8 @@ def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
 class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     @classmethod
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
-                                  use_cache: bool):
-        break_sent_use_cache = lambda sent: process_sent_into_frags(sent, use_cache,
+                                  ):
+        break_sent_use_cache = lambda sent: process_sent_into_frags(sent,
                                                                     get_main_path())
         notes_content = [note.content for note in notes]
         notebook = indexing.notebook
@@ -237,7 +235,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
 
     @classmethod
     def process_note_without_content(cls, notes: List[Note], indexing: Indexing,
-                                     use_cache: bool):
+                                     ):
         new_src_list = []
         new_weights = []
 
@@ -256,7 +254,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
 
     @classmethod
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
-                                use_cache: bool):
+                                ):
 
         notebook = indexing.notebook
         notes_with_content = []
@@ -272,10 +270,10 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
             notes_content.append(note.content)
 
         new_src_list_1, new_weights_1 = cls.process_note_without_content(
-            notes_without_content, indexing, use_cache)
+            notes_without_content, indexing)
 
         new_src_list_2, new_weights_2 = cls.process_note_with_content(
-            notes_with_content, indexing, use_cache)
+            notes_with_content, indexing)
 
         new_src_list = new_src_list_1 + new_src_list_2
         new_weights = new_weights_1 + new_weights_2
@@ -290,10 +288,10 @@ prompt_for_splitting = "Split the following sentence into smaller fragments (no 
 prompt_for_extracting = "Give some phrases that summarize the following sentence. The phrases should be no more than 8 words and represents what the sentence is describing. Put each phrase in a new line."
 
 
-def process_sent_into_frags(sent: str, use_cache=True,
+def process_sent_into_frags(sent: str,
                             prompt=prompt_for_extracting):
     cache = cache_manager.read_cache(sent, "sent_breaking")
-    if use_cache and cache.is_valid():
+    if cache.is_valid():
         return cache.value
 
     system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."

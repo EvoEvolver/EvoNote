@@ -7,11 +7,11 @@ system_message = "You should output everything concisely as if you are a compute
                  "program. "
 
 
-def keyword_amplify(keywords: List[str], n_limit=3, use_cache=True):
+def keyword_amplify(keywords: List[str], n_limit=3):
     """Return a list of keywords that are similar to the given keyword."""
     cache_key = str(keywords)
     cache = cache_manager.read_cache(cache_key, "keyword_amplify")
-    if use_cache and cache.is_valid():
+    if cache.is_valid():
         return cache.value
 
     prompt = "You are a program that generates related keywords based on given keywords " \

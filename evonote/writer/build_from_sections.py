@@ -24,11 +24,9 @@ def build_from_sections(doc, root: Note):
 def digest_all_descendants(notebook: Notebook):
     all_notes = notebook.get_all_notes()
     all_notes = [note for note in all_notes if len(note.content) > 0]
-    # digests = []
-    digest_content_with_cache = lambda x: digest_content(x, use_cache=True)
     finished = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        for note, digest in zip(all_notes, executor.map(digest_content_with_cache,
+        for note, digest in zip(all_notes, executor.map(digest_content,
                                                         [note.content for note in
                                                          all_notes])):
             note: Note
@@ -42,9 +40,9 @@ def digest_all_descendants(notebook: Notebook):
     save_cache()
 
 
-def digest_content(content, use_cache=False):
+def digest_content(content):
     cache = cache_manager.read_cache(content, "digest_content")
-    if use_cache and cache.is_valid():
+    if cache.is_valid():
         return cache.value
 
     chat = Chat(
@@ -63,7 +61,7 @@ def digest_content(content, use_cache=False):
     except:
         print("failed to parse, retrying...")
         print(res)
-        return digest_content(content, use_cache)
+        return digest_content(content)
 
     cache.set_cache(res)
     return res

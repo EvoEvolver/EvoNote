@@ -10,12 +10,11 @@ from evonote.model.chat import Chat
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
 
 
-def filter_note_by_note(note: Note, notebook: Notebook, criteria_prompt: str,
-                        use_cache=True):
+def filter_note_by_note(note: Note, notebook: Notebook, criteria_prompt: str):
     note_path = note.get_note_path(notebook)
     cache_key = f"\nPath: {note_path}\nContent: {note.content}\n{criteria_prompt}"
     cache = cache_manager.read_cache(cache_key, "note_filtering")
-    if use_cache and cache.is_valid():
+    if cache.is_valid():
         return cache.value
 
     if len(note.content) > 0:
@@ -43,13 +42,11 @@ def filter_note_by_note(note: Note, notebook: Notebook, criteria_prompt: str,
     return res
 
 
-def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str,
-                                 use_cache=True) -> None:
+def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str) -> None:
     notes = notebook.get_all_notes()
     useless_notes = []
     for note in notes:
-        if not filter_note_by_note(note, notebook, criteria_prompt,
-                                   use_cache=use_cache):
+        if not filter_note_by_note(note, notebook, criteria_prompt):
             useless_notes.append(note)
 
     remove_happened = True
@@ -65,11 +62,11 @@ def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str,
         useless_notes = new_useless_notes
 
 
-def filter_notebook_indices(notebook_yaml, criteria_prompt, use_cache) -> \
+def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
         List[int]:
     cache_key = f"\n{notebook_yaml}\n{criteria_prompt}"
     cache = cache_manager.read_cache(cache_key, "notebook_filtering")
-    if use_cache and cache.is_valid():
+    if cache.is_valid():
         return cache.value
 
     prompt = f"You are working on filtering notes in a database according to its content and the path it is stored. The databased is stored in a YAML file, with each note labelled by an index." \
@@ -107,12 +104,10 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt, use_cache) -> \
     return useful_indices
 
 
-def filter_notebook_in_group(notebook: Notebook, criteria_prompt: str,
-                             use_cache=True) -> Notebook:
+def filter_notebook_in_group(notebook: Notebook, criteria_prompt: str) -> Notebook:
     tree_with_indices, note_indexed = notebook.get_tree_with_indices_for_prompt()
     tree_in_yaml = yaml.dump(tree_with_indices)
-    useful_indices = filter_notebook_indices(tree_in_yaml, criteria_prompt,
-                                             use_cache)
+    useful_indices = filter_notebook_indices(tree_in_yaml, criteria_prompt)
     useful_notes = [note_indexed[i] for i in useful_indices]
     filtered = new_notebook_from_note_subset(useful_notes, notebook)
     return filtered
@@ -126,5 +121,4 @@ def keyword_filter(notebook: Notebook, keywords: List[str],
     else:
         prompt = "The note is related to the following keyword: " + keywords[0]
     return filter_notebook_in_group(notebook,
-                                    prompt,
-                                    use_cache=use_cache)
+                                    prompt)
