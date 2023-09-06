@@ -64,6 +64,10 @@ class CacheManager:
         self.pending_cache: List[Cache] = []
         # List of active cache. Used for garbage collection
         self.active_cache_hash: Set[str] = set()
+        #
+        self.types_to_refresh: Set[str] = set()
+        #
+        self.types_used: Set[str] = set()
 
     def save_all_cache_to_file(self):
         self.apply_cache_update()
@@ -80,15 +84,18 @@ class CacheManager:
 
     def read_cache(self, input: any, type: str, create_cache=True) -> Cache | None:
         hash = get_hash(input, type)
-        cache_table = self.cache_table
-        if hash not in cache_table:
+        self.types_used.add(type)
+        un_hit = hash not in self.cache_table
+        if type in self.types_to_refresh:
+            un_hit = True
+        if un_hit:
             if create_cache:
                 new_cache = Cache(None, hash, input, type)
                 self.add_cache(new_cache)
                 return new_cache
             else:
                 return None
-        cache_hit = cache_table[hash]
+        cache_hit = self.cache_table[hash]
         self.active_cache_hash.add(hash)
         return cache_hit
 
