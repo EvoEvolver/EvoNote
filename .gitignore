@@ -1,3 +1,5 @@
 .idea
 temp
 */__pycache__/
+*.ec.*
+*/embedding_cache.npy
