@@ -26,7 +26,7 @@ class Notebook:
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
 
-        self.indexings: List[Indexing] = []
+        self.indexings: Dict[Type[Indexer], Indexing] = {}
 
         self.topic = topic
         self.root: Note
@@ -37,9 +37,18 @@ class Notebook:
 
         self.rule_of_path = rule_of_path
 
-    def add_indexing(self, indexer_class: Type[Indexer]):
+    def add_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
         new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
-        self.indexings.append(new_indexing)
+        self.indexings[indexer_class] = new_indexing
+        return new_indexing
+
+    def get_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
+        if indexer_class is None:
+            indexer_class = FragmentedEmbeddingIndexer
+        if indexer_class not in self.indexings:
+            return self.add_indexing(indexer_class)
+        else:
+            return self.indexings[indexer_class]
 
     def add_simple_indexing(self):
         self.add_indexing(FragmentedEmbeddingIndexer)
@@ -105,7 +114,7 @@ class Notebook:
         else:
             self.parents[child].append(parent)
 
-        for indexing in self.indexings:
+        for indexing in self.indexings.values():
             indexing.add_new_note(child)
 
     def remove_note(self, note: Note):
@@ -131,7 +140,7 @@ class Notebook:
         del self.children[note]
         del self.note_path[note]
         del self.parents[note]
-        for indexing in self.indexings:
+        for indexing in self.indexings.values():
             indexing.remove_note(note)
 
     def get_dict_for_prompt(self):
@@ -170,17 +179,15 @@ class Notebook:
     def get_notes_by_similarity(self, query_list: List[str],
                                 weights: List[float] | None = None,
                                 top_k: int = 10,
-                                note_filter: Callable[[Note], bool] = None
+                                note_filter: Callable[[Note], bool] = None,
+                                indexer_class: Type[Indexer] = None
                                 ) -> List[Note]:
         if weights is None:
             weights = [1.0] * len(query_list)
         assert len(query_list) == len(weights)
 
-        # Use the default indexing
-        if len(self.indexings) == 0:
-            print("No indexing found. Adding simple indexing as default")
-            self.add_simple_indexing()
-        indexing = self.indexings[0]
+
+        indexing = self.get_indexing(indexer_class)
 
         top_k_notes = indexing.get_top_k_notes(query_list, weights, top_k, note_filter)
 
@@ -189,10 +196,11 @@ class Notebook:
     def get_sub_notebook_by_similarity(self, query_list: List[str],
                                        weights: List[float] | None = None,
                                        top_k: int = 10,
-                                       note_filter: Callable[[Note], bool] = None
+                                       note_filter: Callable[[Note], bool] = None,
+                                       indexer_class: Type[Indexer] = None
                                        ) -> Notebook:
         top_k_descendants = self.get_notes_by_similarity(query_list, weights, top_k,
-                                                         note_filter)
+                                                         note_filter, indexer_class)
         new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
         return new_notebook
 
