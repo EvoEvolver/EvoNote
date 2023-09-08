@@ -1,6 +1,6 @@
 import copy
 
-from evonote.model.llm import complete_chat, complete_chat_expensive
+from evonote.model.openai import complete_chat, complete_chat_expensive
 
 
 class Chat:

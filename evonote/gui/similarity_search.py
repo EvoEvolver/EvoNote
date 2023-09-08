@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 from evonote.gui.utlis import hypenate_texts
-from evonote.model.llm import get_embeddings, flatten_nested_list
+from evonote.model.openai import get_embeddings, flatten_nested_list
 
 # see https://plotly.com/python/heatmaps/
 
