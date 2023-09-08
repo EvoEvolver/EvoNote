@@ -12,10 +12,16 @@ from evonote.indexing.core import FragmentedEmbeddingIndexer
 class Notebook:
     """
     Store the information of notes contained
-    The information is mainly the relationship between notes
+    The information is mainly the path of each note
+    The indexings of each note
     """
 
     def __init__(self, topic, root: Note = None, rule_of_path: str = None):
+        """
+        :param topic: The topic of the notebook
+        :param root: The root of the notebook. If None, a new root will be created
+        :param rule_of_path: The rule for creating paths.
+        """
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
@@ -106,7 +112,7 @@ class Notebook:
         """
         Remove a note from the tree
         This will remove all the indexing data of the notebook
-        It is better to create another
+        It is better to create another notebook that removing a note
         :param note:
         :return:
         """
@@ -155,9 +161,11 @@ class Notebook:
         return tree_with_indices, note_indexed
 
     def show_notebook_gui(self):
+        """
+        Show the notebook in a webpage
+        """
         assert self.root is not None
         draw_treemap(self.root, self)
-        pass
 
     def get_notes_by_similarity(self, query_list: List[str],
                                 weights: List[float] | None = None,
@@ -189,6 +197,12 @@ class Notebook:
         return new_notebook
 
     def duplicate_notebook_by_note_mapping(self, note_mapping: Callable[[Note, Notebook], Note]) -> Notebook:
+        """
+        Duplicate the notebook by mapping each note to a new note
+        It can also be used for creating a copy of the notebook
+        :param note_mapping: The mapping function for each note
+        :return: A new notebook
+        """
         new_notebook = Notebook(self.topic, rule_of_path=self.rule_of_path)
         new_notebook.set_root(note_mapping(self.root, new_notebook))
         for note in self.get_all_notes():

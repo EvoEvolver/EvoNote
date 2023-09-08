@@ -48,6 +48,13 @@ def get_doc_in_prompt(doc_tuple):
     return doc
 
 
+class FunctionDocs:
+    def __init__(self, general, params, returns, keywords):
+        self.general = general if general is not None else ""
+        self.params = params if general is not None else ""
+        self.returns = returns if general is not None else ""
+        self.keywords = keywords if general is not None else ""
+
 def build_notebook_for_module(leaf, root_note: Note, doc_parser):
     child_note = Note(root_note.default_notebook)
     child_key = leaf["type"] + ": " + leaf["name"]
@@ -67,17 +74,9 @@ def build_notebook_for_module(leaf, root_note: Note, doc_parser):
             else:
                 general, parameter, return_value, keywords = doc_parser(doc_raw)
             function_note = child_note.s("function: " + name)
-            #function_note.be(get_doc_in_prompt(doc_tuple))
-            if len(general) > 0:
-                docs["general"] = general
-                function_note.be(general)
-            if len(parameter) > 0:
-                docs["parameter"] = parameter
-            if len(return_value) > 0:
-                docs["return value"] = return_value
-            if len(keywords) > 0:
-                docs["keywords"] = keywords
-            function_note.resource.add_resource(child["obj"], "code:function", docs)
+            function_note.be(general)
+            function_docs = FunctionDocs(general, parameter, return_value, keywords)
+            function_note.resource.add_function(child["obj"], function_docs)
         elif child["type"] == "module":
             build_notebook_for_module(child, child_note, doc_parser)
         elif child["type"] == "class":

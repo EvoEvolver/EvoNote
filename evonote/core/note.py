@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
+    from evonote.writer.extract_from_module import FunctionDocs
     from evonote.core.notebook import Notebook
 
 class Note:
@@ -104,9 +105,9 @@ class NoteResource:
         self.resource = []
         # Possible types: Notebook, Note, Function, Class, Module
         self.resource_type: List[str] = []
-        self.resource_docs: List[str] = []
+        self.resource_docs: List[any] = []
 
-    def add_resource(self, resource, resource_type: str, resource_docs: str):
+    def add_resource(self, resource, resource_type: str, resource_docs: any):
         self.resource.append(resource)
         self.resource_type.append(resource_type)
         self.resource_docs.append(resource_docs)
@@ -114,13 +115,20 @@ class NoteResource:
     def get_resource_by_type(self, resource_type):
         """
         Return the first resource of the given type
-        :param resource_type:
-        :return:
         """
         for i in range(len(self.resource_type)):
             if self.resource_type[i] == resource_type:
                 return self.resource[i]
         return None
+
+    def get_resource_and_docs_by_type(self, resource_type):
+        """
+        Return the first resource of the given type with its docs
+        """
+        for i in range(len(self.resource_type)):
+            if self.resource_type[i] == resource_type:
+                return self.resource[i], self.resource_docs[i]
+        return None, None
 
     def get_resource_types(self):
         return self.resource_type
@@ -134,7 +142,7 @@ class NoteResource:
     def add_notebook(self, notebook, notebook_docs):
         self.add_resource(notebook, "notebook", notebook_docs)
 
-    def add_function(self, function, function_docs):
+    def add_function(self, function, function_docs: FunctionDocs):
         self.add_resource(function, "function", function_docs)
 
     def add_module(self, module, module_docs):
