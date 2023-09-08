@@ -26,9 +26,14 @@ class Notebook:
         self.note_path: Dict[Note, List[str]] = {}
         self.parents: Dict[Note, List[Note]] = {}
 
+        # The dict for indexings made for the notebook
+        # The key is the class of the indexer and the value is the indexing
+        # The reason for using class as key is that the class is more static and hashable
         self.indexings: Dict[Type[Indexer], Indexing] = {}
 
         self.topic = topic
+
+        # Set up the root
         self.root: Note
         if root is None:
             root = Note(self)
@@ -37,21 +42,15 @@ class Notebook:
 
         self.rule_of_path = rule_of_path
 
-    def add_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
-        new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
-        self.indexings[indexer_class] = new_indexing
-        return new_indexing
-
-    def get_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
+    def make_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
         if indexer_class is None:
             indexer_class = FragmentedEmbeddingIndexer
         if indexer_class not in self.indexings:
-            return self.add_indexing(indexer_class)
+            new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
+            self.indexings[indexer_class] = new_indexing
+            return new_indexing
         else:
             return self.indexings[indexer_class]
-
-    def add_simple_indexing(self):
-        self.add_indexing(FragmentedEmbeddingIndexer)
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -187,7 +186,7 @@ class Notebook:
         assert len(query_list) == len(weights)
 
 
-        indexing = self.get_indexing(indexer_class)
+        indexing = self.make_indexing(indexer_class)
 
         top_k_notes = indexing.get_top_k_notes(query_list, weights, top_k, note_filter)
 
