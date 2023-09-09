@@ -1,4 +1,5 @@
 from evonote.core.notebook import Notebook
+from evonote.indexing.code_indexer import CodeDocsIndexer
 from evonote.model.chat import Chat
 
 system_message = "You should output everything concisely as if you are a computer program"
@@ -33,5 +34,4 @@ def search_function(description: str, notebook: Notebook):
     names = possible_function_names(description)
     docstring = possible_docstring(description)
     query_keys = names + [docstring]
-    notebook.get_sub_notebook_by_similarity(query_keys, top_k=2, note_filter=lambda
-        note: note.type == "code:function").show_notebook_gui()
+    notebook.get_sub_notebook_by_similarity(query_keys, top_k=10, indexer_class=CodeDocsIndexer).show_notebook_gui()

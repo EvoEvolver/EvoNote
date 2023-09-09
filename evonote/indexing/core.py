@@ -5,14 +5,12 @@ import math
 import numpy as np
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
-from evonote.utils import get_main_path
-
 if TYPE_CHECKING:
     from evonote.core.note import Note
     from evonote.core.notebook import Notebook
 
 from evonote.file_helper.cache_manage import save_cache, cache_manager
-from evonote.model.llm import get_embeddings
+from evonote.model.openai import get_embeddings
 
 
 class Indexer:
@@ -47,7 +45,6 @@ class Indexing:
 
     def add_new_note(self, note: Note):
         self.notes_without_indexer.append(note)
-#        self.indexer.remove_note(note)
 
     def remove_note(self, note: Note):
         if note in self.notes_without_indexer:
@@ -79,6 +76,16 @@ class Indexing:
         return top_k_notes
 
 
+class Query:
+    def __init__(self, query, query_type: str = "similarity"):
+        """
+        :param query: The content of the query
+        :param query_type: The type of the query. It can be "similarity" or "question" or any other type the indexer supports
+            if the indexer does not support the query type, it will treat it as a similarity query
+        """
+        self.query = query
+        self.query_type = query_type
+
 
 indexing_debug_config = {
     "show_src_similarity_gui": False,
@@ -90,6 +97,12 @@ class AbsEmbeddingIndexer(Indexer):
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
                                 ) -> (
             List[List[str]], List[List[float]], List[Note]):
+        """
+        Select notes that will be indexed and return a list of srcs and weights for each
+        :param new_notes: The incoming notes
+        :param indexing: The indexing object
+        :return: A triplet of srcs, weights, and notes
+        """
         raise NotImplementedError
 
     @classmethod
@@ -103,7 +116,7 @@ class AbsEmbeddingIndexer(Indexer):
             }
 
         new_srcs, new_weights, new_note_of_vecs = cls.prepare_src_weight_list(new_notes,
-                                                                               indexing)
+                                                                              indexing)
         indexing.data["srcs_list"].extend(new_srcs)
         indexing.data["note_of_vecs"].extend(new_note_of_vecs)
         indexing.data["weights_list"].extend(new_weights)
@@ -202,8 +215,8 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     @classmethod
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
                                   ):
-        break_sent_use_cache = lambda sent: process_sent_into_frags(sent,
-                                                                    get_main_path())
+        break_sent_use_cache = lambda sent: process_sent_into_frags(sent)
+
         notes_content = [note.content for note in notes]
         notebook = indexing.notebook
 
