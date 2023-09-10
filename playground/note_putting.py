@@ -1,6 +1,6 @@
-from evonote.core.note import Note
-from evonote.core.notebook import Notebook
-from evonote.writer.note_putting import add_content_to_notebook
+from evonote.notebook.note import Note
+from evonote.notebook.notebook import Notebook
+from evonote.builder.note_putting import add_content_to_notebook
 
 
 memory_notebook = Notebook("memory of things",
