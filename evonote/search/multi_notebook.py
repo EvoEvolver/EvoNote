@@ -1,6 +1,6 @@
 from typing import List
 
-from evonote.core.notebook import Notebook
+from evonote.notebook.notebook import Notebook
 from evonote.search.fine_searcher import filter_notebook_in_group
 
 

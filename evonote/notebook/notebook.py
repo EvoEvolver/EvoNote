@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Type, Callable
 
-from evonote.core.note import Note
+from evonote.notebook.note import Note
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.core import Indexing, Indexer
 

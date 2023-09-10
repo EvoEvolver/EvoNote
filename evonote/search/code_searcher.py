@@ -1,4 +1,4 @@
-from evonote.core.notebook import Notebook
+from evonote.notebook.notebook import Notebook
 from evonote.indexing.code_indexer import CodeDocsIndexer
 from evonote.model.chat import Chat
 

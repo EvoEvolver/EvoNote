@@ -2,12 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from evonote.writer.extract_from_module import FunctionDocs
-    from evonote.core.notebook import Notebook
+    from evonote.builder.extract_from_module import FunctionDocs
+    from evonote.notebook.notebook import Notebook
 
 class Note:
     """
-    A tree-like data structure that stores core
+    A tree-like data structure that stores notebook
     usually for the direct summary of paragraphs
 
     The relation of the items are mainly represented by the tree structure
@@ -22,7 +22,7 @@ class Note:
         self._is_note = True
         # content is string no matter what _content_type is
         self.content: str = ""
-        # The root note helps merge two core bases
+        # The root note helps merge two notebook bases
         self.default_notebook: Notebook = default_notebook
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
@@ -62,8 +62,8 @@ class Note:
 
     def be(self, content: str) -> Note:
         """
-        Assign the note with a writer (generator)
-        :param writer:
+        Assign the note with a builder (generator)
+        :param builder:
         :return: The note itself
         """
         self.content = content

@@ -6,8 +6,8 @@ import numpy as np
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evonote.core.note import Note
-    from evonote.core.notebook import Notebook
+    from evonote.notebook.note import Note
+    from evonote.notebook.notebook import Notebook
 
 from evonote.file_helper.cache_manage import save_cache, cache_manager
 from evonote.model.openai import get_embeddings

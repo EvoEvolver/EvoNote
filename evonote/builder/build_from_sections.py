@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import ast
 
-from evonote.core.note import Note
-from evonote.core.notebook import Notebook, make_notebook_root
+from evonote.notebook.note import Note
+from evonote.notebook.notebook import Notebook, make_notebook_root
 from evonote.model.chat import Chat
 import concurrent.futures
 from evonote.file_helper.cache_manage import save_cache, cache_manager

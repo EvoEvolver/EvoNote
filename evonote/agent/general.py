@@ -1,4 +1,4 @@
-from evonote.core.notebook import Notebook
+from evonote.notebook.notebook import Notebook
 
 class AgentState:
     def __init__(self):

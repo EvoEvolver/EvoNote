@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from evonote.gui.utlis import hypenate_texts
 
 if TYPE_CHECKING:
-    from evonote.core.note import Note
-    from evonote.core.notebook import Notebook
+    from evonote.notebook.note import Note
+    from evonote.notebook.notebook import Notebook
 
 h_en = Hyphenator('en_US')
 

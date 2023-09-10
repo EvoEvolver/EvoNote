@@ -1,9 +1,9 @@
 from typing import List
 
-from evonote.core.note import Note
+from evonote.notebook.note import Note
 from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
 from evonote.model.chat import Chat
-from evonote.writer.extract_from_module import FunctionDocs
+from evonote.builder.extract_from_module import FunctionDocs
 
 
 

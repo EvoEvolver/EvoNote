@@ -1,7 +1,7 @@
 from typing import List
 
-from evonote.core.note import Note
-from evonote.core.notebook import Notebook
+from evonote.notebook.note import Note
+from evonote.notebook.notebook import Notebook
 from evonote.file_helper.cache_manage import cache_manager
 from evonote.utils import robust_json_parse
 from evonote.model.chat import Chat
