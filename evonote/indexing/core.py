@@ -148,7 +148,7 @@ class AbsEmbeddingIndexer(Indexer):
 
         embedding_dim = len(src_embedding_list[0])
 
-        for i, start_index in enumerate(children_index_start[:-1]):
+        for i, start_index in enumerate(children_index_start):
             if start_index == -1:
                 new_vecs.append(np.zeros(embedding_dim))
                 continue

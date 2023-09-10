@@ -93,6 +93,11 @@ class Notebook:
         leaf.add_child(path[-1], note)
         return leaf
 
+    def get_new_note_by_path(self, path: List[str]) -> Note:
+        new_note = Note(self)
+        self.add_note_by_path(path, new_note)
+        return new_note
+
     def set_root(self, root: Note):
         self.children[root] = {}
         self.note_path[root] = []
@@ -235,6 +240,8 @@ def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Note
     new_notebook = Notebook(topic=notebook.topic, root=notebook.root)
     root = new_notebook.root
     for note in notes:
+        if note is root:
+            continue
         leaf = root
         note_path = note.get_note_path(notebook)
         for key in note_path[:-1]:
