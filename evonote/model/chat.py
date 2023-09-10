@@ -1,28 +1,18 @@
 from __future__ import annotations
 import copy
-import inspect
 
+from evonote.file_helper.logger import Logger
 from evonote.gui.dictionary_viewer import show_document_with_key_gui
 from evonote.model.openai import complete_chat, complete_chat_expensive
 
-chat_loggers = []
 
-class ChatLogger:
-    def __init__(self):
-        self.chat_list = []
-        # the path of the file that calls this function
-        self.caller_list = []
+class ChatLogger(Logger):
+    active_loggers = []
 
-    def __enter__(self):
-        chat_loggers.append(self)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        chat_loggers.remove(self)
-        contents = [str(chat) for chat in self.chat_list]
+    def display_log(self):
+        contents = [str(chat) for chat in self.log_list]
         filenames = [caller_name.split("/")[-1] for caller_name in self.caller_list]
         show_document_with_key_gui(filenames, contents)
-
 
 
 class Chat:
@@ -83,21 +73,15 @@ class Chat:
     def complete_chat(self, options=None):
         res = complete_chat(self, options=options)
         self.add_assistant_message(res)
-        if len(chat_loggers) > 0:
-            # get the file that calls this function
-            caller_name = inspect.stack()[1].filename
-            for chat_logger in chat_loggers:
-                chat_logger.chat_list.append(self)
-                chat_logger.caller_list.append(caller_name)
+        if len(ChatLogger.active_loggers) > 0:
+            for chat_logger in ChatLogger.active_loggers:
+                chat_logger.add_log(self)
         return res
 
     def complete_chat_expensive(self, options=None):
         res = complete_chat_expensive(self, options=options)
         self.add_assistant_message(res)
-        if len(chat_loggers) > 0:
-            # get the file that calls this function
-            caller_name = inspect.stack()[1].filename
-            for chat_logger in chat_loggers:
-                chat_logger.chat_list.append(self)
-                chat_logger.caller_list.append(caller_name)
+        if len(ChatLogger.active_loggers) > 0:
+            for chat_logger in ChatLogger.active_loggers:
+                chat_logger.add_log(self)
         return res

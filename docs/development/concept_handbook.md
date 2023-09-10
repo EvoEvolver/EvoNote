@@ -21,6 +21,17 @@
 
 When you want to discard a certain type of cache. You can use `with cache_manager.refresh_cache(cache_type: str):` to wrap the code that generates the cache. This will disable the cache of the type `cache_type`.
 
+## Debug
+
+In the `debug` file, many useful function for revealing the intermediate results are provided. You can use them to debug the program. For example:
+```python
+from evonote.debug import display_chats
+with display_chats():
+    some_code()
+```
+All the calling of chat completion will be displayed.
+
+
 # Important functionalities
 
 `search`: The folder includes the codes for searching in the knowledge base.

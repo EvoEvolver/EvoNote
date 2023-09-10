@@ -5,6 +5,8 @@ import math
 import numpy as np
 from typing import List, Type, Any, Callable, TYPE_CHECKING
 
+from evonote.file_helper.logger import Logger
+
 if TYPE_CHECKING:
     from evonote.notebook.note import Note
     from evonote.notebook.notebook import Notebook
@@ -86,10 +88,13 @@ class Query:
         self.query = query
         self.query_type = query_type
 
+class IndexingSearchLogger(Logger):
+    active_loggers = []
 
-indexing_debug_config = {
-    "show_src_similarity_gui": False,
-}
+    def display_log(self):
+        from evonote.gui.similarity_search import draw_similarity_gui
+        for log in self.log_list:
+            draw_similarity_gui(*log)
 
 
 class AbsEmbeddingIndexer(Indexer):
@@ -183,9 +188,10 @@ class AbsEmbeddingIndexer(Indexer):
 
         similarity = np.sum(similarity, axis=1)
 
-        if indexing_debug_config["show_src_similarity_gui"]:
-            show_src_similarity_gui(similarity, indexing.data, query, weights)
-            pass
+        if len(IndexingSearchLogger.active_loggers) > 0:
+            IndexingSearchLogger.add_log_to_all(
+                show_src_similarity_gui(similarity, indexing.data, query, weights))
+
 
         return similarity, indexing.data["note_of_vecs"]
 
@@ -201,14 +207,14 @@ class AbsEmbeddingIndexer(Indexer):
 
 
 def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
-    from evonote.gui.similarity_search import draw_similarity_gui
+
     top_note_index = np.argsort(similarity)[::-1][:top_k]
     notes = data["note_of_vecs"]
     top_notes = [notes[i] for i in top_note_index]
     contents = [note.content for note in top_notes]
     src_list = data["srcs_list"]
     src_list = [src_list[i] for i in top_note_index]
-    draw_similarity_gui(src_list, weights, query, contents)
+    return src_list, weights, query, contents
 
 
 class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
