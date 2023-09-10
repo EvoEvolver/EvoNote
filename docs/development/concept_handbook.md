@@ -31,6 +31,7 @@ with display_chats():
 ```
 All the calling of chat completion will be displayed.
 
+See https://github.com/EvoEvolver/EvoNote/blob/main/playground/debug.py for examples of usage.
 
 # Important functionalities
 
