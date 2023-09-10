@@ -67,6 +67,8 @@ class CacheManager:
         #
         self.types_to_refresh: Set[str] = set()
         #
+        self.refresh_all: bool = False
+        #
         self.types_used: Set[str] = set()
 
     def save_all_cache_to_file(self):
@@ -89,7 +91,7 @@ class CacheManager:
         hash = get_hash(input, type)
         self.types_used.add(type)
         un_hit = hash not in self.cache_table
-        if type in self.types_to_refresh:
+        if type in self.types_to_refresh or self.refresh_all:
             un_hit = True
         if un_hit:
             if create_cache:
@@ -148,5 +150,42 @@ def save_used_cache():
 def discard_cache():
     cache_manager.discard_cache_update()
 
+
+class RefreshContext:
+    def __init__(self, cache_type: str = ""):
+        """
+        :param cache_type: The type of cache to refresh. If type is "", then all cache will be
+        refreshed
+        """
+        self.cache_type = cache_type
+        self.already_refreshed = False
+
+    def __enter__(self):
+        if self.cache_type != "":
+            if self.cache_type not in cache_manager.types_to_refresh:
+                cache_manager.types_to_refresh.add(self.cache_type)
+            else:
+                self.already_refreshed = True
+        else:
+            if cache_manager.refresh_all:
+                self.already_refreshed = True
+            else:
+                cache_manager.refresh_all = True
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.cache_type != "":
+            if not self.already_refreshed:
+                cache_manager.types_to_refresh.remove(self.cache_type)
+        else:
+            if not self.already_refreshed:
+                cache_manager.refresh_all = False
+
+def cache_refresh(cache_type: str):
+    """
+    :param cache_type: The type of cache to refresh. If type is "", then all cache will be
+    refreshed
+    :return: The context manager
+    """
+    return RefreshContext(cache_type)
 
 cache_manager = CacheManager()
