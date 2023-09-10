@@ -3,9 +3,9 @@ from typing import List
 import yaml
 
 from evonote.file_helper.cache_manage import cache_manager
+from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, new_notebook_from_note_subset
-from evonote.model.chat import Chat
 
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
 

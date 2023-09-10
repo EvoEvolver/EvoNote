@@ -72,6 +72,7 @@ def flatten_nested_list(texts: list[list[str]], make_cache=False) \
         flattened_texts.extend(texts_)
     return flattened_texts, index_start
 
+
 def get_embeddings(texts: list[str], make_cache=True) -> list[list[float]]:
     global embedding_cache
     if embedding_cache is None:

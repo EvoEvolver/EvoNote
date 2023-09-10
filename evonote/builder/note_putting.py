@@ -1,10 +1,10 @@
 from typing import List
 
+from evonote.file_helper.cache_manage import cache_manager
+from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook
-from evonote.file_helper.cache_manage import cache_manager
 from evonote.utils import robust_json_parse
-from evonote.model.chat import Chat
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."
 
@@ -35,9 +35,10 @@ def search_similar_paths(keywords, notebook: Notebook):
     return similar_paths
 
 
-def conceive_path(content: str, context: str, similar_paths: List[List[str]], notebook:Notebook):
+def conceive_path(content: str, context: str, similar_paths: List[List[str]],
+                  notebook: Notebook):
     prompt = "You are managing a notebook."
-    prompt += "Here is a description of the notebook:"+notebook.topic+"\n\n"
+    prompt += "Here is a description of the notebook:" + notebook.topic + "\n\n"
     prompt += "You are trying to find a path to put a new note based on its content and context."
     prompt += f"\nContent: {content}"
     if len(context) > 0:
@@ -60,7 +61,7 @@ def conceive_path(content: str, context: str, similar_paths: List[List[str]], no
     start = res.find(":")
     res = res[start + 1:].strip()
     res = res.split("/")
-    if len(res)>0 and len(res[0])==0:
+    if len(res) > 0 and len(res[0]) == 0:
         res = res[1:]
     return res
 
@@ -100,7 +101,8 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put,
     # TODO not finished
 
 
-def put_content_to_notebook(content: str, context: str, conceived_path, notebook: Notebook):
+def put_content_to_notebook(content: str, context: str, conceived_path,
+                            notebook: Notebook):
     chat = Chat(system_message=system_message)
 
     prompt_adding = "You are managing a database of notes."

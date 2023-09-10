@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import concurrent
 import math
-import numpy as np
 from typing import List, Type, Any, Callable, TYPE_CHECKING
+
+import numpy as np
 
 from evonote.file_helper.logger import Logger
 
@@ -87,6 +88,7 @@ class Query:
         """
         self.query = query
         self.query_type = query_type
+
 
 class IndexingSearchLogger(Logger):
     active_loggers = []
@@ -192,7 +194,6 @@ class AbsEmbeddingIndexer(Indexer):
             IndexingSearchLogger.add_log_to_all(
                 show_src_similarity_gui(similarity, indexing.data, query, weights))
 
-
         return similarity, indexing.data["note_of_vecs"]
 
     @classmethod
@@ -207,7 +208,6 @@ class AbsEmbeddingIndexer(Indexer):
 
 
 def show_src_similarity_gui(similarity, data, query, weights, top_k=10):
-
     top_note_index = np.argsort(similarity)[::-1][:top_k]
     notes = data["note_of_vecs"]
     top_notes = [notes[i] for i in top_note_index]

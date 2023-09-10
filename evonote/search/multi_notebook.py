@@ -4,7 +4,8 @@ from evonote.notebook.notebook import Notebook
 from evonote.search.fine_searcher import filter_notebook_in_group
 
 
-def search_related_notebook_to_store(content_to_store, bookshelf: Notebook) -> List[Notebook]:
+def search_related_notebook_to_store(content_to_store, bookshelf: Notebook) -> List[
+    Notebook]:
     criteria_prompt = ("Whether the note describes a notebook "
                        "that is suitable for storing the following content:")
     criteria_prompt += f"\n{content_to_store}"

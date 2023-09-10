@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from evonote.builder.extract_from_module import FunctionDocs
     from evonote.notebook.notebook import Notebook
+
 
 class Note:
     """
@@ -153,6 +155,3 @@ class NoteResource:
 
     def add_note(self, note, note_docs):
         self.add_resource(note, "note", note_docs)
-
-
-

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import ast
+import concurrent.futures
 
+from evonote.file_helper.cache_manage import save_cache, cache_manager
+from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, make_notebook_root
-from evonote.model.chat import Chat
-import concurrent.futures
-from evonote.file_helper.cache_manage import save_cache, cache_manager
 
 
 def notebook_from_doc(doc, meta) -> Notebook:
@@ -20,14 +20,17 @@ def build_from_sections(doc, root: Note):
     for section in doc["sections"]:
         build_from_sections(section, root.s(section["title"]))
 
+
 def move_original_content_to_resource(note, notebook):
     new_note = Note(notebook)
     if len(note.content) > 0:
         new_note.resource.add_text(note.content, "original_content")
     return new_note
 
+
 def digest_all_descendants(notebook: Notebook) -> Notebook:
-    notebook = notebook.duplicate_notebook_by_note_mapping(move_original_content_to_resource)
+    notebook = notebook.duplicate_notebook_by_note_mapping(
+        move_original_content_to_resource)
     all_notes = notebook.get_all_notes()
     contents = [note.resource.get_resource_by_type("text") for note in all_notes]
     non_empty_contents = []
@@ -39,7 +42,7 @@ def digest_all_descendants(notebook: Notebook) -> Notebook:
     finished = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         for note, digest in zip(non_empty_notes, executor.map(digest_content,
-                                                        non_empty_contents)):
+                                                              non_empty_contents)):
             note: Note
             set_notes_by_digest(note, digest, notebook)
             finished += 1

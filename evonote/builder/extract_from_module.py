@@ -1,10 +1,11 @@
 import importlib
+import inspect
 import os
 import pkgutil
 from typing import Dict, List, Callable, Tuple
+
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import make_notebook_root
-import inspect
 
 
 class ModuleManager:

@@ -1,6 +1,7 @@
 # Import necessary libraries
 import plotly.graph_objects as go
 
+
 def show_document_with_key_gui(keys, documents):
     if len(keys) == 0:
         print("No keys to show")
@@ -34,6 +35,7 @@ def show_document_with_key_gui(keys, documents):
     ])
     fig.show()
 
+
 # Run the app
 if __name__ == '__main__':
     # Your dictionary
@@ -44,4 +46,3 @@ if __name__ == '__main__':
         # ... add as many keys and values as you like
     }
     show_document_with_key_gui(list(data.keys()), list(data.values()))
-

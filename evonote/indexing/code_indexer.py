@@ -1,10 +1,8 @@
 from typing import List
 
-from evonote.notebook.note import Note
-from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
-from evonote.model.chat import Chat
 from evonote.builder.extract_from_module import FunctionDocs
-
+from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
+from evonote.notebook.note import Note
 
 
 class CodeParameterIndexer(AbsEmbeddingIndexer):
@@ -26,7 +24,6 @@ class CodeParameterIndexer(AbsEmbeddingIndexer):
                     weight_list.append([0.4, 0.1, 0.5])
                     note_can_index.append(note)
         return contents, weight_list, note_can_index
-
 
 
 class CodeReturnIndexer(AbsEmbeddingIndexer):
@@ -83,7 +80,7 @@ class CodeDocsIndexer(AbsEmbeddingIndexer):
                     note_can_index.append(note)
                     contents.append([docs.general, function_name])
                     weight_list.append([0.7, 0.3])
-                #for keyword in docs.keywords:
+                # for keyword in docs.keywords:
                 #    note_can_index.append(note)
                 #    contents.append([keyword, function_name])
                 #    weight_list.append([0.6, 0.4])

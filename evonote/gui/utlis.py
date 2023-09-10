@@ -1,7 +1,8 @@
-
-from hyphen.textwrap2 import fill
 from hyphen import Hyphenator
+from hyphen.textwrap2 import fill
+
 h_en = Hyphenator('en_US')
+
 
 def hypenate_texts(texts: str, line_width=40):
     if "\\" in texts:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import copy
 
 from evonote.file_helper.logger import Logger

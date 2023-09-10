@@ -1,23 +1,22 @@
-
-
-import plotly.graph_objects as go
 import numpy as np
+import plotly.graph_objects as go
 
 from evonote.gui.utlis import hypenate_texts
 from evonote.model.openai import get_embeddings, flatten_nested_list
 
+
 # see https://plotly.com/python/heatmaps/
 
 def draw_heatmap(z, hovertext):
-
     fig = go.Figure(data=go.Heatmap(
         z=z,
         hovertext=hovertext,
         hovertemplate="<b>%{hovertext}</b><extra></extra>",
-        )
+    )
     )
 
     fig.show()
+
 
 def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5):
     query_embeddings = np.array(get_embeddings(query))
@@ -33,7 +32,8 @@ def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5
 
     # iterate over lines
     for i, index in enumerate(index_start):
-        similarity_for_note = src_similarities[index:index+min(len(src_lists[i]), width)]
+        similarity_for_note = src_similarities[
+                              index:index + min(len(src_lists[i]), width)]
         matched_query = []
         matched_query_score = []
         for j, similarity in enumerate(similarity_for_note):
@@ -46,8 +46,10 @@ def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5
         matched_query_score = np.array(matched_query_score)[rank]
         if len(src_lists[i]) < width:
             src_list_for_display.append(src_lists[i] + [""] * (width - len(src_lists[i])))
-            matched_query = np.concatenate([matched_query, [""] * (width - len(src_lists[i]))])
-            matched_query_score = np.concatenate([matched_query_score, [None] * (width - len(src_lists[i]))])
+            matched_query = np.concatenate(
+                [matched_query, [""] * (width - len(src_lists[i]))])
+            matched_query_score = np.concatenate(
+                [matched_query_score, [None] * (width - len(src_lists[i]))])
         else:
             src_list_for_display.append(src_lists[i][:width])
 
@@ -72,10 +74,12 @@ def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5
             else:
                 score = matched_query_score_list[i][j]
                 new_score = (score - min_score) / (max_score - min_score)
-                text = "content: " + hypenate_texts(content_list[i], line_width=100) + "<br>"
+                text = "content: " + hypenate_texts(content_list[i],
+                                                    line_width=100) + "<br>"
                 text += "src: " + src_list_for_display[i][j] + "<br>"
                 # round score to 3 decimal places
-                text += "query: " + matched_query_list[i][j] + "<br>" + "score: " + str(round(new_score, 3))
+                text += "query: " + matched_query_list[i][j] + "<br>" + "score: " + str(
+                    round(new_score, 3))
                 display_text_for_note.append(text)
                 if score is not None:
                     matched_query_score_list[i][j] = new_score
@@ -84,19 +88,25 @@ def prepare_similarity_grid(src_lists, weight_list, query, content_list, width=5
     display_texts = display_texts[::-1]
     matched_query_score_list = matched_query_score_list[::-1]
 
-
-
     return display_texts, matched_query_score_list
 
+
 def draw_similarity_gui(src_lists, weight_list, query, content_list, width=5):
-    matched_query_list, matched_query_score_list = prepare_similarity_grid(src_lists, weight_list, query, content_list, width)
+    matched_query_list, matched_query_score_list = prepare_similarity_grid(src_lists,
+                                                                           weight_list,
+                                                                           query,
+                                                                           content_list,
+                                                                           width)
     draw_heatmap(matched_query_score_list, matched_query_list)
+
 
 if __name__ == "__main__":
     content = ["note1", "note2", "note3"]
-    src_lists = [["apple", "beer", "computer", "computer","computer" ,"computer"],
+    src_lists = [["apple", "beer", "computer", "computer", "computer", "computer"],
                  ["banana", "speakers"],
                  ["red", "watermelon", "microphone"]]
     query = ["apple", "guitar"]
-    matched_query_list, matched_query_score_list = prepare_similarity_grid(src_lists, [0.5, 0.5], query, content)
+    matched_query_list, matched_query_score_list = prepare_similarity_grid(src_lists,
+                                                                           [0.5, 0.5],
+                                                                           query, content)
     draw_heatmap(matched_query_score_list, matched_query_list)

@@ -1,7 +1,9 @@
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import plotly.graph_objects as go
 from hyphen import Hyphenator
-from typing import TYPE_CHECKING
 
 from evonote.gui.utlis import hypenate_texts
 

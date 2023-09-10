@@ -1,9 +1,13 @@
 from __future__ import annotations
+
 import inspect
 from typing import List
 
 
 class Logger:
+    """
+    Please refer to existing children classes if you want to make a new one
+    """
     active_loggers: List[Logger] = []
 
     def __init__(self, file_path_scope: str | List[str] | None = None):

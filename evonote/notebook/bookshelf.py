@@ -17,5 +17,5 @@ class Bookshelf(Notebook):
 def get_note_for_notebook(notebook: Notebook, default_notebook: Notebook) -> Note:
     note = Note(default_notebook)
     note.resource.add_notebook(notebook, notebook.topic)
-    note.be("A notebook with topic: "+ notebook.topic)
+    note.be("A notebook with topic: " + notebook.topic)
     return note

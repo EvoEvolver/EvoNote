@@ -6,8 +6,10 @@ from evonote.model.chat import ChatLogger
 def display_chats():
     return ChatLogger()
 
+
 def display_embedding_search():
     return IndexingSearchLogger()
+
 
 def refresh_cache():
     return cache_manager.refresh_cache()
