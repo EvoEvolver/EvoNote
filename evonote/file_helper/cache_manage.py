@@ -135,7 +135,7 @@ class CacheManager:
             cache_table[cache.hash] = cache
         return cache_table
 
-    def refresh_cache(self, cache_type: str):
+    def refresh_cache(self, cache_type: str = ""):
         """
         Refresh (delete) all cache of the given type. Usage: `with cache_manager.refresh_cache(cache_type):`.
         :param cache_type: The type of cache to refresh. If type is "", then all cache will be

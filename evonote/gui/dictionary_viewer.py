@@ -1,44 +1,47 @@
 # Import necessary libraries
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
+import plotly.graph_objects as go
 
-# Your dictionary
-data = {
-    "Key1": "Value1",
-    "Key2": "Value2",
-    "Key3": "Value3",
-    #... add as many keys and values as you like
-}
+def show_document_with_key_gui(keys, documents):
+    if len(keys) == 0:
+        print("No keys to show")
+        return
 
-# Initialize Dash app
-app = dash.Dash(__name__)
+    html_documents = [document.replace("\n", "<br>") for document in documents]
 
-# Layout for the app
-app.layout = html.Div([
-    html.Div([
-        html.H3("Keys:"),
-        dcc.RadioItems(
-            id='key-selector',
-            options=[{'label': key, 'value': key} for key in data.keys()],
-            value=list(data.keys())[0]
-        )
-    ], style={'width': '30%', 'display': 'inline-block'}),
+    values = [keys,
+              html_documents]
 
-    html.Div([
-        html.H3("Value:"),
-        html.Div(id='value-display', children="")
-    ], style={'width': '60%', 'display': 'inline-block', 'verticalAlign': 'top'})
-])
-
-# Callback to update the value when a key is clicked
-@app.callback(
-    Output('value-display', 'children'),
-    [Input('key-selector', 'value')]
-)
-def update_value(selected_key):
-    return data[selected_key]
+    fig = go.Figure(data=[go.Table(
+        columnorder=[1, 2],
+        columnwidth=[80, 400],
+        header=dict(
+            values=[['Keys'],
+                    ['Logs']],
+            line_color='darkslategray',
+            fill_color='royalblue',
+            align=['left', 'center'],
+            font=dict(color='white', size=12),
+            height=40
+        ),
+        cells=dict(
+            values=values,
+            line_color='darkslategray',
+            fill=dict(color=['paleturquoise', 'white']),
+            align=['left', 'center'],
+            font_size=12,
+            height=30)
+    )
+    ])
+    fig.show()
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    # Your dictionary
+    data = {
+        "Key1": "Value1",
+        "Key2": "Value2",
+        "Key3": "Value3",
+        # ... add as many keys and values as you like
+    }
+    show_document_with_key_gui(list(data.keys()), list(data.values()))
+
