@@ -135,6 +135,15 @@ class CacheManager:
             cache_table[cache.hash] = cache
         return cache_table
 
+    def refresh_cache(self, cache_type: str):
+        """
+        Refresh (delete) all cache of the given type. Usage: `with cache_manager.refresh_cache(cache_type):`.
+        :param cache_type: The type of cache to refresh. If type is "", then all cache will be
+        refreshed
+        :return: A context manager of the refresh
+        """
+        return RefreshContext(self, cache_type)
+
 
 def save_cache():
     cache_manager.save_all_cache_to_file()
@@ -152,40 +161,34 @@ def discard_cache():
 
 
 class RefreshContext:
-    def __init__(self, cache_type: str = ""):
+    def __init__(self, cache_manager_: CacheManager, cache_type: str = ""):
         """
         :param cache_type: The type of cache to refresh. If type is "", then all cache will be
         refreshed
         """
         self.cache_type = cache_type
+        self.cache_manager = cache_manager_
         self.already_refreshed = False
 
     def __enter__(self):
         if self.cache_type != "":
-            if self.cache_type not in cache_manager.types_to_refresh:
-                cache_manager.types_to_refresh.add(self.cache_type)
+            if self.cache_type not in self.cache_manager.types_to_refresh:
+                self.cache_manager.types_to_refresh.add(self.cache_type)
             else:
                 self.already_refreshed = True
         else:
-            if cache_manager.refresh_all:
+            if self.cache_manager.refresh_all:
                 self.already_refreshed = True
             else:
-                cache_manager.refresh_all = True
+                self.cache_manager.refresh_all = True
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.cache_type != "":
             if not self.already_refreshed:
-                cache_manager.types_to_refresh.remove(self.cache_type)
+                self.cache_manager.types_to_refresh.remove(self.cache_type)
         else:
             if not self.already_refreshed:
-                cache_manager.refresh_all = False
+                self.cache_manager.refresh_all = False
 
-def cache_refresh(cache_type: str):
-    """
-    :param cache_type: The type of cache to refresh. If type is "", then all cache will be
-    refreshed
-    :return: The context manager
-    """
-    return RefreshContext(cache_type)
 
 cache_manager = CacheManager()
