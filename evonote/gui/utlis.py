@@ -5,6 +5,12 @@ h_en = Hyphenator('en_US')
 
 
 def hypenate_texts(texts: str, line_width=40):
+    """
+    Hypenate texts. Add <br> to the end of each line.
+    :param texts: The texts to be hypenated
+    :param line_width: The width of each line
+    :return: The hypenated texts
+    """
     if "\\" in texts:
         hyphenator = False
     else:

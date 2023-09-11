@@ -1,13 +1,20 @@
 # Import necessary libraries
 import plotly.graph_objects as go
 
+from evonote.gui.utlis import hypenate_texts
+
 
 def show_document_with_key_gui(keys, documents):
     if len(keys) == 0:
         print("No keys to show")
         return
 
-    html_documents = [document.replace("\n", "<br>") for document in documents]
+    html_documents = []
+    for document in documents:
+        html_document = []
+        for lines in document.split("\n"):
+            html_document.append(hypenate_texts(lines, 100).replace("<br>", " \\<br>"))
+        html_documents.append("<br>".join(html_document))
 
     values = [keys,
               html_documents]
