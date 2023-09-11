@@ -221,8 +221,6 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     @classmethod
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
                                   ):
-        break_sent_use_cache = lambda sent: process_sent_into_frags(sent)
-
         notes_content = [note.content for note in notes]
         notebook = indexing.notebook
 
@@ -231,7 +229,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
         n_finished = 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             for note, frags in zip(notes,
-                                   executor.map(break_sent_use_cache, notes_content)):
+                                   executor.map(process_sent_into_frags, notes_content)):
                 new_src = []
                 new_src.extend(frags)
                 note_path = note.get_note_path(notebook)

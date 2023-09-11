@@ -113,8 +113,7 @@ def filter_notebook_in_group(notebook: Notebook, criteria_prompt: str) -> Notebo
     return filtered
 
 
-def keyword_filter(notebook: Notebook, keywords: List[str],
-                   use_cache=True):
+def keyword_filter(notebook: Notebook, keywords: List[str]):
     if len(keywords) > 1:
         prompt = "The note is related to all of the following keywords: " + ",".join(
             keywords)
