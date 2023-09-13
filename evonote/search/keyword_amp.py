@@ -1,18 +1,14 @@
 from typing import List
 
-from evonote.file_helper.cache_manage import cache_manager
+from evonote.file_helper.cache_manage import cached_function
 from evonote.model.chat import Chat
 
 system_message = "You should output everything concisely as if you are a computer " \
                  "program. "
 
-
+@cached_function("keyword_amplify")
 def keyword_amplify(keywords: List[str], n_limit=3):
     """Return a list of keywords that are similar to the given keyword."""
-    cache_key = str(keywords)
-    cache = cache_manager.read_cache(cache_key, "keyword_amplify")
-    if cache.is_valid():
-        return cache.value
 
     prompt = "You are a program that generates related keywords based on given keywords " \
              "to help the search engine find related logs. "
@@ -24,7 +20,6 @@ def keyword_amplify(keywords: List[str], n_limit=3):
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]
-    cache.set_cache(res)
     return res
 
 

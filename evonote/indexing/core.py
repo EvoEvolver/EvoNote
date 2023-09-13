@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from evonote.notebook.note import Note
     from evonote.notebook.notebook import Notebook
 
-from evonote.file_helper.cache_manage import save_cache, cache_manager
+from evonote.file_helper.cache_manage import save_cache, cached_function
 from evonote.model.openai import get_embeddings
 
 
@@ -304,12 +304,9 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
 prompt_for_splitting = "Split the following sentence into smaller fragments (no more than about 8 words). Put each fragment in a new line."
 prompt_for_extracting = "Give some phrases that summarize the following sentence. The phrases should be no more than 8 words and represents what the sentence is describing. Put each phrase in a new line."
 
-
+@cached_function("sent_breaking")
 def process_sent_into_frags(sent: str,
                             prompt=prompt_for_extracting):
-    cache = cache_manager.read_cache(sent, "sent_breaking")
-    if cache.is_valid():
-        return cache.value
 
     system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."
     from evonote.model.chat import Chat
@@ -335,7 +332,5 @@ def process_sent_into_frags(sent: str,
             res.extend(keys[1:])
 
     res = [line for line in res if len(line.strip()) != 0]
-
-    cache.set_cache(res)
 
     return res

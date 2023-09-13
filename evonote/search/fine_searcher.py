@@ -2,7 +2,7 @@ from typing import List
 
 import yaml
 
-from evonote.file_helper.cache_manage import cache_manager
+from evonote.file_helper.cache_manage import cache_manager, cached_function
 from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, new_notebook_from_note_subset
@@ -62,12 +62,9 @@ def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str) -> No
         useless_notes = new_useless_notes
 
 
+@cached_function("notebook_filtering")
 def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
         List[int]:
-    cache_key = f"\n{notebook_yaml}\n{criteria_prompt}"
-    cache = cache_manager.read_cache(cache_key, "notebook_filtering")
-    if cache.is_valid():
-        return cache.value
 
     prompt = f"You are working on filtering notes in a database according to its content and the path it is stored. The databased is stored in a YAML file, with each note labelled by an index." \
              f"\n{criteria_prompt}"
@@ -99,7 +96,6 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
         useful_indices = [int(i.strip()) for i in res.split(",")]
     except Exception as e:
         raise ValueError(f"Invalid answer: {res}, {original_res}")
-    cache.set_cache(useful_indices)
 
     return useful_indices
 

@@ -12,9 +12,14 @@ paper_notebook = notebook_from_doc(doc, meta)
 
 digest_notebook = digest_all_descendants(paper_notebook)
 
+# Try removing comments to show the notebook before digesting
+
 # paper_notebook.show_notebook_gui()
 
 digest_notebook.show_notebook_gui()
 
-
 save_used_cache()
+
+# Try removing comments to save the notebook
+
+# digest_notebook.save("AI4Science.enb")

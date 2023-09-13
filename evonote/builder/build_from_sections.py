@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import concurrent.futures
 
-from evonote.file_helper.cache_manage import save_cache, cache_manager
+from evonote.file_helper.cache_manage import save_cache, cached_function
 from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, make_notebook_root
@@ -52,11 +52,8 @@ def digest_all_descendants(notebook: Notebook) -> Notebook:
     save_cache()
     return notebook
 
-
+@cached_function("digest_content")
 def digest_content(content):
-    cache = cache_manager.read_cache(content, "digest_content")
-    if cache.is_valid():
-        return cache.value
 
     chat = Chat(
         system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")
@@ -76,7 +73,6 @@ def digest_content(content):
         print(res)
         return digest_content(content)
 
-    cache.set_cache(res)
     return res
 
 
