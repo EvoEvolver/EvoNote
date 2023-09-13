@@ -1,6 +1,6 @@
 from typing import List
 
-from evonote.file_helper.cache_manage import cache_manager
+from evonote.file_helper.cache_manage import cache_manager, cached_function
 from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook
@@ -8,11 +8,8 @@ from evonote.utils import robust_json_parse
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."
 
-
+@cached_function("content2keywords")
 def generate_possible_keywords(content: str, context: str):
-    cache = cache_manager.read_cache((content, context), "content2keywords")
-    if cache.is_valid():
-        return cache.value
     prompt = "You are managing a database of notes."
     prompt += "You are trying to find a path to put a new note based on its content and context."
     prompt += f"\nContent: {content}"
@@ -25,7 +22,6 @@ def generate_possible_keywords(content: str, context: str):
     res = res.split("\n")
     res = [r.strip() for r in res]
     res = [r for r in res if len(r) > 0]
-    cache.set_cache(res)
     return res
 
 

@@ -191,4 +191,25 @@ class RefreshContext:
                 self.cache_manager.refresh_all = False
 
 
+def cached_function(cache_type: str):
+    """
+    A decorator with argument cache_type. Usage: `@cached_function(cache_type)`.
+    :param cache_type: An identifier of the cache type. It should be distinct from other cache types.
+    """
+
+    def cached_function_wrapper(func):
+        def func_wrapper(*args, **kwargs):
+            with cache_manager.refresh_cache(cache_type):
+                cache = cache_manager.read_cache((args, kwargs), cache_type)
+                if cache.is_valid():
+                    return cache.value
+                res = func(*args, **kwargs)
+                cache.set_cache(res)
+                return res
+
+        return func_wrapper
+
+    return cached_function_wrapper
+
+
 cache_manager = CacheManager()
