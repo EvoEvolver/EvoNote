@@ -30,7 +30,7 @@ def possible_docstring(description: str):
     return res
 
 
-def search_function(description: str, notebook: Notebook):
+def search_function(description: str, notebook: Notebook, top_k=10):
     """
     Plan: TODO
     1. Imagine the docstring of the function by the description
@@ -43,5 +43,5 @@ def search_function(description: str, notebook: Notebook):
     names = possible_function_names(description)
     docstring = possible_docstring(description)
     query_keys = names + [docstring]
-    notebook.get_sub_notebook_by_similarity(query_keys, top_k=10,
-                                            indexer_class=CodeDocsIndexer).show_notebook_gui()
+    return notebook.get_sub_notebook_by_similarity(query_keys, top_k=top_k,
+                                            indexer_class=CodeDocsIndexer)

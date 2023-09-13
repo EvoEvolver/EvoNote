@@ -7,6 +7,7 @@ from typing import List, Type, Any, Callable, TYPE_CHECKING
 import numpy as np
 
 from evonote.file_helper.logger import Logger
+from evonote.model.chat import Chat
 
 if TYPE_CHECKING:
     from evonote.notebook.note import Note
@@ -308,12 +309,13 @@ prompt_for_extracting = "Give some phrases that summarize the following sentence
 def process_sent_into_frags(sent: str,
                             prompt=prompt_for_extracting):
 
-    system_message = "You are a helpful processor for NLP problems. Answer anything concisely and parsable. Use newline to separate multiple answers."
-    from evonote.model.chat import Chat
+    system_message = ("You are a helpful processor for NLP problems. Answer anything "
+                      "concisely and parsable. Use newline to separate multiple answers.")
+
     chat = Chat(
         user_message=prompt,
         system_message=system_message)
-    chat.add_user_message(sent)
+    chat.add_user_message("Sentence: "+sent)
     res = chat.complete_chat()
     res = res.split('\n')
 
