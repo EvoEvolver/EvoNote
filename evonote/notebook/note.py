@@ -28,18 +28,6 @@ class Note:
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
 
-    @property
-    def note_path(self):
-        return self.get_note_path(self.default_notebook)
-
-    @property
-    def parents(self):
-        return self.get_parents(self.default_notebook)
-
-    @property
-    def children(self):
-        return self.get_children(self.default_notebook)
-
     def get_note_path(self, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_note_path(self)
@@ -72,7 +60,7 @@ class Note:
 
     def __str__(self):
         if len(self.content) == 0:
-            return "Path" + str(self.note_path)
+            return "Path" + str(self.get_note_path())
         return self.content
 
     def s(self, key, notebook: Notebook | None = None) -> Note:
