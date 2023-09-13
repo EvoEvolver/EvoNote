@@ -199,13 +199,12 @@ def cached_function(cache_type: str):
 
     def cached_function_wrapper(func):
         def func_wrapper(*args, **kwargs):
-            with cache_manager.refresh_cache(cache_type):
-                cache = cache_manager.read_cache((args, kwargs), cache_type)
-                if cache.is_valid():
-                    return cache.value
-                res = func(*args, **kwargs)
-                cache.set_cache(res)
-                return res
+            cache = cache_manager.read_cache((args, kwargs), cache_type)
+            if cache.is_valid():
+                return cache.value
+            res = func(*args, **kwargs)
+            cache.set_cache(res)
+            return res
 
         return func_wrapper
 
