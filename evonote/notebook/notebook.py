@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Type, Callable
+import dill
 
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.core import FragmentedEmbeddingIndexer
@@ -228,6 +229,26 @@ class Notebook:
                                               note_mapping(note, new_notebook))
         return new_notebook
 
+    def save(self, path: str, save_indexing: bool = False):
+        # TODO: We need to test this function and make sure it works
+        with open(path, "wb") as f:
+            if not save_indexing:
+                indexings = self.indexings
+                self.indexings = {}
+            try:
+                dill.dump(self, f)
+            except Exception as e:
+                print(e)
+            finally:
+                if not save_indexing:
+                    self.indexings = indexings
+
+    @staticmethod
+    def load(path: str) -> Notebook:
+        # TODO: We need to test this function and make sure it works
+        with open(path, "rb") as f:
+            notebook = dill.load(f)
+        return notebook
 
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     if topic is None:

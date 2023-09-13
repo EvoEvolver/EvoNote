@@ -21,7 +21,6 @@ class Note:
     def __init__(self, default_notebook: Notebook):
         super().__init__()
 
-        self._is_note = True
         # content is string no matter what _content_type is
         self.content: str = ""
         # The root note helps merge two notebook bases
