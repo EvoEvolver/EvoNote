@@ -3,22 +3,23 @@ from __future__ import annotations
 import ast
 import concurrent.futures
 
+from evonote.data_cleaning.document import Document
 from evonote.file_helper.cache_manage import save_cache, cached_function
 from evonote.model.chat import Chat
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, make_notebook_root
 
 
-def notebook_from_doc(doc, meta) -> Notebook:
+def notebook_from_doc(doc: Document, meta) -> Notebook:
     root, notebook = make_notebook_root(meta["title"])
     build_from_sections(doc, root)
     return notebook
 
 
-def build_from_sections(doc, root: Note):
-    root.be(doc["content"])
-    for section in doc["sections"]:
-        build_from_sections(section, root.s(section["title"]))
+def build_from_sections(doc: Document, root: Note):
+    root.be(doc.content)
+    for section in doc.sections:
+        build_from_sections(section, root.s(section.title))
 
 
 def move_original_content_to_resource(note, notebook):

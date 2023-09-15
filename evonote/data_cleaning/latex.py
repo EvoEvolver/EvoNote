@@ -1,5 +1,7 @@
 import re
 
+from evonote.data_cleaning.document import Document
+
 
 def latex_to_markdown(latex: str):
     # replace \textit{xxx} with *xxx*
@@ -47,18 +49,14 @@ def divide_text_into_section(section_level, tex):
     return content, sections
 
 
-def process_section_level(section_level, curr_level, doc):
+def process_section_level(section_level, curr_level, doc: Document):
     if section_level == curr_level:
-        content, subsections = divide_text_into_section(section_level, doc["content"])
-        doc["content"] = content
+        content, subsections = divide_text_into_section(section_level, doc.content)
+        doc.content = content
         for subsection in subsections:
-            doc["sections"].append({
-                "title": subsection[0],
-                "content": subsection[1].strip(),
-                "sections": []
-            })
+            doc.sections.append(Document(subsection[0], subsection[1].strip(), []))
     else:
-        for i, section in enumerate(doc["sections"]):
+        for i, section in enumerate(doc.sections):
             process_section_level(section_level, curr_level + 1, section)
 
 
@@ -69,16 +67,12 @@ def process_latex_sections(tex: str):
         title = title[0].strip()
     else:
         title = ""
-    doc = {
-        "title": title,
-        "content": tex,
-        "sections": []
-    }
+    doc = Document(title, tex, [])
     for i in range(0, 4):
         process_section_level(i, 0, doc)
     # delete the content before first section in the root
     # because it's usually irrelevant
-    doc["content"] = ""
+    doc.content = ""
     return doc, {"abstract": abs, "title": title}
 
 
@@ -99,17 +93,6 @@ def process_latex(latex: str):
     return res
 
 
-def iter_sections(doc, root_path=""):
-    if len(doc["content"]) > 0:
-        yield doc, root_path + "\\" + doc["title"]
-    for section in doc["sections"]:
-        yield from iter_sections(section, root_path=root_path + "\\" + doc["title"])
-
-
-def get_section_list(doc):
-    return list(iter_sections(doc))
-
-
 def to_paragraphs(text):
     # separate by \n\n
     paragraphs = text.split("\n\n")
@@ -122,7 +105,6 @@ def to_paragraphs(text):
 def process_latex_into_standard(tex: str):
     tex = latex_to_markdown(tex)
     doc, meta = process_latex_sections(tex)
-    # doc_dict = {"section_tree": doc, "meta": meta}
     return doc, meta
 
 
