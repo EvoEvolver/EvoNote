@@ -10,6 +10,9 @@ with debug.display_chats():
     notebook = notebook.get_sub_notebook_by_similarity([keyword], top_k=6)
     res = notebook_to_paragraph(notebook,
                                 f"You should focus on writing about {keyword}")
+
+    # Refactor the notebook
+
     new_notebook = Notebook(keyword)
     note = new_notebook.get_new_note_by_path([keyword])
     note.be(res)

@@ -182,6 +182,8 @@ class Notebook:
     def get_path_content_str_for_prompt(self):
         res = []
         for note, path in self.note_path.items():
+            if len(note.content) == 0:
+                continue
             path_str = "/".join(path)
             if len(path) == 0:
                 path_str = "root"

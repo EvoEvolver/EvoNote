@@ -70,18 +70,24 @@ If not, give a JSON string with the key `analysis` and `reason`.
 
 def analyze_question(question: str, context=""):
     system_prompt = "You are world-class analyzer for planning a question answering problem."
-    prompt = f"""
+    chat = Chat(system_message=system_prompt)
+
+    prompt_2 = f"""
 Think step-by-step and analyze how to gather information for answering the following question."""
-    if len(context) > 0:
-        prompt += f"""\n{context}"""
-    prompt += f"""    
+    prompt_2 += f"""    
 - Each of your step must start with `Ask:` followed by a question.
 - You only need to consider the next 3 steps.
 Give your analysis by a JSON string with the following keys in order: `analysis`, `first step`, `second step`, `third step`. 
 If you think the question can be answered by a memory listed above, give a JSON string with the key `analysis` and `answer`.
 """
-    chat = Chat(user_message=prompt, system_message=system_prompt)
-    chat.add_user_message("Question:\n" + question)
+
+    prompt_1 = f"""Question:{question}"""
+    if len(context) > 0:
+        prompt_1 += f"""\n\n{context}"""
+
+    chat.add_user_message(prompt_1)
+    chat.add_user_message(prompt_2)
+
     res = chat.complete_chat()
     res = robust_json_parse(res)
     return res
@@ -94,11 +100,12 @@ def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
     :return: The answer
     """
     working_memory = Notebook("Working Notebook")
+    working_memory.root.be("")
     old_plan = None
     exit_flag = False
     while not exit_flag:
         context = ""
-        if old_plan is not None:
+        if False and old_plan is not None:
             context += "Here is your previous analysis plan. You have finished the first step of it.\n"
             context += json.dumps(old_plan, indent=1)
             context += "\n"
@@ -132,25 +139,6 @@ def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
 
 if __name__ == "__main__":
     import evonote.debug as debug
-
-    knowledge_base = Notebook("An introduction to the republic of Ganzi")
-    knowledge_base.get_new_note_by_path(["Ganzi"]).be(
-        "The republic of Ganzi is a country in the world.")
-    knowledge_base.get_new_note_by_path(["Ganzi", "Capital"]).be(
-        "Litang is the capital of the republic of Ganzi.")
-    knowledge_base.get_new_note_by_path(["Ganzi", "Leaders"]).be(
-        "There are many leaders in of the republic of Ganzi.")
-    knowledge_base.get_new_note_by_path(["Ganzi", "Leaders", "President"]).be(
-        "Dingzhen is the president of the republic of Ganzi.")
-    knowledge_base.get_new_note_by_path(["Ganzi", "Leaders", "Vice President"]).be(
-        "Ruike is the vice president of the republic of Ganzi.")
-    knowledge_base.get_new_note_by_path(["Dingzhen", "Pet"]).be(
-        "Zhenzhu the horse is the pet of the president of the republic of Ganzi.")
-    knowledge_base.get_new_note_by_path(["Dingzhen", "Motto"]).be(
-        "It's the mother who give me life.")
-
-    # knowledge_base.show_notebook_gui()
-
+    from evonote.testing.sample_notebook.dingzhen_world import dingzhen_world
     question = "Who is the pet of the president of the republic of Ganzi?"
-
-    single_notebook_qa_agent(question, knowledge_base)
+    single_notebook_qa_agent(question, dingzhen_world)
