@@ -175,9 +175,18 @@ class Notebook:
         return tree, note_indexed
 
     def get_dict_for_prompt(self):
-        dict_with_indices, note_indexed = self.get_notebook_dict(add_index=False)
-        delete_extra_keys_for_prompt(dict_with_indices)
-        return dict_with_indices, note_indexed
+        dict_without_indices, note_indexed = self.get_notebook_dict(add_index=False)
+        delete_extra_keys_for_prompt(dict_without_indices)
+        return dict_without_indices
+
+    def get_path_content_str_for_prompt(self):
+        res = []
+        for note, path in self.note_path.items():
+            path_str = "/".join(path)
+            if len(path) == 0:
+                path_str = "root"
+            res.append(f"{path_str}: {note.content}")
+        return "\n".join(res)
 
     def get_dict_with_indices_for_prompt(self):
         dict_with_indices, note_indexed = self.get_notebook_dict()

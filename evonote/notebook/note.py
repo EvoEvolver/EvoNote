@@ -51,8 +51,13 @@ class Note:
 
     def be(self, content: str) -> Note:
         """
-        Assign the note with a transform (generator)
-        :param transform:
+        :return: The note itself
+        """
+        self.content = content
+        return self
+
+    def set_content(self, content: str) -> Note:
+        """
         :return: The note itself
         """
         self.content = content

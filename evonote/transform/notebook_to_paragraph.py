@@ -20,7 +20,7 @@ Start your answer with `Paragraph:`
     return res
 
 def notebook_to_paragraph(notebook: Notebook, writing_instruction: str):
-    dict_for_prompt = notebook.get_dict_for_prompt()[0]
+    dict_for_prompt = notebook.get_dict_for_prompt()
     dict_for_prompt = json.dumps(dict_for_prompt, indent=1)
     res = _notebook_to_paragraph_impl(dict_for_prompt, writing_instruction)
     return res
