@@ -65,7 +65,6 @@ def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str) -> No
 @cached_function("notebook_filtering")
 def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
         List[int]:
-
     prompt = f"You are working on filtering notes in a database according to its content and the path it is stored. The databased is stored in a YAML file, with each note labelled by an index." \
              f"\n{criteria_prompt}"
     chat = Chat(
@@ -101,7 +100,7 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
 
 
 def filter_notebook_in_group(notebook: Notebook, criteria_prompt: str) -> Notebook:
-    tree_with_indices, note_indexed = notebook.get_tree_with_indices_for_prompt()
+    tree_with_indices, note_indexed = notebook.get_dict_with_indices_for_prompt()
     tree_in_yaml = yaml.dump(tree_with_indices)
     useful_indices = filter_notebook_indices(tree_in_yaml, criteria_prompt)
     useful_notes = [note_indexed[i] for i in useful_indices]

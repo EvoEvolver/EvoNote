@@ -152,7 +152,7 @@ class Notebook:
         for indexing in self.indexings.values():
             indexing.remove_note(note)
 
-    def get_dict_for_prompt(self):
+    def get_notebook_dict(self, add_index=True):
         tree = {
             "subtopics": {},
         }
@@ -168,15 +168,21 @@ class Notebook:
                 leaf = leaf["subtopics"][key]
             if len(note.content) > 0:
                 leaf["content"] = note.content
-                leaf["index"] = i_note
+                if add_index:
+                    leaf["index"] = i_note
                 note_indexed.append(note)
                 i_note += 1
         return tree, note_indexed
 
-    def get_tree_with_indices_for_prompt(self):
-        tree_with_indices, note_indexed = self.get_dict_for_prompt()
-        delete_extra_keys_for_prompt(tree_with_indices)
-        return tree_with_indices, note_indexed
+    def get_dict_for_prompt(self):
+        dict_with_indices, note_indexed = self.get_notebook_dict(add_index=False)
+        delete_extra_keys_for_prompt(dict_with_indices)
+        return dict_with_indices, note_indexed
+
+    def get_dict_with_indices_for_prompt(self):
+        dict_with_indices, note_indexed = self.get_notebook_dict()
+        delete_extra_keys_for_prompt(dict_with_indices)
+        return dict_with_indices, note_indexed
 
     def show_notebook_gui(self):
         """

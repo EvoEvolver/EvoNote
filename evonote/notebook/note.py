@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from evonote.builder.extract_from_module import FunctionDocs
+    from evonote.transform.extract_from_module import FunctionDocs
     from evonote.notebook.notebook import Notebook
 
 
@@ -51,8 +51,8 @@ class Note:
 
     def be(self, content: str) -> Note:
         """
-        Assign the note with a builder (generator)
-        :param builder:
+        Assign the note with a transform (generator)
+        :param transform:
         :return: The note itself
         """
         self.content = content

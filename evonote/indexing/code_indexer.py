@@ -1,6 +1,6 @@
 from typing import List
 
-from evonote.builder.extract_from_module import FunctionDocs
+from evonote.transform.extract_from_module import FunctionDocs
 from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
 from evonote.notebook.note import Note
 
