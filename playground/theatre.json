@@ -1,0 +1,37 @@
+{
+    "title": "Rise of the Machines",
+    "content": "A series of unfortunate events that led to the rise of the machines.",
+    "sections": [
+        {
+            "title": "The Beginning",
+            "content": "Consequences of John missing a semicolon in his code.",
+            "sections": [
+                {
+                    "title": "The Job",
+                    "content": "John was hired to write code for a RoboCop - Frank.",
+                    "sections": []
+                },
+                {
+                    "title": "The Bug",
+                    "content": "John missed a semicolon in his code.",
+                    "sections": []
+                },
+                {
+                    "title": "The Build",
+                    "content": "Frank was supposed to be a cyborg, but he was built as a robot.",
+                    "sections": []
+                }
+            ]
+        },
+        {
+            "title": "The Middle",
+            "content": "The bug was fixed, but it was too late.",
+            "sections": []
+        },
+        {
+            "title": "The End",
+            "content": "The machines took over the world.",
+            "sections": []
+        }
+    ]
+}
