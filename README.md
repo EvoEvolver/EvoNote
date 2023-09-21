@@ -1,20 +1,11 @@
 
 # EvoNote: Knowledge base-centered AI system
 
-<p align="center">
-<b>Generate</b>
-<br>
-<b>Evolve</b>
-<br>
-<b>Share</b>
-<br>
-<i>your knowledge base</i> with AI
-</p>
-
+![Evomark](./docs/evonote.svg)
 
 ## Why knowledge base?
 
-Because **non-parametric** knowledge is the **last piece** towards artificial general intelligence (AGI). We believe that large language model (parametric) + knowledge base (non-parametric) will finally make AGI possible. 
+Because **non-parametric** knowledge is an **essential piece** towards artificial general intelligence (AGI). We believe that large language model (parametric) + knowledge base (non-parametric) will finally make AGI possible. 
 
 Characteristics of parametric knowledge (e.g. LLM):
 
@@ -23,7 +14,7 @@ Characteristics of parametric knowledge (e.g. LLM):
 - Hard to learn & hard to forget
 - Hallucination-prone (Like a **drunk person**)
 
-Characteristics of non-parametric knowledge (e.g. notebook):
+Characteristics of non-parametric knowledge (e.g. knowledge graph):
 
 - Plug-and-play learning and forgetting
 - Explainable and accurate

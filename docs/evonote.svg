@@ -1,0 +1,19 @@
+<svg width="1000" height="300" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+
+ <g>
+  <title>background</title>
+  <rect x="-1" y="-1" width="1002" height="302" id="canvas_background" fill="#2e75b6"/>
+  <g id="canvasGrid" width="100%" height="100%" x="0" y="0" overflow="visible" display="none">
+   <rect id="svg_2" width="100%" height="100%" x="0" y="0" stroke-width="0" fill="url(#gridpattern)"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <rect fill="#fff" stroke-width="1.5" x="94.84615" y="63.34863" width="150.51516" height="9.27833" id="svg_1" stroke="#ffffff"/>
+  <rect fill="#fff" stroke-width="1.5" stroke-opacity="null" fill-opacity="null" x="71.65031" y="73.65789" width="29.89685" height="158.76258" id="svg_3" stroke="#ffffff"/>
+  <rect fill="#fff" stroke-width="1.5" stroke-opacity="null" fill-opacity="null" x="114.9492" y="140.66807" width="110.30906" height="19.58759" id="svg_4" stroke="#ffffff"/>
+  <rect fill="#fff" stroke-width="1.5" stroke-opacity="null" fill-opacity="null" x="98.45438" y="224.17306" width="145.36056" height="22.89569" id="svg_6" stroke="#ffffff"/>
+  <text style="cursor: move;" fill="#ffffff" stroke-width="0" stroke-opacity="null" x="260.15814" y="217.25014" id="svg_8" font-size="187" font-family="'Courier New', Courier, monospace" text-anchor="start" xml:space="preserve" transform="matrix(1.04201 0 0 1.04201 -10.9049 -17.1442)" stroke="#ffffff" font-weight="normal" font-style="normal">voNote</text>
+ </g>
+</svg>
