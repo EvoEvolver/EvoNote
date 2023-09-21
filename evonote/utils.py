@@ -1,5 +1,5 @@
 import ast
-
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 def robust_json_parse(src: str):
     # find first {
@@ -25,3 +25,6 @@ def debugger_is_active() -> bool:
 
 def get_main_path():
     return os.path.abspath(sys.argv[0])
+
+
+multi_attempts = retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
