@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import List
-
+from typing import List, Dict
+import json
 
 class Document:
     def __init__(self, title="", content="", sections=None):
@@ -14,3 +14,14 @@ class Document:
             yield self, root_path + "\\" + self.title
         for section in self.sections:
             yield from section.iter_sections(root_path=root_path + "\\" + self.title)
+
+    @classmethod
+    def from_dict(cls, d: Dict):
+        return cls(d.get("title", ""), d.get("content", ""),
+                   [cls.from_dict(sub) for sub in d.get("sections", [])])
+
+    @classmethod
+    def from_json(cls, file_path: str):
+        with open(file_path, "r") as f:
+            d = json.load(f)
+        return cls.from_dict(d)
