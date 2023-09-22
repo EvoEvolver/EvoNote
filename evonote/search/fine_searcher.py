@@ -73,7 +73,8 @@ def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \
     chat.add_user_message("The database: \n" + notebook_yaml)
     chat.add_user_message(
         f"Output the indices of the notes that satisfies the criteria with indices "
-        f"separated by comma (output none when none matches): {criteria_prompt}.")
+        f"separated by comma (output none when none matches): \n"
+        f"{criteria_prompt}.")
     res = chat.complete_chat_expensive()
     original_res = res
     if "none" in res or "None" in res:

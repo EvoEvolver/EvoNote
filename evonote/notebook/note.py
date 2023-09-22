@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from evonote.transform.extract_from_module import FunctionDocs
+    from evonote.transform.module_to_notebook.docs_parser import FunctionDocs
     from evonote.notebook.notebook import Notebook
 
 
@@ -46,6 +46,12 @@ class Note:
 
     def add_child(self, key: str, note: Note, notebook: Notebook | None = None) -> Note:
         notebook = notebook if notebook is not None else self.default_notebook
+        notebook.add_child(key, self, note)
+        return note
+
+    def new_child(self, key: str, notebook: Notebook | None = None) -> Note:
+        notebook = notebook if notebook is not None else self.default_notebook
+        note = Note(notebook)
         notebook.add_child(key, self, note)
         return note
 
