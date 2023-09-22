@@ -1,12 +1,31 @@
 from __future__ import annotations
+
 import inspect
 import re
 from typing import Dict, List, Tuple, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evonote.transform.module_to_notebook.extract_from_module import module_struct
+    from evonote.transform.module_to_notebook import module_struct
+
+"""
+This file is for parsing the docstring and comments in the module.
+
+## Docstring parsers
+
+The class and functions for parse the docstring of functions
+"""
 
 Doc_parser_res = Tuple[str, Dict[str, str], str, List[str]]
+Doc_parser = Callable[[str], Doc_parser_res]
+
+
+class FunctionDocs:
+    def __init__(self, general: str, params: Dict[str, str], returns: str,
+                 keywords: List[str]):
+        self.general: str = general if general is not None else ""
+        self.params: Dict[str, str] = params if params is not None else {}
+        self.returns: str = returns if returns is not None else ""
+        self.keywords: List[str] = keywords if keywords is not None else []
 
 
 def parse_reStructuredText_docs(raw_docs: str) -> Doc_parser_res:
@@ -92,16 +111,81 @@ def parse_google_docs(raw_docs: str):
     return general, params, returns
 
 
-class FunctionDocs:
-    def __init__(self, general: str, params: Dict[str, str], returns: str,
-                 keywords: List[str]):
-        self.general: str = general if general is not None else ""
-        self.params: Dict[str, str] = params if params is not None else {}
-        self.returns: str = returns if returns is not None else ""
-        self.keywords: List[str] = keywords if keywords is not None else []
+"""
+## Extract functions, classes and comments
+"""
 
 
-Doc_parser = Callable[[str], Doc_parser_res]
+def get_in_module_structs(module, functions, classes) -> List[module_struct]:
+
+    # check whether the module has no source code
+    try:
+        module_src = inspect.getsource(module)
+    except OSError:
+        module_src = ""
+
+    raw_comment_struct_list = prepare_raw_comment_struct(module_src)
+
+    func_cls_structs = prepare_func_cls_struct(functions, classes, module_src)
+
+    structs = mix_cmt_cls_func_structs(raw_comment_struct_list, func_cls_structs)
+
+    process_raw_comments(structs)
+
+    return structs
+
+
+def process_raw_comments(structs):
+    for i, struct in enumerate(structs):
+        if struct[0] == "raw_comment":
+            comment_content = struct[1]
+            comment_tokens = process_raw_comment_content(comment_content)
+            structs[i] = ("comment", comment_tokens, struct[2])
+
+"""
+### Mix comments, functions and classes extracted
+
+The mix is non-trivial because we discard the comments inside functions and classes
+"""
+
+def mix_cmt_cls_func_structs(cmt_structs, cls_func_structs) -> List[module_struct]:
+    """
+    Mix the comment_structs and cls_func_structs into a list of struct
+    Discard the comments inside functions and classes
+    :param cmt_structs: The comment_structs
+    :param cls_func_structs: The cls_func_structs
+    :return: A list of struct sorted by the start line
+    """
+    structs = []
+    cmt_index = 0
+    cls_func_index = 0
+    while cmt_index < len(cmt_structs) and cls_func_index < len(cls_func_structs):
+        cmt_struct = cmt_structs[cmt_index]
+        cls_func_struct = cls_func_structs[cls_func_index]
+        if cmt_struct[2][0] < cls_func_struct[2][0]:
+            structs.append(cmt_struct)
+            cmt_index += 1
+        else:
+            structs.append(cls_func_struct)
+            cls_func_index += 1
+            # discard the comments inside functions and classes
+            if cmt_struct[2][1] < cls_func_struct[2][1]:
+                cmt_index += 1
+    # # append the remaining structs
+    # append the remaining comment_structs
+    if (len(structs) > 0 and cmt_index < len(cmt_structs)
+            and cmt_structs[-1][2][1] > structs[-1][2][1]):
+        structs.extend(cmt_structs[cmt_index:])
+
+    if cls_func_index < len(cls_func_structs):
+        structs.extend(cls_func_structs[cls_func_index:])
+    return structs
+
+
+
+"""
+### Extract functions and classes
+"""
 
 
 def add_func_cls_to_struct_list(struct_list: List[module_struct], func_cls_list,
@@ -134,58 +218,48 @@ def prepare_func_cls_struct(functions, classes, module_src) -> List[module_struc
     return structs
 
 
+"""
+### Extract comments
+"""
+
 three_quote_pattern = re.compile(r'"""(.*?)"""', re.DOTALL)
 
 
-def prepare_comment_struct(module_src: str) -> List[module_struct]:
+def prepare_raw_comment_struct(module_src: str) -> List[module_struct]:
     comment_struct_list = []
     matches = three_quote_pattern.finditer(module_src)
     for match in matches:
-        comment_struct_list.append(("comment", match.group(1), match.span()))
+        comment_content = match.group(1)
+        comment_pos = match.span()
+        comment_struct_list.append(("raw_comment", comment_content, comment_pos))
     return comment_struct_list
 
 
-def mix_cmt_cls_func_structs(cmt_structs, cls_func_structs) -> List[module_struct]:
-    """
-    Mix the comment_structs and cls_func_structs into a list of struct
-    Discard the comments inside functions and classes
-    :param cmt_structs: The comment_structs
-    :param cls_func_structs: The cls_func_structs
-    :return: A list of struct sorted by the start line
-    """
-    structs = []
-    cmt_index = 0
-    cls_func_index = 0
-    while cmt_index < len(cmt_structs) and cls_func_index < len(cls_func_structs):
-        cmt_struct = cmt_structs[cmt_index]
-        cls_func_struct = cls_func_structs[cls_func_index]
-        if cmt_struct[2][0] < cls_func_struct[2][0]:
-            structs.append(cmt_struct)
-            cmt_index += 1
-        else:
-            structs.append(cls_func_struct)
-            cls_func_index += 1
-            # discard the comments inside functions and classes
-            if cmt_struct[2][1] < cls_func_struct[2][1]:
-                cmt_index += 1
-    # append the remaining structs
-    # append the remaining comment_structs
-    if (len(structs) > 0 and cmt_index < len(cmt_structs)
-            and cmt_structs[-1][2][1] > structs[-1][2][1]):
-        structs.extend(cmt_structs[cmt_index:])
-
-    if cls_func_index < len(cls_func_structs):
-        structs.extend(cls_func_structs[cls_func_index:])
-    return structs
+def process_raw_comment_content(comment_content):
+    comment_tokens = []
+    # Find all sections which should start with one or more # followed by a space
+    section_pattern = re.compile(r"(\n#+ .*)")
+    section_matches = section_pattern.finditer(comment_content)
+    last_section_end = 0
+    for section_match in section_matches:
+        section_markdown = section_match.group(1)[1:]
+        # find first non-# character
+        section_title = section_markdown.lstrip("#")
+        section_level = len(section_markdown) - len(section_title)
+        section_title = section_title.strip()
+        section_start, section_end = section_match.span()
+        last_section_end = section_end
+        comment_text_before_section = comment_content[:section_start]
+        if len(comment_text_before_section) > 0:
+            comment_tokens.append(
+                ("text", comment_text_before_section, (0, section_start)))
+        comment_tokens.append(
+            ("section", (section_title, section_level), (section_start, section_end)))
+    if last_section_end < len(comment_content):
+        remaining_text = comment_content[last_section_end:].strip()
+        if len(remaining_text) > 0:
+            comment_tokens.append(("text", remaining_text,
+                                   (last_section_end, len(comment_content))))
+    return comment_tokens
 
 
-def get_in_module_structs(module, functions, classes) -> List[module_struct]:
-    module_src = inspect.getsource(module)
-
-    comment_struct_list = prepare_comment_struct(module_src)
-
-    func_cls_structs = prepare_func_cls_struct(functions, classes, module_src)
-
-    structs = mix_cmt_cls_func_structs(comment_struct_list, func_cls_structs)
-
-    return structs
