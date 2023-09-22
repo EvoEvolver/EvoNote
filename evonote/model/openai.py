@@ -54,7 +54,7 @@ import os
 import numpy as np
 
 model_for_embedding = "text-embedding-ada-002"
-embedding_cache_path = os.getcwd() + "/embedding_cache.npy"
+embedding_cache_path = os.getcwd() + "/embedding.ec.npy"
 model_to_embedding_dim = {
     "text-embedding-ada-002": 1536
 }
@@ -77,7 +77,7 @@ def get_embeddings(texts: list[str], make_cache=True) -> list[list[float]]:
     global embedding_cache
     if embedding_cache is None:
         if os.path.exists(embedding_cache_path):
-            embedding_cache = np.load("embedding_cache.npy", allow_pickle=True).item()
+            embedding_cache = np.load("embedding.ec.npy", allow_pickle=True).item()
         else:
             embedding_cache = {}
 

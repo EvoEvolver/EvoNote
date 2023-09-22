@@ -2,6 +2,5 @@
 temp
 **/__pycache__/
 *.ec.*
-*/embedding_cache.npy
 *.egg-info
 setup.py
