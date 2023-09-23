@@ -162,19 +162,27 @@ def mix_cmt_cls_func_structs(cmt_structs, cls_func_structs) -> List[module_struc
     while cmt_index < len(cmt_structs) and cls_func_index < len(cls_func_structs):
         cmt_struct = cmt_structs[cmt_index]
         cls_func_struct = cls_func_structs[cls_func_index]
-        if cmt_struct[2][0] < cls_func_struct[2][0]:
+
+        if cmt_struct[2][1] < cls_func_struct[2][0]:
             structs.append(cmt_struct)
             cmt_index += 1
         else:
             structs.append(cls_func_struct)
+            curr_cls_func_end = cls_func_struct[2][1]
             cls_func_index += 1
             # discard the comments inside functions and classes
-            if cmt_struct[2][1] < cls_func_struct[2][1]:
-                cmt_index += 1
+            i_delete = 0
+            while i_delete < len(cmt_structs):
+                cmt_end = cmt_structs[i_delete][2][1]
+                if cmt_end < curr_cls_func_end:
+                    i_delete += 1
+                else:
+                    break
+            cmt_index = i_delete
     # # append the remaining structs
     # append the remaining comment_structs
     if (len(structs) > 0 and cmt_index < len(cmt_structs)
-            and cmt_structs[-1][2][1] > structs[-1][2][1]):
+            and cmt_structs[-1][2][0] > cls_func_structs[-1][2][1]):
         structs.extend(cmt_structs[cmt_index:])
 
     if cls_func_index < len(cls_func_structs):
@@ -221,15 +229,15 @@ def prepare_func_cls_struct(functions, classes, module_src) -> List[module_struc
 """
 ### Extract comments
 """
+# three_quote_pattern is multi-line comment pattern
 
-three_quote_pattern = re.compile(r'"""(.*?)"""', re.DOTALL)
-
+three_quote_pattern = re.compile(r'(^|\n)\s*?"""([^(""")]*?)"""', re.DOTALL)
 
 def prepare_raw_comment_struct(module_src: str) -> List[module_struct]:
     comment_struct_list = []
     matches = three_quote_pattern.finditer(module_src)
     for match in matches:
-        comment_content = match.group(1)
+        comment_content = match.group(2)
         comment_pos = match.span()
         comment_struct_list.append(("raw_comment", comment_content, comment_pos))
     return comment_struct_list

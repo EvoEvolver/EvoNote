@@ -88,7 +88,6 @@ def find_sub_module_func_cls(module, root_path):
 
 
 def add_structs_to_tree(classes, functions, module, tree_root_node):
-    module_path = inspect.getfile(module)
     structs = get_in_module_structs(module, functions, classes)
     process_structs_to_tree(structs, tree_root_node)
 
@@ -142,7 +141,6 @@ def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
             section_node = {"type": "section", "obj": section_contents,
                             "name": section_title, "children": {}}
             section_nodes.append(section_node)
-            curr_parent["children"][section_title] = section_node
             if section_level > curr_section_level:
                 section_level_stack.append(section_level)
             elif section_level < curr_section_level:
@@ -152,12 +150,14 @@ def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
                 section_level_stack.append(section_level)
             else:
                 parent_list.pop()
+            parent_list[-1]["children"][section_title] = section_node
             parent_list.append(section_node)
             curr_parent = section_node
         elif token_type == "text":
             if curr_parent["type"] == "section":
                 curr_parent["obj"].append(token_content)
             else:
+                # TODO revise this behavior
                 curr_parent["children"][token_content] = {"type": "comment",
                                                           "obj": token_content,
                                                           "name": ""}
@@ -220,5 +220,5 @@ def build_notebook_for_module(leaf, root_note: Note, docs_parser: Doc_parser):
 if __name__ == "__main__":
     from evonote.testing import v_lab
 
-    notebook = get_notebook_for_module(v_lab)
+    notebook = get_notebook_for_module(v_lab.operation)
     notebook.show_notebook_gui()
