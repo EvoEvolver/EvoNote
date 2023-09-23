@@ -124,7 +124,8 @@ def process_class_struct(curr_parent, struct_obj):
     for name, child in class_children.items():
         if child["type"] == "function":
             member_functions.append(child["obj"])
-    structs = get_in_module_structs(struct_obj, member_functions, [])
+    class_start_line = inspect.getsourcelines(struct_obj)[1] - 1
+    structs = get_in_module_structs(struct_obj, member_functions, [], line_offset=class_start_line)
     process_structs_to_tree(structs, class_node)
 
 
@@ -179,6 +180,9 @@ def get_class_member_functions(cls):
         type_str = str(type(member))
         # check whether member is a function
         if type_str == "<class 'function'>":
+            # check whether the function is from parent class
+            if member.__qualname__.split(".")[0] != cls.__name__:
+                continue
             member_functions.append(member)
         # Add classmethods
         elif type_str == "<class 'mappingproxy'>":

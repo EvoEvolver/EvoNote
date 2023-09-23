@@ -116,7 +116,7 @@ def parse_google_docs(raw_docs: str):
 """
 
 
-def get_in_module_structs(module, functions, classes) -> List[module_struct]:
+def get_in_module_structs(module, functions, classes, line_offset=0) -> List[module_struct]:
 
     # check whether the module has no source code
     try:
@@ -126,7 +126,7 @@ def get_in_module_structs(module, functions, classes) -> List[module_struct]:
 
     raw_comment_struct_list = prepare_raw_comment_struct(module_src)
 
-    func_cls_structs = prepare_func_cls_struct(functions, classes, module_src)
+    func_cls_structs = prepare_func_cls_struct(functions, classes, module_src, line_offset)
 
     structs = mix_cmt_cls_func_structs(raw_comment_struct_list, func_cls_structs)
 
@@ -197,17 +197,17 @@ def mix_cmt_cls_func_structs(cmt_structs, cls_func_structs) -> List[module_struc
 
 
 def add_func_cls_to_struct_list(struct_list: List[module_struct], func_cls_list,
-                                line_start_pos, struct_type):
+                                line_start_pos, struct_type, line_offset):
     for func_cls in func_cls_list:
         struct_src, struct_start_line = inspect.getsourcelines(func_cls)
-        struct_start_line -= 1
+        struct_start_line = struct_start_line - line_offset - 1
         struct_end_line = struct_start_line + len(struct_src)
         start_pos = line_start_pos[struct_start_line]
         end_pos = line_start_pos[struct_end_line]
         struct_list.append((struct_type, func_cls, (start_pos, end_pos)))
 
 
-def prepare_func_cls_struct(functions, classes, module_src) -> List[module_struct]:
+def prepare_func_cls_struct(functions, classes, module_src, line_offset) -> List[module_struct]:
     """
     Transform the functions and classes into a list of module_struct
     :param functions: The functions in the module
@@ -220,8 +220,8 @@ def prepare_func_cls_struct(functions, classes, module_src) -> List[module_struc
         line_start_pos.append(line_start_pos[-1] + len(src_lines[i - 1]) + 1)
 
     structs = []
-    add_func_cls_to_struct_list(structs, functions, line_start_pos, "function")
-    add_func_cls_to_struct_list(structs, classes, line_start_pos, "class")
+    add_func_cls_to_struct_list(structs, functions, line_start_pos, "function", line_offset)
+    add_func_cls_to_struct_list(structs, classes, line_start_pos, "class", line_offset)
     structs.sort(key=lambda x: x[2][0])
     return structs
 
