@@ -36,7 +36,7 @@ def get_notebook_for_module(module, docs_parser_type="reStruct"):
     tree = {"type": "module", "obj": root_module, "children": {},
             "name": root_module_name}
     get_module_members(root_module, tree, root_path)
-    build_notebook_for_module(tree, note_root, docs_parser)
+    build_notebook_for_struct(tree, note_root, docs_parser)
     return notebook
 
 
@@ -142,6 +142,7 @@ def process_sub_modules(sub_modules, tree_root_node):
 def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
                                section_nodes, struct_obj):
     token_list = struct_obj
+    n_comment = 1
     for token_type, token_content, token_pos in token_list:
         if token_type == "section":
             section_title, section_level = token_content
@@ -163,13 +164,10 @@ def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
             parent_list.append(section_node)
             curr_parent = section_node
         elif token_type == "text":
-            if curr_parent["type"] == "section":
-                curr_parent["obj"].append(token_content)
-            else:
-                # TODO revise this behavior
-                curr_parent["children"][token_content] = {"type": "comment",
-                                                          "obj": token_content,
-                                                          "name": ""}
+            curr_parent["children"][f"comment {n_comment}"] = {"type": "comment",
+                                                      "obj": token_content,
+                                                      "name": ""}
+            n_comment += 1
 
 
 
@@ -194,17 +192,16 @@ def get_class_member_functions(cls):
 """
 
 
-def build_notebook_for_module(leaf, root_note: Note, docs_parser: Doc_parser):
-    child_note = Note(root_note.default_notebook)
-    child_key = leaf["type"] + ": " + leaf["name"]
-    root_note.add_child(child_key, child_note)
-    child_type = "code:" + leaf["type"]
-    child_obj = leaf["obj"]
+def build_notebook_for_struct(leaf, root_note: Note, docs_parser: Doc_parser):
+    curr_note = Note(root_note.default_notebook)
+    curr_key = leaf["type"] + ": " + leaf["name"]
+    root_note.add_child(curr_key, curr_note)
+    curr_type = "code:" + leaf["type"]
+    curr_obj = leaf["obj"]
     docs = inspect.getdoc(leaf["obj"])
-    child_note.resource.add_resource(child_obj, child_type, docs)
+    curr_note.resource.add_resource(curr_obj, curr_type, docs)
 
     for name, child in leaf["children"].items():
-        docs = {}
         match child["type"]:
             case "function":
                 doc_raw = inspect.getdoc(child["obj"])
@@ -213,19 +210,18 @@ def build_notebook_for_module(leaf, root_note: Note, docs_parser: Doc_parser):
                     general, parameter, return_value, keywords = ("", {}, "", [])
                 else:
                     general, parameter, return_value, keywords = docs_parser(doc_raw)
-                function_note = child_note.s("function: " + name)
+                function_note = curr_note.s("function: " + name)
                 function_note.be(name)
                 function_docs = FunctionDocs(general, parameter, return_value, keywords)
                 function_note.resource.add_function(child["obj"], function_docs)
             case "module":
-                build_notebook_for_module(child, child_note, docs_parser)
+                build_notebook_for_struct(child, curr_note, docs_parser)
             case "class":
-                build_notebook_for_module(child, child_note, docs_parser)
+                build_notebook_for_struct(child, curr_note, docs_parser)
             case "comment":
-                child_note.be(child_note.content + "\n".join(child["obj"]))
+                curr_note.be(curr_note.content + "\n" + child["obj"])
             case "section":
-                child_note.be(child["obj"])
-                build_notebook_for_module(child, child_note, docs_parser)
+                build_notebook_for_struct(child, curr_note, docs_parser)
 
 
 if __name__ == "__main__":
