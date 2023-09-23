@@ -46,13 +46,12 @@ def get_notebook_for_module(module, docs_parser_type="reStruct"):
 
 
 def get_module_members(module, tree_root_node, root_path: str):
+
     classes, functions, sub_modules = find_sub_module_func_cls(module, root_path)
 
     add_structs_to_tree(classes, functions, module, tree_root_node)
 
     process_sub_modules(sub_modules, tree_root_node)
-
-    return
 
 
 def find_sub_module_func_cls(module, root_path):
@@ -107,16 +106,26 @@ def process_structs_to_tree(structs: List[module_struct], root_node):
                          "children": {}}
             curr_parent["children"][func_name] = func_node
         elif struct_type == "class":
-            class_name = struct_obj.__name__
-            class_node = {"type": "class", "obj": struct_obj, "name": class_name,
-                          "children": {}}
-            curr_parent["children"][class_name] = class_node
-            get_class_members(struct_obj, class_node["children"])
+            process_class_struct(curr_parent, struct_obj)
 
     for section_node in section_nodes:
         section_node["obj"] = "\n".join(section_node["obj"])
 
     return root_node
+
+
+def process_class_struct(curr_parent, struct_obj):
+    class_name = struct_obj.__name__
+    class_children = {}
+    class_node = {"type": "class", "obj": struct_obj, "name": class_name,
+                  "children": class_children}
+    curr_parent["children"][class_name] = class_node
+    member_functions = get_class_member_functions(struct_obj)
+    for name, child in class_children.items():
+        if child["type"] == "function":
+            member_functions.append(child["obj"])
+    structs = get_in_module_structs(struct_obj, member_functions, [])
+    process_structs_to_tree(structs, class_node)
 
 
 def process_sub_modules(sub_modules, tree_root_node):
@@ -163,20 +172,22 @@ def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
                                                           "name": ""}
 
 
-def get_class_members(cls, tree_root: Dict):
+
+def get_class_member_functions(cls):
+    member_functions = []
     for name, member in inspect.getmembers(cls):
         if isinstance(member, classmethod):
             continue
         type_str = str(type(member))
         # check whether member is a function
         if type_str == "<class 'function'>":
-            tree_root[name] = {"type": "function", "obj": member}
+            member_functions.append(member)
         # Add classmethods
         elif type_str == "<class 'mappingproxy'>":
             for sub_name, sub_member in member.items():
                 if isinstance(sub_member, classmethod):
-                    tree_root[sub_name] = {"type": "function", "obj": sub_member}
-
+                    member_functions.append(sub_member)
+    return member_functions
 
 """
 ## Build notebook for module from the tree
@@ -211,7 +222,7 @@ def build_notebook_for_module(leaf, root_note: Note, docs_parser: Doc_parser):
             case "class":
                 build_notebook_for_module(child, child_note, docs_parser)
             case "comment":
-                child_note.new_child(name).be(child["obj"])
+                child_note.be(child_note.content + "\n".join(child["obj"]))
             case "section":
                 child_note.be(child["obj"])
                 build_notebook_for_module(child, child_note, docs_parser)
@@ -220,5 +231,5 @@ def build_notebook_for_module(leaf, root_note: Note, docs_parser: Doc_parser):
 if __name__ == "__main__":
     from evonote.testing import v_lab
 
-    notebook = get_notebook_for_module(v_lab.operation)
+    notebook = get_notebook_for_module(v_lab)
     notebook.show_notebook_gui()

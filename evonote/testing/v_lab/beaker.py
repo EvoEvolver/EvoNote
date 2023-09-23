@@ -12,6 +12,10 @@ class Beaker:
         self.max_volume = max_volume
         self.contents = []
 
+    """
+    ## Operations of beaker
+    """
+
     def add_liquid(self, liquid_type: str, volume: float) -> bool:
         """
         :keyword: liquid operation
@@ -33,6 +37,10 @@ class Beaker:
         """
         self.contents.append((solid_type, weight))
         return True
+
+    """
+    ## Status of beaker
+    """
 
     def current_volume(self) -> float:
         """

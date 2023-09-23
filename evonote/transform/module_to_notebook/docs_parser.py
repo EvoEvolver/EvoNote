@@ -233,24 +233,24 @@ def prepare_func_cls_struct(functions, classes, module_src) -> List[module_struc
 
 three_quote_pattern = re.compile(r'(^|\n)\s*?"""([^(""")]*?)"""', re.DOTALL)
 
-def prepare_raw_comment_struct(module_src: str) -> List[module_struct]:
+def prepare_raw_comment_struct(parent_src: str) -> List[module_struct]:
     comment_struct_list = []
-    matches = three_quote_pattern.finditer(module_src)
+    matches = three_quote_pattern.finditer(parent_src)
     for match in matches:
         comment_content = match.group(2)
         comment_pos = match.span()
         comment_struct_list.append(("raw_comment", comment_content, comment_pos))
     return comment_struct_list
 
+section_pattern = re.compile(r"(\n\s*?#+ .*)")
 
 def process_raw_comment_content(comment_content):
     comment_tokens = []
     # Find all sections which should start with one or more # followed by a space
-    section_pattern = re.compile(r"(\n#+ .*)")
     section_matches = section_pattern.finditer(comment_content)
     last_section_end = 0
     for section_match in section_matches:
-        section_markdown = section_match.group(1)[1:]
+        section_markdown = section_match.group(1)[1:].lstrip()
         # find first non-# character
         section_title = section_markdown.lstrip("#")
         section_level = len(section_markdown) - len(section_title)
