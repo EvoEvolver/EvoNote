@@ -13,6 +13,9 @@ def get_hash(input: any, type: str) -> str:
 
 
 class Cache:
+    """
+    The class for storing cache.
+    """
     def __init__(self, value, hash: str, input: any, type: str,
                  meta: Optional[Dict] = None):
         self.value = value

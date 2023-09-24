@@ -2,65 +2,16 @@ from typing import List
 
 import yaml
 
-from evonote.file_helper.cache_manage import cache_manager, cached_function
+from evonote.file_helper.cache_manage import cached_function
 from evonote.model.chat import Chat
-from evonote.notebook.note import Note
 from evonote.notebook.notebook import Notebook, new_notebook_from_note_subset
 
+"""
+This module is for fine-grained search. The object notebook will be put in the prompt and LLM can select useful notes by a certain criteria.
+However, fine-grained search should not be adopted because it is slow and expensive.
+"""
+
 system_message = "You are a helpful processor for NLP problems. Output answer concisely as if you are a computer program."
-
-
-def filter_note_by_note(note: Note, notebook: Notebook, criteria_prompt: str):
-    note_path = note.get_note_path(notebook)
-    cache_key = f"\nPath: {note_path}\nContent: {note.content}\n{criteria_prompt}"
-    cache = cache_manager.read_cache(cache_key, "note_filtering")
-    if cache.is_valid():
-        return cache.value
-
-    if len(note.content) > 0:
-        prompt = f"You are working on filtering notes in a database according to its content and the path it is stored."
-        prompt += f"\nPath: {note_path}\nContent: {note.content}"
-    else:
-        prompt = f"You are working on filtering notes in a database according to the path it is stored."
-        prompt += f"\nPath: {note_path}"
-    chat = Chat(
-        user_message=prompt,
-        system_message=system_message)
-    asking_prompt = f" \n {criteria_prompt} \n Answer just Yes or No."
-    chat.add_user_message(asking_prompt)
-
-    res = chat.complete_chat()
-    if "Yes" in res or "yes" in res:
-        res = True
-    elif "No" in res or "no" in res:
-        res = False
-    else:
-        raise ValueError(f"Invalid answer: {res}")
-
-    cache.set_cache(res)
-
-    return res
-
-
-def filter_notebook_note_by_note(notebook: Notebook, criteria_prompt: str) -> None:
-    notes = notebook.get_all_notes()
-    useless_notes = []
-    for note in notes:
-        if not filter_note_by_note(note, notebook, criteria_prompt):
-            useless_notes.append(note)
-
-    remove_happened = True
-    while remove_happened:
-        new_useless_notes = []
-        remove_happened = False
-        for note in useless_notes:
-            if len(note.get_children(notebook)) == 0:
-                notebook.remove_note(note)
-                remove_happened = True
-            else:
-                new_useless_notes.append(note)
-        useless_notes = new_useless_notes
-
 
 @cached_function("notebook_filtering")
 def filter_notebook_indices(notebook_yaml, criteria_prompt) -> \

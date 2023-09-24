@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 from typing import List, TYPE_CHECKING
 
 import openai
@@ -8,6 +9,10 @@ verbose = 1
 
 if TYPE_CHECKING:
     from evonote.model.chat import Chat
+
+"""
+## Chat completion
+"""
 
 default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
 
@@ -31,9 +36,6 @@ def complete_chat_expensive(chat: Chat, options=None):
         0].message.content
 
 
-import concurrent.futures
-
-
 def complete_chat_parallel(chats: List[Chat], options=None):
     def complete_chat_wrapped(chat):
         return complete_chat(chat, options)
@@ -47,7 +49,9 @@ def complete_chat_parallel(chats: List[Chat], options=None):
     return results
 
 
-# Embedding
+"""
+## Embedding
+"""
 
 import hashlib
 import os
@@ -110,18 +114,3 @@ def get_embeddings(texts: list[str], make_cache=True) -> list[list[float]]:
         np.save(embedding_cache_path, embedding_cache)
 
     return embeddings
-
-
-def cache_embeddings():
-    global embedding_cache
-    np.save(embedding_cache_path, embedding_cache)
-
-
-def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
-                            weighting=None):
-    n_lines = len(embedding_for_context_lines)
-    if weighting is None:
-        weighting = np.array([1.0 / (i + 1) for i in range(n_lines)])
-    content_embeddings = np.dot(weighting, embedding_for_context_lines)
-    scores = np.dot(content_embeddings, embedding_to_search.T) / n_lines
-    return scores

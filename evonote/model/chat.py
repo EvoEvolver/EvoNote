@@ -18,16 +18,16 @@ class ChatLogger(Logger):
 
 class Chat:
     """
-    Class for storing the chat history for OpenAI API call
+    Class for chat completion
     """
 
     def __init__(self, user_message=None, system_message: any = None):
         self.history = []
         self.system_message = system_message
         if user_message is not None:
-            self.add_message(user_message, "user")
+            self._add_message(user_message, "user")
 
-    def add_message(self, content: any, role: str):
+    def _add_message(self, content: any, role: str):
         self.history.append({
             "content": content,
             "role": role
@@ -37,10 +37,10 @@ class Chat:
         self.add_user_message(content)
 
     def add_user_message(self, content: any):
-        self.add_message(content, "user")
+        self._add_message(content, "user")
 
     def add_assistant_message(self, content: any):
-        self.add_message(content, "assistant")
+        self._add_message(content, "assistant")
 
     def __copy__(self):
         new_chat_log = Chat(system_message=self.system_message)
@@ -64,12 +64,6 @@ class Chat:
             })
         return res
 
-    def __str__(self):
-        res = []
-        log_list = self.get_log_list()
-        for entry in log_list:
-            res.append(f"------{entry['role']}------\n {entry['content']}")
-        return "\n".join(res)
 
     def complete_chat(self, options=None):
         res = complete_chat(self, options=options)
@@ -86,3 +80,10 @@ class Chat:
             for chat_logger in ChatLogger.active_loggers:
                 chat_logger.add_log(self)
         return res
+
+    def __str__(self):
+        res = []
+        log_list = self.get_log_list()
+        for entry in log_list:
+            res.append(f"------{entry['role']}------\n {entry['content']}")
+        return "\n".join(res)

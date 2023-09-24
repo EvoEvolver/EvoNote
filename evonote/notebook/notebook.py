@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Type, Callable
+
 import dill
 
 from evonote.gui.notebook import draw_treemap
@@ -47,6 +48,10 @@ class Notebook:
         self.in_prompt_name = "#" + str(Notebook.n_notebook)
         Notebook.n_notebook += 1
 
+    """
+    ## Indexing of notes
+    """
+
     def make_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
         if indexer_class is None:
             indexer_class = FragmentedEmbeddingIndexer
@@ -56,6 +61,10 @@ class Notebook:
             return new_indexing
         else:
             return self.indexings[indexer_class]
+
+    """
+    ## Note information query
+    """
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -72,6 +81,10 @@ class Notebook:
             return self.parents[note]
         else:
             raise Exception("No parent found")
+
+    """
+    ## Note operations
+    """
 
     def get_note_by_path(self, path: List[str]) -> Note | None:
         assert self.root is not None
@@ -152,6 +165,10 @@ class Notebook:
         for indexing in self.indexings.values():
             indexing.remove_note(note)
 
+    """
+    ## Representation of notebook in prompt
+    """
+
     def get_notebook_dict(self, add_index=True):
         tree = {
             "subtopics": {},
@@ -195,12 +212,20 @@ class Notebook:
         delete_extra_keys_for_prompt(dict_with_indices)
         return dict_with_indices, note_indexed
 
+    """
+    ## Visualization of notebook
+    """
+
     def show_notebook_gui(self):
         """
         Show the notebook in a webpage
         """
         assert self.root is not None
         draw_treemap(self.root, self)
+
+    """
+    ## Sub-notebook extraction
+    """
 
     def get_notes_by_similarity(self, query_list: List[str],
                                 weights: List[float] | None = None,
@@ -246,6 +271,10 @@ class Notebook:
                                               note_mapping(note, new_notebook))
         return new_notebook
 
+    """
+    ## Persistence of the notebook
+    """
+
     def save(self, path: str, save_indexing: bool = False):
         # TODO: We need to test this function and make sure it works
         with open(path, "wb") as f:
@@ -266,6 +295,7 @@ class Notebook:
         with open(path, "rb") as f:
             notebook = dill.load(f)
         return notebook
+
 
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     if topic is None:

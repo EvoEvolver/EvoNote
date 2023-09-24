@@ -28,6 +28,10 @@ class Note:
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
 
+    """
+    ## Functions for getting the relation of notes
+    """
+
     def get_note_path(self, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_note_path(self)
@@ -40,9 +44,9 @@ class Note:
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_children_dict(self)
 
-    def get_descendants(self: Note, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return get_descendants(self, notebook)
+    """
+    ## Functions for adding children of note
+    """
 
     def add_child(self, key: str, note: Note, notebook: Notebook | None = None) -> Note:
         notebook = notebook if notebook is not None else self.default_notebook
@@ -55,24 +59,9 @@ class Note:
         notebook.add_child(key, self, note)
         return note
 
-    def be(self, content: str) -> Note:
-        """
-        :return: The note itself
-        """
-        self.content = content
-        return self
-
-    def set_content(self, content: str) -> Note:
-        """
-        :return: The note itself
-        """
-        self.content = content
-        return self
-
-    def __str__(self):
-        if len(self.content) == 0:
-            return "Path" + str(self.get_note_path())
-        return self.content
+    """
+    ## Functions for setting content of note
+    """
 
     def s(self, key, notebook: Notebook | None = None) -> Note:
         """
@@ -91,13 +80,28 @@ class Note:
         else:
             raise NotImplementedError()
 
+    def set_content(self, content: str) -> Note:
+        """
+        :return: The note itself
+        """
+        self.content = content
+        return self
 
-def get_descendants(note: Note, notebook: Notebook):
-    descendants = []
-    for child in notebook.children[note].values():
-        descendants.append(child)
-        descendants.extend(get_descendants(child, notebook))
-    return descendants
+    def be(self, content: str) -> Note:
+        """
+        :return: The note itself
+        """
+        self.content = content
+        return self
+
+
+
+
+
+    def __str__(self):
+        if len(self.content) == 0:
+            return "Path" + str(self.get_note_path())
+        return self.content
 
 
 class NoteResource:
@@ -107,10 +111,12 @@ class NoteResource:
         self.resource_type: List[str] = []
         self.resource_docs: List[any] = []
 
-    def add_resource(self, resource, resource_type: str, resource_docs: any):
-        self.resource.append(resource)
-        self.resource_type.append(resource_type)
-        self.resource_docs.append(resource_docs)
+    def has_type(self, resource_type):
+        return resource_type in self.resource_type
+
+    """
+    ## Functions for getting resources
+    """
 
     def get_resource_by_type(self, resource_type):
         """
@@ -133,8 +139,14 @@ class NoteResource:
     def get_resource_types(self):
         return self.resource_type
 
-    def has_type(self, resource_type):
-        return resource_type in self.resource_type
+    """
+    ## Functions for adding resources
+    """
+
+    def add_resource(self, resource, resource_type: str, resource_docs: any):
+        self.resource.append(resource)
+        self.resource_type.append(resource_type)
+        self.resource_docs.append(resource_docs)
 
     def add_text(self, text, text_docs):
         self.add_resource(text, "text", text_docs)

@@ -43,8 +43,7 @@ def show_document_with_key_gui(keys, documents):
     fig.show()
 
 
-# Run the app
-if __name__ == '__main__':
+def example():
     # Your dictionary
     data = {
         "Key1": "Value1",
@@ -53,3 +52,7 @@ if __name__ == '__main__':
         # ... add as many keys and values as you like
     }
     show_document_with_key_gui(list(data.keys()), list(data.values()))
+
+
+if __name__ == '__main__':
+    example()

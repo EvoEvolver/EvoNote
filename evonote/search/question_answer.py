@@ -1,16 +1,3 @@
-"""
-# Question Answering
-## First round similarity search
-- Keyword Extraction & Amplification
-- Imagine the answer
-- Get the top k similar notes
-## Analyze the results
-- Initialize a new notebook
-Put the results in a stack. Whenever the stack is non-empty, do the following:
-- Judge whether they are useful. If so, add them to the new notebook
-- Judge whether their children, siblings, parents are useful. If so, try to add them to the stack
-"""
-import json
 from typing import List
 
 from evonote.model.chat import Chat
@@ -28,8 +15,9 @@ class Plan:
 
 
 """
-# Main function for the QA agent
+## Main function for the QA agent
 """
+
 
 @multi_attempts
 def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
@@ -78,7 +66,7 @@ def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
 
 
 """
-# Analyze and planning
+## Analyze and planning
 """
 
 system_prompt_json = "You are world-class analyzer for planning a question answering problem. You must output in JSON format."
@@ -87,7 +75,7 @@ system_prompt_json = "You are world-class analyzer for planning a question answe
 def analyze_question(question_prompt: str, question_context: str):
     chat = Chat(system_message=system_prompt_json)
 
-    chat.add_user_message(question_prompt+"\n"+question_context)
+    chat.add_user_message(question_prompt + "\n" + question_context)
 
     prompt_analysis = f"""
 You should consider the memory listed above and analyze how the question can be simplified by the memory.
@@ -104,9 +92,9 @@ Start your analysis with `Analysis:`.
 
     return analysis
 
+
 @multi_attempts
 def give_steps(question_prompt: str, analysis: str):
-
     chat = Chat(system_message=system_prompt_json)
 
     question_prompt += f"\n\nAnalysis:\n{analysis}"
@@ -127,7 +115,7 @@ def give_steps(question_prompt: str, analysis: str):
 
 
 """
-# Search
+## Search
 """
 
 
@@ -154,6 +142,7 @@ def search(query: str, notebook: Notebook):
     sub_notebook = filter_notebook_in_group(sub_notebook,
                                             "The note answers the search query:" + query)
     return sub_notebook
+
 
 @multi_attempts
 def answer(question: str, notebook: Notebook):
