@@ -4,7 +4,11 @@ import copy
 
 from evonote.file_helper.logger import Logger
 from evonote.gui.dictionary_viewer import show_document_with_key_gui
-from evonote.model.openai import complete_chat, complete_chat_expensive
+from evonote.model.openai import (complete_chat as openai_complete_chat,
+                                  complete_chat_expensive as openai_complete_chat_expensive,
+                                  model_list as openai_model_list)
+from evonote.model.openllm import (complete_chat as openllm_complete_chat,
+                                   complete_chat_expensive as openllm_complete_chat_expensive)
 
 
 class ChatLogger(Logger):
@@ -64,9 +68,12 @@ class Chat:
             })
         return res
 
-
     def complete_chat(self, options=None):
-        res = complete_chat(self, options=options)
+        options = options or {}
+        if use_openai_model(options):
+            res = openai_complete_chat(self, options=options)
+        else:
+            res = openllm_complete_chat(self, options=options)
         self.add_assistant_message(res)
         if len(ChatLogger.active_loggers) > 0:
             for chat_logger in ChatLogger.active_loggers:
@@ -74,7 +81,11 @@ class Chat:
         return res
 
     def complete_chat_expensive(self, options=None):
-        res = complete_chat_expensive(self, options=options)
+        options = options or {}
+        if use_openai_model(options):
+            res = openai_complete_chat_expensive(self, options=options)
+        else:
+            res = openllm_complete_chat_expensive(self, options=options)
         self.add_assistant_message(res)
         if len(ChatLogger.active_loggers) > 0:
             for chat_logger in ChatLogger.active_loggers:
@@ -87,3 +98,7 @@ class Chat:
         for entry in log_list:
             res.append(f"------{entry['role']}------\n {entry['content']}")
         return "\n".join(res)
+
+
+def use_openai_model(options) -> bool:
+    return options.get("model", "gpt-3.5-turbo") in openai_model_list

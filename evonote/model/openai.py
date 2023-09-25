@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import concurrent.futures
 from typing import List, TYPE_CHECKING
 
 import openai
@@ -14,39 +13,25 @@ if TYPE_CHECKING:
 ## Chat completion
 """
 
-default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
+normal_model = "gpt-3.5-turbo"
+expensive_model = "gpt-4"
+model_list = [normal_model, expensive_model]
 
 
 def complete_chat(chat: Chat, options=None):
-    _options = {**default_kwargs_chat_openai}
-    if options is not None:
-        _options.update(options)
+    options = options or {}
+    _options = {**options, "model": normal_model}
     return openai.ChatCompletion.create(
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
 
 
 def complete_chat_expensive(chat: Chat, options=None):
-    _options = {**default_kwargs_chat_openai}
-    _options["model"] = "gpt-4"
-    if options is not None:
-        _options.update(options)
+    options = options or {}
+    _options = {**options, "model": expensive_model}
     return openai.ChatCompletion.create(
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
-
-
-def complete_chat_parallel(chats: List[Chat], options=None):
-    def complete_chat_wrapped(chat):
-        return complete_chat(chat, options)
-
-    results = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(complete_chat_wrapped, chat) for chat in chats]
-        for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            results.append(result)
-    return results
 
 
 """
