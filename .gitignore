@@ -5,3 +5,4 @@ temp
 */embedding_cache.npy
 *.egg-info
 setup.py
+.run
