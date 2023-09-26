@@ -5,9 +5,8 @@ import inspect
 import json
 import os
 import pkgutil
-from typing import Dict, List
+from typing import List
 
-from evonote.indexing.code_indexer import underscore_to_space
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import make_notebook_root
 from evonote.transform.module_to_notebook import module_struct, ModuleTreeNode
@@ -218,25 +217,7 @@ def build_notebook_for_struct(leaf: ModuleTreeNode, root_note: Note,
     for name, child in leaf["children"].items():
         match child["type"]:
             case "function":
-                doc_raw = inspect.getdoc(child["obj"])
-                if doc_raw is None:
-                    general, parameters, return_value = ("", {}, "")
-                else:
-                    general, parameters, return_value = docs_parser(doc_raw)
-                function_note = curr_note.s("function: " + name)
-                function_note.be(general)
-                function_note.resource.add_function(child["obj"], "function")
-                # Check if the function is callable
-                if callable(child["obj"]):
-                    parameters = {**get_empty_param_dict(child["obj"]), **parameters}
-                else:
-                    parameters = {**get_empty_param_dict(child["obj"].__func__), **parameters}
-                if "self" in parameters:
-                    del parameters["self"]
-                if len(parameters) > 0:
-                    function_note.s("parameters").be(json.dumps(parameters))
-                if len(return_value) > 0:
-                    function_note.s("return value").be(return_value)
+                process_function_leaf(child, curr_note, docs_parser)
             case "module":
                 build_notebook_for_struct(child, curr_note, docs_parser)
             case "class":
@@ -245,6 +226,37 @@ def build_notebook_for_struct(leaf: ModuleTreeNode, root_note: Note,
                 curr_note.be(curr_note.content + "\n" + child["obj"])
             case "section":
                 build_notebook_for_struct(child, curr_note, docs_parser)
+
+
+def process_function_leaf(function_leaf, parent_node, docs_parser):
+    doc_raw = inspect.getdoc(function_leaf["obj"])
+    if doc_raw is None:
+        general, parameters, return_value = ("", {}, "")
+    else:
+        general, parameters, return_value = docs_parser(doc_raw)
+    # Check if the function is callable
+    if callable(function_leaf["obj"]):
+        parameters = {**get_empty_param_dict(function_leaf["obj"]), **parameters}
+    else:
+        parameters = {**get_empty_param_dict(function_leaf["obj"].__func__), **parameters}
+    if "self" in parameters:
+        del parameters["self"]
+    function_name = function_leaf["name"]
+    if not function_name.startswith("__example"):
+        function_note = parent_node.s("function: " + function_name)
+        function_note.be(general)
+        function_note.resource.add_function(function_leaf["obj"], "function")
+        if len(parameters) > 0:
+            function_note.s("parameters").be(json.dumps(parameters))
+        if len(return_value) > 0:
+            function_note.s("return value").be(return_value)
+    # this is a function demonstrate the usage the module
+    else:
+        function_note = parent_node.s("example: " + function_name)
+        function_code = inspect.getsource(function_leaf["obj"])
+        # replace first __example with example
+        function_code = function_code.replace("__example", "example", 1)
+        function_note.be(f"{function_code}")
 
 def get_empty_param_dict(func):
     param_dict = {}

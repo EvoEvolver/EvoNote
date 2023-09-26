@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Tuple, TypedDict
 
 # module_struct = [struct_type, obj, (start_pos, end_pos)]
@@ -8,4 +9,4 @@ class ModuleTreeNode(TypedDict):
     type: str
     obj: any
     name: str
-    children: dict
+    children: dict[str, ModuleTreeNode]

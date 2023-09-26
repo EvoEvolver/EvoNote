@@ -90,6 +90,11 @@ def mix_cmt_cls_func_structs(cmt_structs, cls_func_structs) -> List[module_struc
 
     if cls_func_index < len(cls_func_structs):
         structs.extend(cls_func_structs[cls_func_index:])
+
+
+    if len(cls_func_structs) == 0:
+        structs.extend(cmt_structs[cmt_index:])
+
     return structs
 
 
