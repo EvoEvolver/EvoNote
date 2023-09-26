@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evonote.transform.module_to_notebook.docs_parser import FunctionDocs
     from evonote.notebook.notebook import Notebook
 
 
@@ -18,64 +17,64 @@ class Note:
     Notice that Note object can be indexed by embedding vectors because its
     """
 
-    def __init__(self, default_notebook: Notebook):
+    def __init__(self, notebook: Notebook):
         super().__init__()
 
         # content is string no matter what _content_type is
         self.content: str = ""
         # The root note helps merge two notebook bases
-        self.default_notebook: Notebook = default_notebook
+        self.notebook: Notebook = notebook
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
+
+    def copy_to(self, notebook: Notebook):
+        new_note = Note(notebook)
+        new_note.content = self.content
+        new_note.resource = self.resource
+        return new_note
 
     """
     ## Functions for getting the relation of notes
     """
 
-    def get_note_path(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_note_path(self)
+    def get_note_path(self):
+        return self.notebook.get_note_path(self)
 
-    def get_parents(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_parents(self)
+    def get_parents(self):
+        return self.notebook.get_parents(self)
 
-    def get_children(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_children_dict(self)
+    def get_children(self):
+        return self.notebook.get_children_dict(self)
 
-    def has_child(self, key: str, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.has_child(self, key)
+    def has_child(self, key: str):
+        return self.notebook.has_child(self, key)
 
     """
     ## Functions for adding children of note
     """
 
-    def add_child(self, key: str, note: Note, notebook: Notebook | None = None) -> Note:
-        notebook = notebook if notebook is not None else self.default_notebook
-        notebook.add_child(key, self, note)
+    def add_child(self, key: str, note) -> Note:
+        self.notebook.add_child(key, self, note)
         return note
 
-    def new_child(self, key: str, notebook: Notebook | None = None) -> Note:
-        notebook = notebook if notebook is not None else self.default_notebook
-        note = Note(notebook)
-        notebook.add_child(key, self, note)
+    def new_child(self, key: str) -> Note:
+        note = Note(self.notebook)
+        self.notebook.add_child(key, self, note)
         return note
 
     """
     ## Functions for setting content of note
     """
 
-    def s(self, key, notebook: Notebook | None = None) -> Note:
+    def s(self, key) -> Note:
         """
         Creating a new child note or addressing an existing child note
         :param key: the key of the child note
         :return:
         """
-        notebook = notebook if notebook is not None else self.default_notebook
+        notebook = self.notebook
         if isinstance(key, int) or isinstance(key, str):
-            children = self.get_children(notebook)
+            children = notebook.get_children_dict(self)
             if key not in children:
                 note = Note(notebook)
                 notebook.add_child(key, self, note)

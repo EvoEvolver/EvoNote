@@ -206,7 +206,7 @@ def get_class_member_functions(cls):
 
 def build_notebook_for_struct(leaf: ModuleTreeNode, root_note: Note,
                               docs_parser: Doc_parser):
-    curr_note = Note(root_note.default_notebook)
+    curr_note = Note(root_note.notebook)
     curr_key = leaf["type"] + ": " + leaf["name"]
     root_note.add_child(curr_key, curr_note)
     curr_type = "code:" + leaf["type"]

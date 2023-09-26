@@ -233,9 +233,9 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
                                    executor.map(process_sent_into_frags, notes_content)):
                 new_src = []
                 new_src.extend(frags)
-                note_path = note.get_note_path(notebook)
+                note_path = notebook.get_note_path(note)
                 if len(note_path) > 0:
-                    new_src.append(note.get_note_path(notebook)[-1])
+                    new_src.append(notebook.get_note_path(note)[-1])
                 new_src.append(note.content)
 
                 new_src_list.append(new_src)
@@ -258,7 +258,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
         new_weights = []
 
         for note in notes:
-            keywords_on_path = note.get_note_path(indexing.notebook)
+            keywords_on_path = note.get_note_path()
             # keep last 1/3 of the keywords
             n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3),
                              len(keywords_on_path))
@@ -280,7 +280,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
         notes_without_content = []
         for note in new_notes:
             if len(note.content) == 0:
-                keywords_on_path = note.get_note_path(notebook)
+                keywords_on_path = notebook.get_note_path(note)
                 if len(keywords_on_path) != 0:
                     notes_without_content.append(note)
                 continue

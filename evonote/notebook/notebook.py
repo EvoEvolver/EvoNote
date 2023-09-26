@@ -125,6 +125,8 @@ class Notebook:
         return list(self.children.keys())
 
     def add_child(self, key: str, parent: Note, child: Note):
+        if child.notebook is not self:
+            child = child.copy_to(self)
         if child not in self.children:
             self.children[child] = {}
         # ensure the parent is in the tree
@@ -314,13 +316,13 @@ def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Note
         if note is root:
             continue
         leaf = root
-        note_path = note.get_note_path(notebook)
+        note_path = notebook.get_note_path(note)
         for key in note_path[:-1]:
-            children = leaf.get_children(notebook=new_notebook)
-            if key not in children:
-                leaf.add_child(key, notebook.get_children_dict(leaf)[key], new_notebook)
-            leaf = children[key]
-        leaf.add_child(note_path[-1], note, new_notebook)
+            children_dict = new_notebook.get_children_dict(leaf)
+            if key not in children_dict:
+                new_notebook.add_child(key, leaf, notebook.get_children_dict(leaf)[key])
+            leaf = children_dict[key]
+        new_notebook.add_child(note_path[-1], leaf, note)
     return new_notebook
 
 
