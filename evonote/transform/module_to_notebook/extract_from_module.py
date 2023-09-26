@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import json
 import os
 import pkgutil
 from typing import Dict, List
 
+from evonote.indexing.code_indexer import underscore_to_space
 from evonote.notebook.note import Note
 from evonote.notebook.notebook import make_notebook_root
-from evonote.transform.module_to_notebook import module_struct
-from evonote.transform.module_to_notebook.docs_parser import parse_reStructuredText_docs, \
-    parse_google_docs, FunctionDocs, Doc_parser, get_in_module_structs
+from evonote.transform.module_to_notebook import module_struct, ModuleTreeNode
+from evonote.transform.module_to_notebook.docs_parser import \
+    parse_reStructuredText_docstring, \
+    parse_google_docstring, FunctionDocs, Doc_parser, get_in_module_structs
 
 """
 This modules is for extract the information from python modules and build a notebook for it.
@@ -23,9 +26,9 @@ This modules is for extract the information from python modules and build a note
 
 def get_notebook_for_module(module, docs_parser_type="reStruct"):
     if docs_parser_type == "reStruct":
-        docs_parser = parse_reStructuredText_docs
+        docs_parser = parse_reStructuredText_docstring
     elif docs_parser_type == "google":
-        docs_parser = parse_google_docs
+        docs_parser = parse_google_docstring
     else:
         raise ValueError("docs_parser_type should be pycharm or vscode")
     root_module = module
@@ -33,25 +36,24 @@ def get_notebook_for_module(module, docs_parser_type="reStruct"):
     root_module_name = module.__name__
     note_root, notebook = make_notebook_root(
         "Notebook of module: " + root_module_name)
-    tree = {"type": "module", "obj": root_module, "children": {},
-            "name": root_module_name}
+    tree: ModuleTreeNode = {"type": "module", "obj": root_module, "children": {},
+                            "name": root_module_name}
     get_module_members(root_module, tree, root_path)
     build_notebook_for_struct(tree, note_root, docs_parser)
     return notebook
 
 
-"""
-## Put module members into tree
-"""
-
-
 def get_module_members(module, tree_root_node, root_path: str):
-
     classes, functions, sub_modules = find_sub_module_func_cls(module, root_path)
 
     add_structs_to_tree(classes, functions, module, tree_root_node)
 
     process_sub_modules(sub_modules, tree_root_node)
+
+
+"""
+## Find submodules, functions and classes in the module
+"""
 
 
 def find_sub_module_func_cls(module, root_path):
@@ -86,12 +88,17 @@ def find_sub_module_func_cls(module, root_path):
     return classes, functions, sub_modules
 
 
+"""
+## Add submodules, functions and classes to the a tree
+"""
+
+
 def add_structs_to_tree(classes, functions, module, tree_root_node):
     structs = get_in_module_structs(module, functions, classes)
     process_structs_to_tree(structs, tree_root_node)
 
 
-def process_structs_to_tree(structs: List[module_struct], root_node):
+def process_structs_to_tree(structs: List[module_struct], root_node: ModuleTreeNode):
     section_level_stack = [-1]
     parent_list = [root_node]
     section_nodes = []
@@ -102,8 +109,9 @@ def process_structs_to_tree(structs: List[module_struct], root_node):
                                        section_nodes, struct_obj)
         elif struct_type == "function":
             func_name = struct_obj.__name__
-            func_node = {"type": "function", "obj": struct_obj, "name": func_name,
-                         "children": {}}
+            func_node: ModuleTreeNode = {"type": "function", "obj": struct_obj,
+                                         "name": func_name,
+                                         "children": {}}
             curr_parent["children"][func_name] = func_node
         elif struct_type == "class":
             process_class_struct(curr_parent, struct_obj)
@@ -114,22 +122,23 @@ def process_structs_to_tree(structs: List[module_struct], root_node):
     return root_node
 
 
-def process_class_struct(curr_parent, struct_obj):
+def process_class_struct(curr_parent: ModuleTreeNode, struct_obj):
     class_name = struct_obj.__name__
     class_children = {}
-    class_node = {"type": "class", "obj": struct_obj, "name": class_name,
-                  "children": class_children}
+    class_node: ModuleTreeNode = {"type": "class", "obj": struct_obj, "name": class_name,
+                                  "children": class_children}
     curr_parent["children"][class_name] = class_node
     member_functions = get_class_member_functions(struct_obj)
     for name, child in class_children.items():
         if child["type"] == "function":
             member_functions.append(child["obj"])
     class_start_line = inspect.getsourcelines(struct_obj)[1] - 1
-    structs = get_in_module_structs(struct_obj, member_functions, [], line_offset=class_start_line)
+    structs = get_in_module_structs(struct_obj, member_functions, [],
+                                    line_offset=class_start_line)
     process_structs_to_tree(structs, class_node)
 
 
-def process_sub_modules(sub_modules, tree_root_node):
+def process_sub_modules(sub_modules, tree_root_node: ModuleTreeNode):
     for i, sub_module in enumerate(sub_modules):
         name = sub_module.__name__.split(".")[-1]
         member = sub_module
@@ -166,10 +175,9 @@ def add_comment_struct_to_tree(curr_parent, parent_list, section_level_stack,
             curr_parent = section_node
         elif token_type == "text":
             curr_parent["children"][f"comment {n_comment}"] = {"type": "comment",
-                                                      "obj": token_content,
-                                                      "name": ""}
+                                                               "obj": token_content,
+                                                               "name": ""}
             n_comment += 1
-
 
 
 def get_class_member_functions(cls):
@@ -191,12 +199,14 @@ def get_class_member_functions(cls):
                     member_functions.append(sub_member)
     return member_functions
 
+
 """
 ## Build notebook for module from the tree
 """
 
 
-def build_notebook_for_struct(leaf, root_note: Note, docs_parser: Doc_parser):
+def build_notebook_for_struct(leaf: ModuleTreeNode, root_note: Note,
+                              docs_parser: Doc_parser):
     curr_note = Note(root_note.default_notebook)
     curr_key = leaf["type"] + ": " + leaf["name"]
     root_note.add_child(curr_key, curr_note)
@@ -210,14 +220,23 @@ def build_notebook_for_struct(leaf, root_note: Note, docs_parser: Doc_parser):
             case "function":
                 doc_raw = inspect.getdoc(child["obj"])
                 if doc_raw is None:
-                    docs = " ".join(name.split("_"))
-                    general, parameter, return_value, keywords = ("", {}, "", [])
+                    general, parameters, return_value = ("", {}, "")
                 else:
-                    general, parameter, return_value, keywords = docs_parser(doc_raw)
+                    general, parameters, return_value = docs_parser(doc_raw)
                 function_note = curr_note.s("function: " + name)
-                function_note.be(name)
-                function_docs = FunctionDocs(general, parameter, return_value, keywords)
-                function_note.resource.add_function(child["obj"], function_docs)
+                function_note.be(general)
+                function_note.resource.add_function(child["obj"], "function")
+                # Check if the function is callable
+                if callable(child["obj"]):
+                    parameters = {**get_empty_param_dict(child["obj"]), **parameters}
+                else:
+                    parameters = {**get_empty_param_dict(child["obj"].__func__), **parameters}
+                if "self" in parameters:
+                    del parameters["self"]
+                if len(parameters) > 0:
+                    function_note.s("parameters").be(json.dumps(parameters))
+                if len(return_value) > 0:
+                    function_note.s("return value").be(return_value)
             case "module":
                 build_notebook_for_struct(child, curr_note, docs_parser)
             case "class":
@@ -226,6 +245,12 @@ def build_notebook_for_struct(leaf, root_note: Note, docs_parser: Doc_parser):
                 curr_note.be(curr_note.content + "\n" + child["obj"])
             case "section":
                 build_notebook_for_struct(child, curr_note, docs_parser)
+
+def get_empty_param_dict(func):
+    param_dict = {}
+    for param_name in inspect.signature(func).parameters.keys():
+        param_dict[param_name] = ""
+    return param_dict
 
 
 if __name__ == "__main__":

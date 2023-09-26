@@ -82,6 +82,9 @@ class Notebook:
         else:
             raise Exception("No parent found")
 
+    def has_child(self, note: Note, key: str):
+        return key in self.get_children_dict(note)
+
     """
     ## Note operations
     """

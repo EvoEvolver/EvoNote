@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from evonote.transform.module_to_notebook.docs_parser import FunctionDocs
@@ -43,6 +43,10 @@ class Note:
     def get_children(self, notebook: Notebook | None = None):
         notebook = notebook if notebook is not None else self.default_notebook
         return notebook.get_children_dict(self)
+
+    def has_child(self, key: str, notebook: Notebook | None = None):
+        notebook = notebook if notebook is not None else self.default_notebook
+        return notebook.has_child(self, key)
 
     """
     ## Functions for adding children of note
@@ -94,10 +98,6 @@ class Note:
         self.content = content
         return self
 
-
-
-
-
     def __str__(self):
         if len(self.content) == 0:
             return "Path" + str(self.get_note_path())
@@ -106,13 +106,12 @@ class Note:
 
 class NoteResource:
     def __init__(self):
-        self.resource = []
+        self.resource = {}
         # Possible types: Notebook, Note, Function, Class, Module
-        self.resource_type: List[str] = []
-        self.resource_docs: List[any] = []
+        self.resource_type = {}
 
     def has_type(self, resource_type):
-        return resource_type in self.resource_type
+        return resource_type in self.resource_type.values()
 
     """
     ## Functions for getting resources
@@ -122,9 +121,9 @@ class NoteResource:
         """
         Return the first resource of the given type
         """
-        for i in range(len(self.resource_type)):
-            if self.resource_type[i] == resource_type:
-                return self.resource[i]
+        for key, value in self.resource_type.items():
+            if value == resource_type:
+                return self.resource[key]
         return None
 
     def get_resource_and_docs_by_type(self, resource_type):
@@ -133,35 +132,34 @@ class NoteResource:
         """
         for i in range(len(self.resource_type)):
             if self.resource_type[i] == resource_type:
-                return self.resource[i], self.resource_docs[i]
-        return None, None
+                return self.resource[i]
+        return None
 
     def get_resource_types(self):
-        return self.resource_type
+        return set(self.resource_type.values())
 
     """
     ## Functions for adding resources
     """
 
-    def add_resource(self, resource, resource_type: str, resource_docs: any):
-        self.resource.append(resource)
-        self.resource_type.append(resource_type)
-        self.resource_docs.append(resource_docs)
+    def add_resource(self, resource, resource_type: str, key: str):
+        self.resource[key] = resource
+        self.resource_type[key] = resource_type
 
-    def add_text(self, text, text_docs):
-        self.add_resource(text, "text", text_docs)
+    def add_text(self, text, key: str):
+        self.add_resource(text, "text", key)
 
-    def add_notebook(self, notebook, notebook_docs):
-        self.add_resource(notebook, "notebook", notebook_docs)
+    def add_notebook(self, notebook, key: str):
+        self.add_resource(notebook, "notebook", key)
 
-    def add_function(self, function, function_docs: FunctionDocs):
-        self.add_resource(function, "function", function_docs)
+    def add_function(self, function, key: str):
+        self.add_resource(function, "function", key)
 
-    def add_module(self, module, module_docs):
-        self.add_resource(module, "module", module_docs)
+    def add_module(self, module, key: str):
+        self.add_resource(module, "module", key)
 
-    def add_class(self, class_, class_docs):
-        self.add_resource(class_, "class", class_docs)
+    def add_class(self, class_, key: str):
+        self.add_resource(class_, "class", key)
 
-    def add_note(self, note, note_docs):
-        self.add_resource(note, "note", note_docs)
+    def add_note(self, note, key: str):
+        self.add_resource(note, "note", key)

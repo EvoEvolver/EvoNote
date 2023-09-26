@@ -18,7 +18,6 @@ class Beaker:
 
     def add_liquid(self, liquid_type: str, volume: float) -> bool:
         """
-        :keyword: liquid operation
         :param liquid_type: The type of liquid, e.g. water, ethanol, etc.
         :param volume: The volume of the liquid added.
         :return: whether the liquid was successfully added.
@@ -30,7 +29,6 @@ class Beaker:
 
     def add_solid(self, solid_type: str, weight: float) -> None:
         """
-        :keyword: solid operation
         :param solid_type: The type of solid, e.g. salt, sugar, etc.
         :param weight: The weight of the solid added.
         :return: whether the solid was successfully added.
@@ -47,3 +45,20 @@ class Beaker:
         :return: The current volume of the beaker.
         """
         return sum([c[1] for c in self.contents])
+
+class Desk:
+    """
+    A desk is for holding beakers. It can hold multiple beakers.
+    """
+    def __init__(self):
+        self.beakers = []
+
+
+def __example_beaker_on_desk():
+    """
+    Here is an example of putting a beaker on a desk.
+    """
+    desk = Desk()
+    beaker = Beaker(100)
+    desk.beakers.append(beaker)
+    return desk
