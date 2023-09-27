@@ -1,0 +1,21 @@
+from doc_in_py.core import get_module_members
+from utils import to_dict
+
+
+def test_1():
+    import testing_module_1
+    struct = get_module_members(testing_module_1)
+    actual = to_dict(struct)
+    expected = {'struct_type': 'module', 'name': 'testing_module_1', 'children': [
+        {'struct_type': 'section', 'name': 'Section 1',
+         'children': [{'struct_type': 'comment', 'obj': 'Some content xyz'},
+                      {'struct_type': 'section', 'name': 'Section 2',
+                       'children': [{'struct_type': 'comment', 'obj': 'Some content abc'},
+                                    {'struct_type': 'function', 'name': 'foo'}]},
+                      {'struct_type': 'section', 'name': 'Section 3', 'children': [
+                          {'struct_type': 'comment', 'obj': 'Some content in section 3'},
+                          {'struct_type': 'function', 'name': 'bar'},
+                          {'struct_type': 'class', 'name': 'baz', 'children': [
+                              {'struct_type': 'function', 'name': '__init__'}]}]}]}]}
+
+    assert actual == expected
