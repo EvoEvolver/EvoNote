@@ -226,7 +226,7 @@ class Notebook:
         Show the notebook in a webpage
         """
         assert self.root is not None
-        draw_treemap(self.root, self)
+        draw_treemap(self.root)
 
     """
     ## Sub-notebook extraction

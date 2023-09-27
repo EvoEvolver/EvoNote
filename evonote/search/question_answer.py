@@ -23,7 +23,7 @@ class Plan:
 def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
     """
     :param question: The question
-    :param notebook: The notebook to search
+    :param knowledge_base: The notebook to search
     :return: The answer
     """
     working_memory = Notebook("Working Notebook")
@@ -163,7 +163,7 @@ If the items is irrelevant to the question, give a JSON string with the a single
 
 if __name__ == "__main__":
     import evonote.debug as debug
-    from evonote.testing.sample_notebook.loader import load_sample_notebook
+    from evonote.testing.testing_notebooks.loader import load_sample_notebook
 
     dingzhen_world = load_sample_notebook("dingzhen_world")
     # question = "Who is the pet of the president of the republic of Ganzi?"

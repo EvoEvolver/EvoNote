@@ -12,7 +12,7 @@ from evonote.notebook.notebook import make_notebook_root
 from evonote.transform.module_to_notebook import module_struct, ModuleTreeNode
 from evonote.transform.module_to_notebook.docs_parser import \
     parse_reStructuredText_docstring, \
-    parse_google_docstring, FunctionDocs, Doc_parser, get_in_module_structs
+    parse_google_docstring, Doc_parser, get_in_module_structs
 
 """
 This modules is for extract the information from python modules and build a notebook for it.
@@ -266,7 +266,7 @@ def get_empty_param_dict(func):
 
 
 if __name__ == "__main__":
-    from evonote.testing import v_lab
+    from evonote.testing.testing_modules import v_lab
 
     notebook = get_notebook_for_module(v_lab)
     notebook.show_notebook_gui()

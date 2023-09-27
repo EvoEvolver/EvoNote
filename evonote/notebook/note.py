@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,8 +30,8 @@ class Note:
 
     def copy_to(self, notebook: Notebook):
         new_note = Note(notebook)
-        new_note.content = self.content
-        new_note.resource = self.resource
+        new_note.content = copy(self.content)
+        new_note.resource = copy(self.resource)
         return new_note
 
     """

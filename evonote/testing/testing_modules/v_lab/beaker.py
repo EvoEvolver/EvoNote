@@ -27,7 +27,7 @@ class Beaker:
         self.contents.append((liquid_type, volume))
         return True
 
-    def add_solid(self, solid_type: str, weight: float) -> None:
+    def add_solid(self, solid_type: str, weight: float) -> bool:
         """
         :param solid_type: The type of solid, e.g. salt, sugar, etc.
         :param weight: The weight of the solid added.

@@ -1,5 +1,5 @@
-import evonote.testing.v_lab.beaker
-import evonote.testing.v_lab.operation
+import evonote.testing.testing_modules.v_lab.beaker
+import evonote.testing.testing_modules.v_lab.operation
 
 """
 This module is for operating self-driven lab

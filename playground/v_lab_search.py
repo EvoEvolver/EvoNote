@@ -1,7 +1,7 @@
 from evonote.transform.module_to_notebook.extract_from_module import get_notebook_for_module
 from evonote.debug import display_chats, display_embedding_search
 from evonote.search.code_searcher import search_function
-from evonote.testing import v_lab
+from evonote.testing.testing_modules import v_lab
 
 notebook = get_notebook_for_module(v_lab)
 

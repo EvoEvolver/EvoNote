@@ -1,4 +1,4 @@
-from evonote.testing.v_lab.beaker import Beaker
+from evonote.testing.testing_modules.v_lab.beaker import Beaker
 
 """
 # Operations
