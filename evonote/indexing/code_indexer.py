@@ -1,7 +1,6 @@
 import json
 from typing import List
 
-from evonote.transform.module_to_notebook.docs_parser import FunctionDocs
 from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
 from evonote.notebook.note import Note
 
@@ -15,7 +14,6 @@ class CodeParameterIndexer(AbsEmbeddingIndexer):
         contents = []
         weight_list = []
         for note in new_notes:
-            docs: FunctionDocs
             function = note.resource.get_resource_by_type("function")
             if function is not None and note.has_child("parameters") > 0:
                 function_name = underscore_to_space(function.__name__)
