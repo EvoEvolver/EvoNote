@@ -15,7 +15,12 @@ def test_1():
                       {'struct_type': 'section', 'name': 'Section 3', 'children': [
                           {'struct_type': 'comment', 'obj': 'Some content in section 3'},
                           {'struct_type': 'function', 'name': 'bar'},
-                          {'struct_type': 'class', 'name': 'baz', 'children': [
-                              {'struct_type': 'function', 'name': '__init__'}]}]}]}]}
+                          {'struct_type': 'class', 'name': 'baz',
+                           'children': [{'struct_type': 'function', 'name': '__init__'},
+                                        {'struct_type': 'section', 'name': 'Section 4',
+                                         'children': [{'struct_type': 'comment',
+                                                       'obj': 'A little bit content'}]}]}]},
+                      {'struct_type': 'section', 'name': 'Section 5',
+                       'children': [{'struct_type': 'comment', 'obj': 'Good bye'}]}]}]}
 
     assert actual == expected

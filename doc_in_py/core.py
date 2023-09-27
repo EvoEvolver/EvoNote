@@ -25,7 +25,6 @@ def get_module_members(module) -> Struct:
     raw_comment_struct_list = prepare_raw_comment_struct(module_src)
 
     # Mix the comments and functions and classes into a list of Struct sorted by the start line.
-    # This will Discard the comments inside functions and classes
     add_raw_comments_to_struct(raw_comment_struct_list, module_struct)
 
     # Parse the raw comments into Structs
@@ -202,7 +201,7 @@ def add_raw_comments_to_struct(cmt_structs: List[Struct], root_struct: Struct):
 
     # append the remaining comment_structs
     if (len(structs) > 0 and cmt_index < len(cmt_structs)
-            and cmt_structs[-1].pos[0] > cls_func_structs[-1].pos[1]):
+            and cmt_structs[cmt_index].pos[0] >= cls_func_structs[-1].pos[1]):
         structs.extend(cmt_structs[cmt_index:])
     # append the remaining cls_func_structs
     if cls_func_index < len(cls_func_structs):
