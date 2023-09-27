@@ -10,7 +10,8 @@ from doc_in_py import Struct
 from doc_in_py.comment_parser import prepare_raw_comment_struct, parse_raw_comments
 
 
-def get_module_members(module, root_path: str) -> Struct:
+def get_module_members(module) -> Struct:
+    root_path = module.__file__.split("__init__.py")[0]
     module_struct, sub_modules = extract_module_tree_without_comment(module, root_path)
 
     # Check whether the module has no source code.
@@ -40,7 +41,7 @@ def get_module_members(module, root_path: str) -> Struct:
 def extract_module_tree_without_comment(module, root_path):
     module_struct: Struct = Struct("module", module, None, module.__name__)
 
-    # Get the sub-modules
+    # Get the submodules
     module_dir = os.path.dirname(inspect.getfile(module))
     sub_modules = []
     is_pkg = hasattr(module, "__path__")
@@ -123,7 +124,7 @@ def build_section_tree(root_struct: Struct):
         curr_parent = parent_list[-1]
         if struct_type == "comment":
             curr_parent.children.append(
-                Struct("comment", struct_obj, None, f"comment {n_comment}"))
+                Struct("comment", struct_obj, None, None))
         elif struct_type == "section":
             section_title, section_level = struct_obj
             struct.name = section_title
@@ -150,10 +151,8 @@ def build_section_tree(root_struct: Struct):
 
 def process_sub_modules(sub_modules, root_struct: Struct):
     for i, sub_module in enumerate(sub_modules):
-        name = sub_module.__name__.split(".")[-1]
         member = sub_module
-        member_path = inspect.getfile(member)
-        root_struct.children.append(get_module_members(member, member_path))
+        root_struct.children.append(get_module_members(member))
 
 
 

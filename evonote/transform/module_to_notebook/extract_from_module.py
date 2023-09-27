@@ -27,12 +27,10 @@ def get_notebook_for_module(module, docs_parser_type="rst"):
         docs_parser = parse_google_docstring
     else:
         raise ValueError("docs_parser_type should be pycharm or vscode")
-    root_module = module
-    root_path = module.__file__.split("__init__.py")[0]
-    root_module_name = module.__name__
+    module_name = module.__name__
     note_root, notebook = make_notebook_root(
-        "Notebook of module: " + root_module_name)
-    module_struct = get_module_members(root_module, root_path)
+        "Notebook of module: " + module_name)
+    module_struct = get_module_members(module)
     build_notebook_for_struct(module_struct, note_root, docs_parser)
     return notebook
 
