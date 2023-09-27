@@ -103,6 +103,9 @@ class Note:
             return "Path" + str(self.get_note_path())
         return self.content
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {str(self.get_note_path())}"
+    
 
 class NoteResource:
     def __init__(self):

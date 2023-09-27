@@ -25,3 +25,6 @@ class Document:
         with open(file_path, "r") as f:
             d = json.load(f)
         return cls.from_dict(d)
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.title!r}"

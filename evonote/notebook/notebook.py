@@ -301,6 +301,9 @@ class Notebook:
             notebook = dill.load(f)
         return notebook
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.root.content!r}"
+
 
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     if topic is None:

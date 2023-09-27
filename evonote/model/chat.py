@@ -99,6 +99,9 @@ class Chat:
             res.append(f"------{entry['role']}------\n {entry['content']}")
         return "\n".join(res)
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.system_message!r}"
+
 
 def use_openai_model(options) -> bool:
     return options.get("model", "gpt-3.5-turbo") in openai_model_list
