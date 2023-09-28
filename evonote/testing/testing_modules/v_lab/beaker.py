@@ -1,3 +1,6 @@
+from doc_in_py.decorator import example
+
+
 class Beaker:
     """
     A beaker is a container that can hold a certain volume of liquid.
@@ -53,8 +56,8 @@ class Desk:
     def __init__(self):
         self.beakers = []
 
-
-def __example_beaker_on_desk():
+@example
+def put_beaker_on_desk():
     """
     Here is an example of putting a beaker on a desk.
     """

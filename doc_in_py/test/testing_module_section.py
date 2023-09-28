@@ -5,22 +5,26 @@ Some content xyz
 Some content abc
 """
 
+
 def foo():
     """
     This is a function
     """
     pass
 
+
 """
 ## Section 3
 Some content in section 3
 """
+
 
 def bar():
     """
     This is another function
     """
     pass
+
 
 class baz:
     def __init__(self):
@@ -30,6 +34,7 @@ class baz:
     ### Section 4
     A little bit content
     """
+
 
 """
 # Section 5

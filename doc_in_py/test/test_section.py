@@ -2,11 +2,11 @@ from doc_in_py.core import get_module_members
 from utils import to_dict
 
 
-def test_1():
-    import testing_module_1
-    struct = get_module_members(testing_module_1)
+def test_section():
+    import testing_module_section
+    struct = get_module_members(testing_module_section)
     actual = to_dict(struct)
-    expected = {'struct_type': 'module', 'name': 'testing_module_1', 'children': [
+    expected = {'struct_type': 'module', 'name': 'testing_module_section', 'children': [
         {'struct_type': 'section', 'name': 'Section 1',
          'children': [{'struct_type': 'comment', 'obj': 'Some content xyz'},
                       {'struct_type': 'section', 'name': 'Section 2',

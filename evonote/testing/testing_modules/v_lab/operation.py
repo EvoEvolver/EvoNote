@@ -1,3 +1,4 @@
+from doc_in_py.decorator import example, todo
 from evonote.testing.testing_modules.v_lab.beaker import Beaker
 
 """
@@ -10,7 +11,7 @@ In this module, we implement functions that can be used to operate the virtual l
 Here is a function that can be used to get a beaker of salt water.
 """
 
-
+@example
 def get_a_beaker_of_salt_water(water_volume: float, salt_weight: float) -> Beaker:
     """
     Get a beaker of salt water.
@@ -29,7 +30,7 @@ def get_a_beaker_of_salt_water(water_volume: float, salt_weight: float) -> Beake
 Here is a function that can be used to get a beaker of sugar water.
 """
 
-
+@todo
 def get_a_beaker_of_sugar_water(water_volume: float, salt_weight: float) -> Beaker:
     """
     Get a beaker of sugar water.
@@ -37,10 +38,4 @@ def get_a_beaker_of_sugar_water(water_volume: float, salt_weight: float) -> Beak
     :param salt_weight: The weight of sugar in the beaker.
     :return: A beaker of salt water.
     """
-    beaker = Beaker(100)
-    beaker.add_liquid("water", water_volume)
-    beaker.add_solid("sugar", salt_weight)
-    """
-    This ends the function
-    """
-    return beaker
+    pass

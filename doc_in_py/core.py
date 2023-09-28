@@ -69,17 +69,36 @@ def extract_module_tree_without_comment(module, root_path):
         true_members.append(member)
         true_member_names.append(name)
 
+    n_todo = 1
+
     for i, member in enumerate(true_members):
         name = true_member_names[i]
         pos = get_member_pos(member)
-        if inspect.isclass(member):
-            class_struct = Struct("class", member, pos, name)
-            extract_class_struct_without_comment(class_struct, member)
-            module_struct.children.append(class_struct)
-        elif inspect.isfunction(member):
-            module_struct.children.append(Struct("function", member, pos, name))
+        parent_struct = module_struct
+        # check decorators
+        if hasattr(member, "__docinpy_todo"):
+            member_type = "function" if inspect.isfunction(member) else "class"
+            todo_struct = Struct("todo", member.__docinpy_todo, pos, f"{member_type}: {member.__name__}")
+            n_todo += 1
+            module_struct.children.append(todo_struct)
+            parent_struct = todo_struct
+        elif hasattr(member, "__docinpy_example") and member.__docinpy_example:
+            example_struct = Struct("example", None, pos, member.__name__)
+            module_struct.children.append(example_struct)
+            parent_struct = example_struct
+
+        add_function_class_to_struct(member, parent_struct, name, pos)
 
     return module_struct, sub_modules
+
+
+def add_function_class_to_struct(member, parent_struct, name, pos):
+    if inspect.isclass(member):
+        class_struct = Struct("class", member, pos, name)
+        extract_class_struct_without_comment(class_struct, member)
+        parent_struct.children.append(class_struct)
+    elif inspect.isfunction(member):
+        parent_struct.children.append(Struct("function", member, pos, name))
 
 
 def get_member_pos(member):
@@ -105,7 +124,7 @@ def extract_class_struct_without_comment(class_struct, class_):
         elif type_str == "<class 'mappingproxy'>":
             for sub_name, sub_member in member.items():
                 if isinstance(sub_member, classmethod):
-                    pos = get_member_pos(member)
+                    pos = get_member_pos(sub_member)
                     class_struct.children.append(
                         Struct("function", sub_member, pos, name))
 
@@ -154,7 +173,6 @@ def process_sub_modules(sub_modules, root_struct: Struct):
         root_struct.children.append(get_module_members(member))
 
 
-
 def add_raw_comments_to_struct(cmt_structs: List[Struct], root_struct: Struct):
     """
     Mix the comment_structs and cls_func_structs into a list of struct
@@ -197,7 +215,6 @@ def add_raw_comments_to_struct(cmt_structs: List[Struct], root_struct: Struct):
                     break
             if next_cls_func.struct_type == "class":
                 add_raw_comments_to_struct(covered_comments, next_cls_func)
-
 
     # append the remaining comment_structs
     if (len(structs) > 0 and cmt_index < len(cmt_structs)

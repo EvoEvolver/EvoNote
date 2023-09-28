@@ -30,12 +30,14 @@ def prepare_raw_comment_struct(parent_src: str) -> List[Struct]:
         comment_struct_list.append(Struct("raw_comment", comment_content, comment_pos))
     return comment_struct_list
 
+
 def get_min_pos_for_line(src: str) -> List[int]:
     src_lines = src.split("\n")
     min_pos_for_line = [0]
     for line in src_lines:
         min_pos_for_line.append(min_pos_for_line[-1] + len(line) + 1)
     return min_pos_for_line
+
 
 def find_line_no(pos: int, min_line_no, min_pos_for_line: List[int]) -> int:
     for i in range(min_line_no - 1, len(min_pos_for_line)):
@@ -64,7 +66,7 @@ def process_raw_comment_content(comment_content: str) -> List[Struct]:
     min_pos_for_line = get_min_pos_for_line(comment_content)
     min_line_no = 1
 
-    comment_tokens = []
+    structs_in_comment = []
     # Find all sections which should start with one or more # followed by a space
     section_matches = section_pattern.finditer(comment_content)
     last_section_end = 0
@@ -78,18 +80,18 @@ def process_raw_comment_content(comment_content: str) -> List[Struct]:
         start_line_no = find_line_no(section_start, min_line_no, min_pos_for_line)
         end_line_no = find_line_no(section_end, start_line_no, min_pos_for_line)
         min_line_no = end_line_no
-        comment_text_before_section = comment_content[last_section_end+1:section_start]
+        comment_text_before_section = comment_content[last_section_end + 1:section_start]
         last_section_end = section_end
         if len(comment_text_before_section) > 0:
-            comment_tokens.append(
+            structs_in_comment.append(
                 Struct("comment", comment_text_before_section, (0, start_line_no)))
-        comment_tokens.append(
+        structs_in_comment.append(
             Struct("section", (section_title, section_level),
                    (start_line_no, end_line_no)))
     if last_section_end < len(comment_content):
         remaining_text = comment_content[last_section_end:].strip()
         if len(remaining_text) > 0:
             last_section_end_line_no = find_line_no(last_section_end, min_line_no, min_pos_for_line)
-            comment_tokens.append(Struct("comment", remaining_text,
+            structs_in_comment.append(Struct("comment", remaining_text,
                                          (last_section_end_line_no, len(min_pos_for_line)-1)))
-    return comment_tokens
+    return structs_in_comment

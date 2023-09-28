@@ -62,6 +62,11 @@ def build_notebook_for_struct(curr_struct: Struct, root_note: Note,
                 curr_note.be(curr_note.content + "\n" + child_struct.obj)
             case "section":
                 build_notebook_for_struct(child_struct, curr_note, docs_parser)
+            case "todo":
+                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+            case "example":
+                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+
 
 
 def process_function_struct(function_struct: Struct, parent_node: Note, docs_parser):
