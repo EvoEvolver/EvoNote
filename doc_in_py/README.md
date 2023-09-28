@@ -69,3 +69,18 @@ def __example_usage_of_foo():
     """
     foo()
 ```
+
+## Project todos
+
+- Extract variables from module and classes
+- Extract comments for class variables (What should be the format of the comments?)
+- Process code of function and extract comments
+- TODO decorator for functions
+
+- Serialization from structs to Python code
+
+## Philosophy behind DocInPy
+
+All the programming languages encourage the programmers to put their code in the tree structure. For example, you can put your functions in difference classes, in different files and put the files in different folders. However, it is still very common to put a lot of functions in a single file, in which the codes are arranged in an almost flat structure.
+
+`DocInPy` helps this by adding a zero-cost way to add sections to your functions and classes. It makes another step towards a more tree-like structure of the codebase. We believe this will help the programmers to understand the codebase better. See [Method of Loci](docs/introduction/2.1 Method of Loci.md) for more details.
