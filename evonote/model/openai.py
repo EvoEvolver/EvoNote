@@ -9,52 +9,41 @@ verbose = 1
 if TYPE_CHECKING:
     from evonote.model.chat import Chat
 
-default_kwargs_chat_openai = {"model": "gpt-3.5-turbo"}
+"""
+## Chat completion
+"""
+
+normal_model = "gpt-3.5-turbo"
+expensive_model = "gpt-4"
+model_list = [normal_model, expensive_model]
 
 
 def complete_chat(chat: Chat, options=None):
-    _options = {**default_kwargs_chat_openai}
-    if options is not None:
-        _options.update(options)
+    options = options or {}
+    _options = {**options, "model": normal_model}
     return openai.ChatCompletion.create(
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
 
 
 def complete_chat_expensive(chat: Chat, options=None):
-    _options = {**default_kwargs_chat_openai}
-    _options["model"] = "gpt-4"
-    if options is not None:
-        _options.update(options)
+    options = options or {}
+    _options = {**options, "model": expensive_model}
     return openai.ChatCompletion.create(
         messages=chat.get_log_list(), **_options).choices[
         0].message.content
 
 
-import concurrent.futures
-
-
-def complete_chat_parallel(chats: List[Chat], options=None):
-    def complete_chat_wrapped(chat):
-        return complete_chat(chat, options)
-
-    results = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(complete_chat_wrapped, chat) for chat in chats]
-        for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            results.append(result)
-    return results
-
-
-# Embedding
+"""
+## Embedding
+"""
 
 import hashlib
 import os
 import numpy as np
 
 model_for_embedding = "text-embedding-ada-002"
-embedding_cache_path = os.getcwd() + "/embedding_cache.npy"
+embedding_cache_path = os.getcwd() + "/embedding.ec.npy"
 model_to_embedding_dim = {
     "text-embedding-ada-002": 1536
 }
@@ -77,7 +66,7 @@ def get_embeddings(texts: list[str], make_cache=True) -> list[list[float]]:
     global embedding_cache
     if embedding_cache is None:
         if os.path.exists(embedding_cache_path):
-            embedding_cache = np.load("embedding_cache.npy", allow_pickle=True).item()
+            embedding_cache = np.load("embedding.ec.npy", allow_pickle=True).item()
         else:
             embedding_cache = {}
 
@@ -110,18 +99,3 @@ def get_embeddings(texts: list[str], make_cache=True) -> list[list[float]]:
         np.save(embedding_cache_path, embedding_cache)
 
     return embeddings
-
-
-def cache_embeddings():
-    global embedding_cache
-    np.save(embedding_cache_path, embedding_cache)
-
-
-def scores_in_context_lines(embedding_to_search, embedding_for_context_lines,
-                            weighting=None):
-    n_lines = len(embedding_for_context_lines)
-    if weighting is None:
-        weighting = np.array([1.0 / (i + 1) for i in range(n_lines)])
-    content_embeddings = np.dot(weighting, embedding_for_context_lines)
-    scores = np.dot(content_embeddings, embedding_to_search.T) / n_lines
-    return scores

@@ -14,9 +14,8 @@ if TYPE_CHECKING:
 h_en = Hyphenator('en_US')
 
 
-def draw_treemap(root: Note, notebook: Notebook = None):
-    if notebook is None:
-        notebook = root.default_notebook
+def draw_treemap(root: Note):
+    notebook = root.notebook
     labels = []
     parents = []
     values = []
@@ -53,9 +52,9 @@ def draw_treemap(root: Note, notebook: Notebook = None):
 
 def add_note_to_list(labels, parents, values, names, note: Note, notebook: Notebook):
     i = 1
-    children = note.get_children(notebook=notebook)
+    children = notebook.get_children_dict(note)
     for key, child in children.items():
-        notepath = child.get_note_path(notebook=notebook)
+        notepath = notebook.get_note_path(child)
         label = str(i) + ". " + key if len(children) > 1 else key
         labels.append(label)
         parents.append("/".join(notepath[:-1]))

@@ -4,7 +4,11 @@ import copy
 
 from evonote.file_helper.logger import Logger
 from evonote.gui.dictionary_viewer import show_document_with_key_gui
-from evonote.model.openai import complete_chat, complete_chat_expensive
+from evonote.model.openai import (complete_chat as openai_complete_chat,
+                                  complete_chat_expensive as openai_complete_chat_expensive,
+                                  model_list as openai_model_list)
+from evonote.model.openllm import (complete_chat as openllm_complete_chat,
+                                   complete_chat_expensive as openllm_complete_chat_expensive)
 
 
 class ChatLogger(Logger):
@@ -18,16 +22,16 @@ class ChatLogger(Logger):
 
 class Chat:
     """
-    Class for storing the chat history for OpenAI API call
+    Class for chat completion
     """
 
     def __init__(self, user_message=None, system_message: any = None):
         self.history = []
         self.system_message = system_message
         if user_message is not None:
-            self.add_message(user_message, "user")
+            self._add_message(user_message, "user")
 
-    def add_message(self, content: any, role: str):
+    def _add_message(self, content: any, role: str):
         self.history.append({
             "content": content,
             "role": role
@@ -37,10 +41,10 @@ class Chat:
         self.add_user_message(content)
 
     def add_user_message(self, content: any):
-        self.add_message(content, "user")
+        self._add_message(content, "user")
 
     def add_assistant_message(self, content: any):
-        self.add_message(content, "assistant")
+        self._add_message(content, "assistant")
 
     def __copy__(self):
         new_chat_log = Chat(system_message=self.system_message)
@@ -64,15 +68,12 @@ class Chat:
             })
         return res
 
-    def __str__(self):
-        res = []
-        log_list = self.get_log_list()
-        for entry in log_list:
-            res.append(f"------{entry['role']}------\n {entry['content']}")
-        return "\n".join(res)
-
     def complete_chat(self, options=None):
-        res = complete_chat(self, options=options)
+        options = options or {}
+        if use_openai_model(options):
+            res = openai_complete_chat(self, options=options)
+        else:
+            res = openllm_complete_chat(self, options=options)
         self.add_assistant_message(res)
         if len(ChatLogger.active_loggers) > 0:
             for chat_logger in ChatLogger.active_loggers:
@@ -80,9 +81,27 @@ class Chat:
         return res
 
     def complete_chat_expensive(self, options=None):
-        res = complete_chat_expensive(self, options=options)
+        options = options or {}
+        if use_openai_model(options):
+            res = openai_complete_chat_expensive(self, options=options)
+        else:
+            res = openllm_complete_chat_expensive(self, options=options)
         self.add_assistant_message(res)
         if len(ChatLogger.active_loggers) > 0:
             for chat_logger in ChatLogger.active_loggers:
                 chat_logger.add_log(self)
         return res
+
+    def __str__(self):
+        res = []
+        log_list = self.get_log_list()
+        for entry in log_list:
+            res.append(f"------{entry['role']}------\n {entry['content']}")
+        return "\n".join(res)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.system_message!r}"
+
+
+def use_openai_model(options) -> bool:
+    return options.get("model", "gpt-3.5-turbo") in openai_model_list

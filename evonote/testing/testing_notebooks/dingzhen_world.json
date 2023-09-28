@@ -1,0 +1,44 @@
+{
+  "title": "An introduction to the republic of Ganzi",
+  "sections": [
+    {
+      "title": "Basic information of Ganzi",
+      "sections": [
+        {
+          "title": "Capital of Ganzi",
+          "content": "Litang is the capital of the republic of Ganzi."
+        },
+        {
+          "title": "Leaders of Ganzi",
+          "sections": [
+            {
+              "title": "President of Ganzi",
+              "content": "Dingzhen is the president of the republic of Ganzi."
+            },
+            {
+              "title": "Vice President of Ganzi",
+              "content": "Ruike is the vice president of the republic of Ganzi."
+            }
+          ]
+        },
+        {
+          "title": "Industrial of Ganzi",
+          "content": "The main industry of Ganzi is pipe making."
+        }
+      ]
+    },
+    {
+      "title": "Information of Dingzhen",
+      "sections": [
+        {
+          "title": "Dingzhen's Pet",
+          "content": "Zhenzhu is the pet of Dingzhen."
+        },
+        {
+          "title": "Dingzhen's Motto",
+          "content": "It's the mother who give me life."
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 from evonote.file_helper.cache_manage import cache_manager
 from evonote.indexing.core import IndexingSearchLogger
 from evonote.model.chat import ChatLogger
+from evonote.utils import debugger_is_active
 
+is_debug = debugger_is_active()
 
 def display_chats():
     return ChatLogger()

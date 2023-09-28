@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Type, Callable
+
 import dill
 
 from evonote.gui.notebook import draw_treemap
@@ -47,6 +48,10 @@ class Notebook:
         self.in_prompt_name = "#" + str(Notebook.n_notebook)
         Notebook.n_notebook += 1
 
+    """
+    ## Indexing of notes
+    """
+
     def make_indexing(self, indexer_class: Type[Indexer]) -> Indexing:
         if indexer_class is None:
             indexer_class = FragmentedEmbeddingIndexer
@@ -56,6 +61,10 @@ class Notebook:
             return new_indexing
         else:
             return self.indexings[indexer_class]
+
+    """
+    ## Note information query
+    """
 
     def get_note_path(self, note: Note):
         if note not in self.note_path:
@@ -72,6 +81,13 @@ class Notebook:
             return self.parents[note]
         else:
             raise Exception("No parent found")
+
+    def has_child(self, note: Note, key: str):
+        return key in self.get_children_dict(note)
+
+    """
+    ## Note operations
+    """
 
     def get_note_by_path(self, path: List[str]) -> Note | None:
         assert self.root is not None
@@ -109,6 +125,8 @@ class Notebook:
         return list(self.children.keys())
 
     def add_child(self, key: str, parent: Note, child: Note):
+        if child.notebook is not self:
+            child = child.copy_to(self)
         if child not in self.children:
             self.children[child] = {}
         # ensure the parent is in the tree
@@ -151,6 +169,10 @@ class Notebook:
         del self.parents[note]
         for indexing in self.indexings.values():
             indexing.remove_note(note)
+
+    """
+    ## Representation of notebook in prompt
+    """
 
     def get_notebook_dict(self, add_index=True):
         tree = {
@@ -195,12 +217,20 @@ class Notebook:
         delete_extra_keys_for_prompt(dict_with_indices)
         return dict_with_indices, note_indexed
 
+    """
+    ## Visualization of notebook
+    """
+
     def show_notebook_gui(self):
         """
         Show the notebook in a webpage
         """
         assert self.root is not None
-        draw_treemap(self.root, self)
+        draw_treemap(self.root)
+
+    """
+    ## Sub-notebook extraction
+    """
 
     def get_notes_by_similarity(self, query_list: List[str],
                                 weights: List[float] | None = None,
@@ -246,6 +276,10 @@ class Notebook:
                                               note_mapping(note, new_notebook))
         return new_notebook
 
+    """
+    ## Persistence of the notebook
+    """
+
     def save(self, path: str, save_indexing: bool = False):
         # TODO: We need to test this function and make sure it works
         with open(path, "wb") as f:
@@ -267,6 +301,10 @@ class Notebook:
             notebook = dill.load(f)
         return notebook
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.root.content!r}"
+
+
 def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
     if topic is None:
         topic = ""
@@ -281,13 +319,13 @@ def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Note
         if note is root:
             continue
         leaf = root
-        note_path = note.get_note_path(notebook)
+        note_path = notebook.get_note_path(note)
         for key in note_path[:-1]:
-            children = leaf.get_children(notebook=new_notebook)
-            if key not in children:
-                leaf.add_child(key, notebook.get_children_dict(leaf)[key], new_notebook)
-            leaf = children[key]
-        leaf.add_child(note_path[-1], note, new_notebook)
+            children_dict = new_notebook.get_children_dict(leaf)
+            if key not in children_dict:
+                new_notebook.add_child(key, leaf, notebook.get_children_dict(leaf)[key])
+            leaf = children_dict[key]
+        new_notebook.add_child(note_path[-1], leaf, note)
     return new_notebook
 
 

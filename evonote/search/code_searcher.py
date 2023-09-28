@@ -2,6 +2,11 @@ from evonote.indexing.code_indexer import CodeDocsIndexer
 from evonote.model.chat import Chat
 from evonote.notebook.notebook import Notebook
 
+"""
+This module contains functions for searching in notebooks of python functions.
+The python functions can be indexed by their docstrings, function names, parameter names, return values, etc.
+"""
+
 system_message = "You should output everything concisely as if you are a computer program"
 
 

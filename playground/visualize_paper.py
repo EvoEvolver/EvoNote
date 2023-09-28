@@ -1,10 +1,11 @@
 from evonote.file_helper.cache_manage import save_used_cache, save_cache
+from evonote.testing.sample_paper import sample_paper
 from evonote.transform.build_from_sections import digest_all_descendants, \
     notebook_from_doc
 from evonote.data_cleaning.latex_converter import process_latex_into_standard
 
 
-tex = open("AI4Science.tex", "r", encoding="utf-8").read()
+tex = sample_paper
 
 doc, meta = process_latex_into_standard(tex)
 

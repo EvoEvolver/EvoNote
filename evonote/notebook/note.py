@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from copy import copy
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evonote.transform.extract_from_module import FunctionDocs
     from evonote.notebook.notebook import Notebook
 
 
@@ -18,45 +18,80 @@ class Note:
     Notice that Note object can be indexed by embedding vectors because its
     """
 
-    def __init__(self, default_notebook: Notebook):
+    def __init__(self, notebook: Notebook):
         super().__init__()
 
         # content is string no matter what _content_type is
         self.content: str = ""
         # The root note helps merge two notebook bases
-        self.default_notebook: Notebook = default_notebook
+        self.notebook: Notebook = notebook
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
 
-    def get_note_path(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_note_path(self)
+    def copy_to(self, notebook: Notebook):
+        new_note = Note(notebook)
+        new_note.content = copy(self.content)
+        new_note.resource = copy(self.resource)
+        return new_note
 
-    def get_parents(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_parents(self)
+    """
+    ## Functions for getting the relation of notes
+    """
 
-    def get_children(self, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return notebook.get_children_dict(self)
+    def get_note_path(self):
+        return self.notebook.get_note_path(self)
 
-    def get_descendants(self: Note, notebook: Notebook | None = None):
-        notebook = notebook if notebook is not None else self.default_notebook
-        return get_descendants(self, notebook)
+    def get_parents(self):
+        return self.notebook.get_parents(self)
 
-    def add_child(self, key: str, note: Note, notebook: Notebook | None = None) -> Note:
-        notebook = notebook if notebook is not None else self.default_notebook
-        notebook.add_child(key, self, note)
+    def get_children(self):
+        return self.notebook.get_children_dict(self)
+
+    def has_child(self, key: str):
+        return self.notebook.has_child(self, key)
+
+    """
+    ## Functions for adding children of note
+    """
+
+    def add_child(self, key: str, note) -> Note:
+        self.notebook.add_child(key, self, note)
         return note
 
-    def be(self, content: str) -> Note:
+    def new_child(self, key: str) -> Note:
+        note = Note(self.notebook)
+        self.notebook.add_child(key, self, note)
+        return note
+
+    """
+    ## Functions for setting content of note
+    """
+
+    def s(self, key) -> Note:
+        """
+        Creating a new child note or addressing an existing child note
+        :param key: the key of the child note
+        :return:
+        """
+        notebook = self.notebook
+        if isinstance(key, int) or isinstance(key, str):
+            children = notebook.get_children_dict(self)
+            if key not in children:
+                note = Note(notebook)
+                notebook.add_child(key, self, note)
+                return note
+            return children[key]
+        else:
+            raise NotImplementedError()
+
+    def set_content(self, content: str) -> Note:
         """
         :return: The note itself
         """
         self.content = content
         return self
 
-    def set_content(self, content: str) -> Note:
+    def be(self, content: str) -> Note:
         """
         :return: The note itself
         """
@@ -68,51 +103,30 @@ class Note:
             return "Path" + str(self.get_note_path())
         return self.content
 
-    def s(self, key, notebook: Notebook | None = None) -> Note:
-        """
-        Creating a new child note or addressing an existing child note
-        :param key: the key of the child note
-        :return:
-        """
-        notebook = notebook if notebook is not None else self.default_notebook
-        if isinstance(key, int) or isinstance(key, str):
-            children = self.get_children(notebook)
-            if key not in children:
-                note = Note(notebook)
-                notebook.add_child(key, self, note)
-                return note
-            return children[key]
-        else:
-            raise NotImplementedError()
-
-
-def get_descendants(note: Note, notebook: Notebook):
-    descendants = []
-    for child in notebook.children[note].values():
-        descendants.append(child)
-        descendants.extend(get_descendants(child, notebook))
-    return descendants
-
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {str(self.get_note_path())}"
+    
 
 class NoteResource:
     def __init__(self):
-        self.resource = []
+        self.resource = {}
         # Possible types: Notebook, Note, Function, Class, Module
-        self.resource_type: List[str] = []
-        self.resource_docs: List[any] = []
+        self.resource_type = {}
 
-    def add_resource(self, resource, resource_type: str, resource_docs: any):
-        self.resource.append(resource)
-        self.resource_type.append(resource_type)
-        self.resource_docs.append(resource_docs)
+    def has_type(self, resource_type):
+        return resource_type in self.resource_type.values()
+
+    """
+    ## Functions for getting resources
+    """
 
     def get_resource_by_type(self, resource_type):
         """
         Return the first resource of the given type
         """
-        for i in range(len(self.resource_type)):
-            if self.resource_type[i] == resource_type:
-                return self.resource[i]
+        for key, value in self.resource_type.items():
+            if value == resource_type:
+                return self.resource[key]
         return None
 
     def get_resource_and_docs_by_type(self, resource_type):
@@ -121,29 +135,34 @@ class NoteResource:
         """
         for i in range(len(self.resource_type)):
             if self.resource_type[i] == resource_type:
-                return self.resource[i], self.resource_docs[i]
-        return None, None
+                return self.resource[i]
+        return None
 
     def get_resource_types(self):
-        return self.resource_type
+        return set(self.resource_type.values())
 
-    def has_type(self, resource_type):
-        return resource_type in self.resource_type
+    """
+    ## Functions for adding resources
+    """
 
-    def add_text(self, text, text_docs):
-        self.add_resource(text, "text", text_docs)
+    def add_resource(self, resource, resource_type: str, key: str):
+        self.resource[key] = resource
+        self.resource_type[key] = resource_type
 
-    def add_notebook(self, notebook, notebook_docs):
-        self.add_resource(notebook, "notebook", notebook_docs)
+    def add_text(self, text, key: str):
+        self.add_resource(text, "text", key)
 
-    def add_function(self, function, function_docs: FunctionDocs):
-        self.add_resource(function, "function", function_docs)
+    def add_notebook(self, notebook, key: str):
+        self.add_resource(notebook, "notebook", key)
 
-    def add_module(self, module, module_docs):
-        self.add_resource(module, "module", module_docs)
+    def add_function(self, function, key: str):
+        self.add_resource(function, "function", key)
 
-    def add_class(self, class_, class_docs):
-        self.add_resource(class_, "class", class_docs)
+    def add_module(self, module, key: str):
+        self.add_resource(module, "module", key)
 
-    def add_note(self, note, note_docs):
-        self.add_resource(note, "note", note_docs)
+    def add_class(self, class_, key: str):
+        self.add_resource(class_, "class", key)
+
+    def add_note(self, note, key: str):
+        self.add_resource(note, "note", key)
