@@ -45,7 +45,7 @@ def digest_all_descendants(notebook: Notebook) -> Notebook:
         for note, digest in zip(non_empty_notes, executor.map(digest_content,
                                                               non_empty_contents)):
             note: Note
-            set_notes_by_digest(note, digest, notebook)
+            set_notes_by_digest(note, digest)
             finished += 1
         if finished % 5 == 4:
             print("digest received ", finished, "/", len(all_notes))
@@ -77,17 +77,16 @@ def digest_content(content):
     return res
 
 
-def set_notes_by_digest(note: Note, digest: str, notebook):
+def set_notes_by_digest(note: Note, digest: str):
     parsed_res = ast.literal_eval(digest)
-    iter_and_assign(note, parsed_res, notebook)
+    iter_and_assign(note, parsed_res)
 
 
-def iter_and_assign(note: Note, tree: dict, notebook: Notebook):
+def iter_and_assign(note: Note, tree: dict):
     if "topic" not in tree or "statement" not in tree:
         raise Exception("incomplete tree node")
-        return
-    node = note.s(tree["topic"], notebook).be(tree["statement"])
+    node = note.s(tree["topic"]).be(tree["statement"])
     if "subtopics" not in tree:
         return
     for subtopic in tree["subtopics"]:
-        iter_and_assign(node, subtopic, notebook)
+        iter_and_assign(node, subtopic)
