@@ -7,19 +7,17 @@
 
 Because **non-parametric** knowledge is an **essential piece** towards artificial general intelligence (AGI). We believe that large language model (parametric) + knowledge base (non-parametric) will finally make AGI possible. 
 
-Characteristics of parametric knowledge (e.g. LLM):
+Characteristics of parametric (dense) knowledge (e.g. LLM):
 
-- Fast and efficient
-- Good at understanding and reasoning
-- Hard to learn & hard to forget
+- Good at understanding and reasoning with common knowledge
+- Hard to learn & hard to forget due to its **dense nature**.
 - Hallucination-prone (Like a **drunk person**)
 
-Characteristics of non-parametric knowledge (e.g. knowledge graph):
+Characteristics of non-parametric (discrete) knowledge (e.g. knowledge graph):
 
 - Plug-and-play learning and forgetting
 - Explainable and accurate
-- Less efficient and dependent on parametric knowledge
-- Not really understanding (Like a [**Chinese room**](https://plato.stanford.edu/entries/chinese-room/))
+- Not really understanding subtle contexts of objects due to its **discrete nature** (Like a [**Chinese room**](https://plato.stanford.edu/entries/chinese-room/)).
 
 ## Core of intelligence-related tasks
 
@@ -43,8 +41,8 @@ EvoNote is build for holding and operating knowledge bases (notebooks). EvoNote 
 
 - A tree-based knowledge base framework
 - Convenient tools for 
-  - constructing knowledge bases from texts
-  - generating texts from knowledge bases
+  - constructing knowledge bases from texts and Python modules
+  - generating texts or Python codes from knowledge bases
 - Tools for exploration to find new insights in knowledge bases (*)
 - Tools for export and import knowledge bases to facilitate collaboration (*)
 
@@ -52,9 +50,10 @@ EvoNote is build for holding and operating knowledge bases (notebooks). EvoNote 
 
 ## What EvoNote is not
 
-- EvoNote does not aim to build large knowledge bases swiftly and search from it with low latency. Instead, EvoNote provides a more human-like approach, in which the structure of knowledge items is highly non-trivial. With a structure, one can search the knowledge even more semantically than a naive embedding-based search.
+- EvoNote does not aim to build large multimodal knowledge bases swiftly and search from it with low latency (e.g. [LlamaIndex](https://github.com/jerryjliu/llama_index), [embedchain](https://github.com/embedchain/embedchain)). Instead, EvoNote provides a more human-like approach, in which the structure of knowledge items is highly non-trivial. With a structure, one can search the knowledge even more semantically than a naive embedding-based search.
 
-- The knowledge base in EvoNote is not a *knowledge graph*. We believe that knowledge graph is too rigid to hold human knowledge. Similar to what is happening in human-brain, the knowledge base in EvoNote is softer and vaguer, whose interpretation is dependent on the language model.
+- The knowledge base in EvoNote is not a *knowledge graph*. We believe that knowledge graph is too rigid to hold human knowledge. Similar to what is happening in human-brain, the knowledge base in EvoNote is softer and vaguer, whose interpretation is dependent on the language model. 
+  - Knowledge graph also allows to many edges to a node, which make the connection of knowledge dense and hard to process.
 
 ## Installation
 
