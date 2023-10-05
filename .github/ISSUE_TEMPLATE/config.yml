@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: README Document
+    url: https://github.com/EvoEvolver/EvoNote/blob/main/README.md
+    about: Please ask and answer questions here.
+  - name: Concept Handbook
+    url: https://github.com/EvoEvolver/EvoNote/blob/main/docs/development/concept_handbook.md
+    about: Key concepts on AI knowledge bases.
+  - name: Blogs & More Readings
+    url: https://github.com/EvoEvolver/EvoNote/tree/main/docs/writings
+    about: A collection of essaies on AI knowledge base and it's applications in LLM.
