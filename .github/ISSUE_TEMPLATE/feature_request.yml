@@ -1,0 +1,28 @@
+name: Feature Request
+description: Propose a new feature or enhancement to the project
+labels: ['development']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+
+        Please provide details about the feature you'd like to see implemented. Your insights will help us better understand your needs and prioritize accordingly.
+
+  - type: textarea
+    id: feature-motivation
+    attributes:
+      label: Motivation
+      description: Why is this feature important? How would it benefit the project or its users?
+      placeholder: This feature is essential because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Detailed Feature Description
+      description: Please provide a more in-depth description of the feature. If possible, include potential implementations or UI mock-ups.
+      placeholder: The feature would work by...
+    validations:
+      required: true

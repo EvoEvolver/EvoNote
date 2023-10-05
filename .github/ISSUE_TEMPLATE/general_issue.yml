@@ -1,0 +1,27 @@
+name: General Issue
+description: Propose a discussion or enhancement on the project.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General Issue
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+#      description:
+      options:
+        - Testing
+        - Documentation
+        - Enhancement
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      placeholder: Write your issue here.
+    validations:
+      required: true
