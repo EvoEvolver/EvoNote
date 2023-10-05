@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict, List, Type, Callable
+from typing import Dict, List, Type, Callable, Tuple
 
 import dill
+from bidict import bidict
 
 from evonote.gui.notebook import draw_treemap
 from evonote.indexing.core import FragmentedEmbeddingIndexer
@@ -19,15 +20,13 @@ class Notebook:
 
     n_notebook = 0
 
-    def __init__(self, topic, root: Note = None, rule_of_path: str = None):
+    def __init__(self, topic, rule_of_path: str = None):
         """
         :param topic: The topic of the notebook
-        :param root: The root of the notebook. If None, a new root will be created
         :param rule_of_path: The rule for creating paths.
         """
         self.children: Dict[Note, Dict[str, Note]] = {}
-        self.note_path: Dict[Note, List[str]] = {}
-        self.parents: Dict[Note, List[Note]] = {}
+        self.note_path: bidict[Note, Tuple[str]] = bidict()
 
         # The dict for indexings made for the notebook
         # The key is the class of the indexer and the value is the indexing
@@ -37,11 +36,9 @@ class Notebook:
         self.topic = topic
 
         # Set up the root
-        self.root: Note
-        if root is None:
-            root = Note(self)
-            root.be(topic)
-        self.set_root(root)
+        root = Note(self)
+        self.children[root] = {}
+        self.note_path[root] = tuple()
 
         self.rule_of_path = rule_of_path
 
@@ -67,59 +64,67 @@ class Notebook:
     """
 
     def get_note_path(self, note: Note):
-        if note not in self.note_path:
-            self.note_path[note] = []
         return self.note_path[note]
 
     def get_children_dict(self, note: Note):
-        if note not in self.children:
-            self.children[note] = {}
         return self.children[note]
 
-    def get_parents(self, note: Note):
-        if note in self.parents:
-            return self.parents[note]
-        else:
-            raise Exception("No parent found")
+    def get_parent(self, note: Note):
+        note_path = self.get_note_path(note)
+        if len(note_path) == 0:
+            return None
+        parent_path = note_path[:-1]
+        parent = self.get_note_by_path(parent_path)
+        return parent
 
     def has_child(self, note: Note, key: str):
         return key in self.get_children_dict(note)
+
+    @property
+    def root(self):
+        root = self.get_note_by_path(tuple())
+        return root
 
     """
     ## Note operations
     """
 
-    def get_note_by_path(self, path: List[str]) -> Note | None:
-        assert self.root is not None
-        leaf = self.root
-        for key in path:
-            leaf = self.children[leaf].get(key, None)
-            if leaf is None:
-                return None
-        return leaf
+    def set_root(self, note: Note):
+        if self.root in self.children:
+            children = self.children[self.root]
+        else:
+            children = {}
+        self.children[note] = children
+        del self.note_path[self.root]
+        self.note_path[note] = tuple()
 
-    def add_note_by_path(self, path: List[str], note: Note) -> Note:
-        if self.root is None:
-            self.set_root(Note(self))
+
+    def get_note_by_path(self, path: Tuple | List) -> Note | None:
+        path = tuple(path)
+        return self.note_path.inverse[path]
+
+    def add_note_by_path(self, path: Tuple[str] | List[str], note: Note | str) -> Note:
+        if isinstance(note, str):
+            note_content = note
+            note = Note(self)
+            note.set_content(note_content)
+        note: Note
+        if len(path) == 0:
+            self.set_root(note)
+            return note
         leaf = self.root
         for key in path[:-1]:
             children = self.children[leaf]
             if key not in children:
-                leaf.add_child(key, Note(self))
+                self.add_child(key, leaf, Note(self))
             leaf = children[key]
-        leaf.add_child(path[-1], note)
-        return leaf
+        self.add_child(path[-1], leaf, note)
+        return note
 
     def get_new_note_by_path(self, path: List[str]) -> Note:
         new_note = Note(self)
         self.add_note_by_path(path, new_note)
         return new_note
-
-    def set_root(self, root: Note):
-        self.children[root] = {}
-        self.note_path[root] = []
-        self.parents[root] = []
-        self.root = root
 
     def get_all_notes(self):
         return list(self.children.keys())
@@ -134,12 +139,8 @@ class Notebook:
         children_dict = self.get_children_dict(parent)
         children_dict[key] = child
         parent_note_path = self.get_note_path(parent)
-        child_note_path = parent_note_path + [key]
+        child_note_path = parent_note_path + (key,)
         self.note_path[child] = child_note_path
-        if child not in self.parents:
-            self.parents[child] = [parent]
-        else:
-            self.parents[child].append(parent)
 
         for indexing in self.indexings.values():
             indexing.add_new_note(child)
@@ -156,17 +157,15 @@ class Notebook:
         for key, child in children_dict.items():
             self.remove_note(child)
 
-        parents = self.get_parents(note)
-        for parent in parents:
-            children_dict = self.get_children_dict(parent)
-            for key, child in children_dict.items():
-                if child is note:
-                    del children_dict[key]
-                    break
+        parent = self.get_parent(note)
+        children_dict = self.get_children_dict(parent)
+        for key, child in children_dict.items():
+            if child is note:
+                del children_dict[key]
+                break
 
         del self.children[note]
         del self.note_path[note]
-        del self.parents[note]
         for indexing in self.indexings.values():
             indexing.remove_note(note)
 
@@ -225,7 +224,6 @@ class Notebook:
         """
         Show the notebook in a webpage
         """
-        assert self.root is not None
         draw_treemap(self.root)
 
     """
@@ -268,11 +266,8 @@ class Notebook:
         :return: A new notebook
         """
         new_notebook = Notebook(self.topic, rule_of_path=self.rule_of_path)
-        new_notebook.set_root(note_mapping(self.root, new_notebook))
         for note in self.get_all_notes():
-            if note is not self.root:
-                # Here is not tested
-                new_notebook.add_note_by_path(self.get_note_path(note),
+            new_notebook.add_note_by_path(self.get_note_path(note),
                                               note_mapping(note, new_notebook))
         return new_notebook
 
@@ -313,11 +308,9 @@ def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
-    new_notebook = Notebook(topic=notebook.topic, root=notebook.root)
+    new_notebook = Notebook(topic=notebook.topic)
     root = new_notebook.root
     for note in notes:
-        if note is root:
-            continue
         leaf = root
         note_path = notebook.get_note_path(note)
         for key in note_path[:-1]:

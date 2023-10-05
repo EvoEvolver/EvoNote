@@ -59,8 +59,8 @@ def divide_text_into_section(section_level, text):
     return content, sections
 
 
-def process_html_sections(html: str, meta: dict):
-    doc = Document(meta["title"], html, [])
+def process_html_sections(markdown_src: str, meta: dict):
+    doc = Document(meta["title"], markdown_src, [])
     for i in range(0, 4):
         process_section_level(i, 0, doc)
     doc.content = ""
@@ -68,8 +68,8 @@ def process_html_sections(html: str, meta: dict):
 
 
 def process_html_into_standard(html: str):
-    mkd, meta = html_to_markdown(html)
-    doc = process_html_sections(mkd, meta)
+    markdown_src, meta = html_to_markdown(html)
+    doc = process_html_sections(markdown_src, meta)
     return doc, meta
 
 

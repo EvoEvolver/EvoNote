@@ -41,8 +41,8 @@ class Note:
     def get_note_path(self):
         return self.notebook.get_note_path(self)
 
-    def get_parents(self):
-        return self.notebook.get_parents(self)
+    def get_parent(self):
+        return self.notebook.get_parent(self)
 
     def get_children(self):
         return self.notebook.get_children_dict(self)
