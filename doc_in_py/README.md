@@ -130,6 +130,12 @@ def buggy_foo():
 
 ## Philosophy behind `DocInPy`
 
+### Literate programming
+
+`DocInPy` can be regarded as an effort toward the idea - [literate programming](https://guides.nyu.edu/datascience/literate-prog). We think literate programming gets even more important in the era of AI for it provides more context information for AI-based agents to understand the codebase.
+
+### Sparse tree structure
+
 All the programming languages encourage the programmers to put their code in the tree structure. For example, you can
 put your functions in difference classes, in different files and put the files in different folders. However, it is
 still very common to put a lot of functions in a single file, in which the codes are arranged in an almost flat
