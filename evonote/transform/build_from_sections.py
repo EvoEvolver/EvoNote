@@ -32,7 +32,7 @@ def move_original_content_to_resource(note, notebook):
 def digest_all_descendants(notebook: Notebook) -> Notebook:
     notebook = notebook.duplicate_notebook_by_note_mapping(
         move_original_content_to_resource)
-    all_notes = notebook.get_all_notes()
+    all_notes = notebook.get_note_list()
     contents = [note.resource.get_resource_by_type("text") for note in all_notes]
     non_empty_contents = []
     non_empty_notes = []

@@ -26,7 +26,7 @@ class Notebook:
         :param rule_of_path: The rule for creating paths.
         """
         self.children: Dict[Note, Dict[str, Note]] = {}
-        self.note_path: bidict[Note, Tuple[str]] = bidict()
+        self.note_path: bidict[Note, Tuple[str, ...]] = bidict()
 
         # The dict for indexings made for the notebook
         # The key is the class of the indexer and the value is the indexing
@@ -53,7 +53,7 @@ class Notebook:
         if indexer_class is None:
             indexer_class = FragmentedEmbeddingIndexer
         if indexer_class not in self.indexings:
-            new_indexing = Indexing(self.get_all_notes(), indexer_class, self)
+            new_indexing = Indexing(self.get_note_list(), indexer_class, self)
             self.indexings[indexer_class] = new_indexing
             return new_indexing
         else:
@@ -64,7 +64,10 @@ class Notebook:
     """
 
     def get_note_path(self, note: Note):
-        return self.note_path[note]
+        try:
+            return self.note_path[note]
+        except KeyError:
+            return None
 
     def get_children_dict(self, note: Note):
         return self.children[note]
@@ -80,6 +83,9 @@ class Notebook:
     def has_child(self, note: Note, key: str):
         return key in self.get_children_dict(note)
 
+    def has_note(self, note: Note):
+        return note in self.note_path
+
     @property
     def root(self):
         root = self.get_note_by_path(tuple())
@@ -92,12 +98,12 @@ class Notebook:
     def set_root(self, note: Note):
         if self.root in self.children:
             children = self.children[self.root]
+            del self.children[self.root]
         else:
             children = {}
         self.children[note] = children
         del self.note_path[self.root]
         self.note_path[note] = tuple()
-
 
     def get_note_by_path(self, path: Tuple | List) -> Note | None:
         path = tuple(path)
@@ -126,8 +132,8 @@ class Notebook:
         self.add_note_by_path(path, new_note)
         return new_note
 
-    def get_all_notes(self):
-        return list(self.children.keys())
+    def get_note_list(self):
+        return list(self.note_path.keys())
 
     def add_child(self, key: str, parent: Note, child: Note):
         if child.notebook is not self:
@@ -135,10 +141,16 @@ class Notebook:
         if child not in self.children:
             self.children[child] = {}
         # ensure the parent is in the tree
-        assert parent in self.children
-        children_dict = self.get_children_dict(parent)
-        children_dict[key] = child
+        assert self.has_note(parent)
         parent_note_path = self.get_note_path(parent)
+        children_dict = self.get_children_dict(parent)
+
+        if key in children_dict:
+            old_child = children_dict[key]
+            del self.children[old_child]
+            del self.note_path[old_child]
+
+        children_dict[key] = child
         child_note_path = parent_note_path + (key,)
         self.note_path[child] = child_note_path
 
@@ -177,7 +189,7 @@ class Notebook:
         tree = {
             "subtopics": {},
         }
-        notes = self.get_all_notes()
+        notes = self.get_note_list()
         note_indexed = []
         i_note = 0
         for i, note in enumerate(notes):
@@ -266,9 +278,9 @@ class Notebook:
         :return: A new notebook
         """
         new_notebook = Notebook(self.topic, rule_of_path=self.rule_of_path)
-        for note in self.get_all_notes():
-            new_notebook.add_note_by_path(self.get_note_path(note),
-                                              note_mapping(note, new_notebook))
+        for note in self.get_note_list():
+            new_path = self.get_note_path(note)
+            new_notebook.add_note_by_path(new_path, note_mapping(note, new_notebook))
         return new_notebook
 
     """
@@ -309,16 +321,8 @@ def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
     new_notebook = Notebook(topic=notebook.topic)
-    root = new_notebook.root
     for note in notes:
-        leaf = root
-        note_path = notebook.get_note_path(note)
-        for key in note_path[:-1]:
-            children_dict = new_notebook.get_children_dict(leaf)
-            if key not in children_dict:
-                new_notebook.add_child(key, leaf, notebook.get_children_dict(leaf)[key])
-            leaf = children_dict[key]
-        new_notebook.add_child(note_path[-1], leaf, note)
+        new_notebook.add_note_by_path(notebook.get_note_path(note), note)
     return new_notebook
 
 

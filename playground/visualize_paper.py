@@ -23,4 +23,4 @@ save_used_cache()
 
 # Try removing comments to save the notebook
 
-# digest_notebook.save("AI4Science.enb")
+digest_notebook.save("AI4Science.enb")
