@@ -16,34 +16,34 @@ class Notebook:
     Store the information of notes contained
     The information is mainly the path of each note
     The indexings of each note
+
+    :cvar children: The children of each note
+    :cvar note_path: The path of each note
+    :cvar indexings: The dict for indexings made for the notebook
+        The key is the class of the indexer and the value is the indexing
     """
 
-    n_notebook = 0
 
-    def __init__(self, topic, rule_of_path: str = None):
+    def __init__(self, root_content, rule_of_path: str = None):
         """
-        :param topic: The topic of the notebook
+        :param root_content: The content of the root of the notebook
         :param rule_of_path: The rule for creating paths.
         """
         self.children: Dict[Note, Dict[str, Note]] = {}
         self.note_path: bidict[Note, Tuple[str, ...]] = bidict()
 
-        # The dict for indexings made for the notebook
-        # The key is the class of the indexer and the value is the indexing
         # The reason for using class as key is that the class is more static and hashable
         self.indexings: Dict[Type[Indexer], Indexing] = {}
-
-        self.topic = topic
 
         # Set up the root
         root = Note(self)
         self.children[root] = {}
         self.note_path[root] = tuple()
+        root.set_content(root_content)
 
+        # TODO: this can be note, notebook, or string in the future
         self.rule_of_path = rule_of_path
 
-        self.in_prompt_name = "#" + str(Notebook.n_notebook)
-        Notebook.n_notebook += 1
 
     """
     ## Indexing of notes
@@ -90,6 +90,10 @@ class Notebook:
     def root(self):
         root = self.get_note_by_path(tuple())
         return root
+
+    @property
+    def topic(self):
+        return self.root.content
 
     """
     ## Note operations
@@ -312,15 +316,13 @@ class Notebook:
         return f"<{self.__class__.__name__}> {self.root.content!r}"
 
 
-def make_notebook_root(topic: str = None) -> tuple[Note, Notebook]:
-    if topic is None:
-        topic = ""
-    notebook = Notebook(topic)
-    return notebook.root, notebook
+"""
+## Auxiliary functions
+"""
 
 
 def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
-    new_notebook = Notebook(topic=notebook.topic)
+    new_notebook = Notebook(root_content=notebook.topic)
     for note in notes:
         new_notebook.add_note_by_path(notebook.get_note_path(note), note)
     return new_notebook

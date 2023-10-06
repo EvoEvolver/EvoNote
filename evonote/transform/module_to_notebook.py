@@ -6,7 +6,7 @@ import json
 from doc_in_py.core import get_module_members
 from doc_in_py import Struct
 from evonote.notebook.note import Note
-from evonote.notebook.notebook import make_notebook_root
+from evonote.notebook.notebook import Notebook
 from doc_in_py.docs_parser import \
     parse_rst_docstring, \
     parse_google_docstring, Doc_parser
@@ -28,10 +28,10 @@ def get_notebook_for_module(module, docs_parser_type="rst"):
     else:
         raise ValueError("docs_parser_type should be pycharm or vscode")
     module_name = module.__name__
-    note_root, notebook = make_notebook_root(
+    notebook = Notebook(
         "Notebook of module: " + module_name)
     module_struct = get_module_members(module)
-    build_notebook_for_struct(module_struct, note_root, docs_parser)
+    build_notebook_for_struct(module_struct, notebook.root, docs_parser)
     return notebook
 
 
