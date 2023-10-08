@@ -20,6 +20,10 @@ export default defineUserConfig({
             {
                 text: 'Home',
                 link: '/',
+            },
+            {
+                text: 'GitHub',
+                link: 'https://github.com/EvoEvolver/EvoNote',
             }
         ],
         sidebar: {

@@ -3,6 +3,10 @@
 
 ![Evomark](./docs/evonote.svg)
 
+<center>
+<a href="https://evonote.org">Webiste</a> | <a href="https://evonote.org/html/project_tree.html">ProjectTree</a>
+</center>
+
 ## Why knowledge base?
 
 Because **non-parametric** knowledge is an **essential piece** towards artificial general intelligence (AGI). We believe that large language model (parametric) + knowledge base (non-parametric) will finally make AGI possible. 
@@ -68,3 +72,7 @@ Idea needed:
 - How to efficiently use the structure of the knowledge base to search for useful items?
 - How to construct knowledge base items from a paper-long text with high quality?
 - How to rearrange the knowledge base items to find new insights?
+
+## Acknowledgement
+
+This project is led by [the matter lab](https://www.matter.toronto.edu/) at the University of Toronto.
