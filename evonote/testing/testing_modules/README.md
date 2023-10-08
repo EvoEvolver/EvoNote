@@ -44,4 +44,4 @@ We can ask the agent to write a function to attack a target with a series of mag
 
 ## Format of documentation
 
-We want to mix the documentation with the code by the `DocInPy` format.
+We want to mix the documentation with the code by the DocInPy format.

@@ -1,8 +1,8 @@
 # DocInPy - Documentation just in your Python code
 
-`DocInPy` is a standard for putting documentation just in your Python code. It is proposed to provide another option
+DocInPy is a standard for putting documentation just in your Python code. It is proposed to provide another option
 other than the current standard of putting documentation in a separate file. Though it is not new to mix documentation
-with code, in `DocInPy`, you can also do
+with code, in DocInPy, you can also do
 
 - Adding sections to your functions and classes
 - Adding examples to your functions and classes
@@ -12,14 +12,14 @@ codebase. It is also important for AI-based agents to understand the codebase an
 
 ## EvoNote
 
-EvoNote is using `DocInPy` to document its codebase. You can have a good visualization of EvoNote's codebase by
+EvoNote is using DocInPy to document its codebase. You can have a good visualization of EvoNote's codebase by
 running [EvoNote visualization](https://github.com/EvoEvolver/EvoNote/blob/main/playground/visualize_paper.py).
 
 ## How to use
 
 ### Sections
 
-Putting sections in `DocInPy` is as easy as putting sections in Markdown. You just need to put a `#` before your section
+Putting sections in DocInPy is as easy as putting sections in Markdown. You just need to put a `#` before your section
 title in a comment environment starting with `"""`. For example,
 
 ```python
@@ -128,11 +128,11 @@ def buggy_foo():
 
 - Serialization from structs to Python code
 
-## Philosophy behind `DocInPy`
+## Philosophy behind DocInPy
 
 ### Literate programming
 
-`DocInPy` can be regarded as an effort toward the idea - [literate programming](https://guides.nyu.edu/datascience/literate-prog). We think literate programming gets even more important in the era of AI for it provides more context information for AI-based agents to understand the codebase.
+DocInPy can be regarded as an effort toward the idea - [literate programming](https://guides.nyu.edu/datascience/literate-prog). We think literate programming gets even more important in the era of AI for it provides more context information for AI-based agents to understand the codebase.
 
 ### Sparse tree structure
 
@@ -141,6 +141,6 @@ put your functions in difference classes, in different files and put the files i
 still very common to put a lot of functions in a single file, in which the codes are arranged in an almost flat
 structure.
 
-`DocInPy` helps this by adding a zero-cost way to add sections to your functions and classes. It makes another step
+DocInPy helps this by adding a zero-cost way to add sections to your functions and classes. It makes another step
 towards a more tree-like structure of the codebase. We believe this will help the programmers to understand the codebase
 better. See [Method of Loci](docs/introduction/2.1 Method of Loci.md) for more details.
