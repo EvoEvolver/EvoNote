@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - main
+
+env:
+  OPENAI_API_KEY: NAN
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies 📦
+        run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+
+      - name: build project tree📦
+        run:  |
+          mkdir output
+          python -c "import evonote, json;from evonote.gui.notebook import get_json_for_treemap;from evonote.transform.module_to_notebook import get_notebook_for_module;notebook = get_notebook_for_module(evonote);tree = get_json_for_treemap(notebook.root);f = open('output/project_tree.json', 'w');json.dump(tree, f)"
+
+      - name: Deploy to image-data branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./output
+          publish_branch: image-data
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

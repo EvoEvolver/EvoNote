@@ -1,0 +1,43 @@
+<head>
+    <!-- Load plotly.js into the DOM -->
+    <script src='https://cdn.plot.ly/plotly-2.26.0.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+    <script lang="javascript">
+		tree_json_url = 'https://raw.githubusercontent.com/EvoEvolver/EvoNote/image-data/project_tree.json'
+        d3.json(tree_json_url, function (err, rows) {
+            function unpack(rows, key) {
+                return rows.map(function (row) {
+                    return row[key]
+                });
+            }
+
+            console.log(rows)
+            var data = [{
+                type: "treemap",
+                ids: unpack(rows, 'id'),
+                labels: unpack(rows, 'label'),
+                parents: unpack(rows, 'parent'),
+                text: unpack(rows, 'text')
+            }];
+            var layout = {
+                autosize: true,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                margin: {
+                    l: 10,
+                    r: 10,
+                    b: 10,
+                    t: 10,
+                    pad: 4
+                },
+            };
+
+            Plotly.newPlot('myDiv', data, layout);
+        })
+
+    </script>
+</head>
+
+<body>
+<div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+</body>
