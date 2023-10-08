@@ -1,6 +1,3 @@
-> Before your read, run `/playground/visualize_the_project.py` to see the magic!!
-
-
 # Class
 
 ## Knowledge storage

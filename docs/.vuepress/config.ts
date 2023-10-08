@@ -10,11 +10,11 @@ function get_md_files_names_in_path(path: string) {
     return file_paths;
 }
 
-// @ts-ignore
 export default defineUserConfig({
     repo: 'EvoEvolver/EvoNote',
     docsDir: 'docs',
     head: [['link', { rel: 'icon', href: '/image/favicon.ico' }]],
+    // @ts-ignore
     theme: defaultTheme({
         navbar: [
             {
@@ -40,7 +40,7 @@ export default defineUserConfig({
                     },
                     {
                         text: 'Project tree',
-                        link: 'https://evonote.org/project_tree.html',
+                        link: 'https://evonote.org/html/project_tree.html',
                     }
                 ],
             }],
