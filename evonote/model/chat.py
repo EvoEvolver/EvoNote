@@ -31,14 +31,15 @@ class Chat:
         if user_message is not None:
             self._add_message(user_message, "user")
 
+    """
+    ## Message editing and output
+    """
+
     def _add_message(self, content: any, role: str):
         self.history.append({
             "content": content,
             "role": role
         })
-
-    def ask(self, content: any):
-        self.add_user_message(content)
 
     def add_user_message(self, content: any):
         self._add_message(content, "user")
@@ -46,10 +47,6 @@ class Chat:
     def add_assistant_message(self, content: any):
         self._add_message(content, "assistant")
 
-    def __copy__(self):
-        new_chat_log = Chat(system_message=self.system_message)
-        new_chat_log.history = copy.deepcopy(self.history)
-        return new_chat_log
 
     def get_log_list(self):
         """
@@ -67,6 +64,10 @@ class Chat:
                 "role": message["role"]
             })
         return res
+
+    """
+    ## Chat completion functions
+    """
 
     def complete_chat(self, options=None):
         options = options or {}
@@ -92,6 +93,10 @@ class Chat:
                 chat_logger.add_log(self)
         return res
 
+    """
+    ## Magic methods
+    """
+
     def __str__(self):
         res = []
         log_list = self.get_log_list()
@@ -101,6 +106,11 @@ class Chat:
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.system_message!r}"
+
+    def __copy__(self):
+        new_chat_log = Chat(system_message=self.system_message)
+        new_chat_log.history = copy.deepcopy(self.history)
+        return new_chat_log
 
 
 def use_openai_model(options) -> bool:

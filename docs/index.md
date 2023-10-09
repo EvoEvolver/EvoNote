@@ -1,3 +1,3 @@
 ![](./evonote.svg)
 
-Welcome to the Evonote documentation!
+Welcome to the EvoNote documentation!
