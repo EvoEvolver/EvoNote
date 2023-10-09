@@ -49,6 +49,7 @@ def extract_module_tree_without_comment(module, root_path):
     # Get sub_module tree from .tree.yml if it exists
     module_dir = os.path.dirname(inspect.getfile(module))
     tree_yml_path = os.path.join(module_dir, ".tree.yml")
+    tree_config_dict = {}
     if os.path.exists(tree_yml_path):
         try:
             with open(tree_yml_path, "r") as f:
@@ -56,7 +57,7 @@ def extract_module_tree_without_comment(module, root_path):
         except:
             pass
 
-    if module.__file__.endswith("__init__.py"):
+    if module.__file__.endswith("__init__.py") and len(tree_config_dict) > 0:
         sections_dict = build_module_section_dict(tree_config_dict, sub_modules)
         if sections_dict is not None:
             sub_modules = sections_dict
