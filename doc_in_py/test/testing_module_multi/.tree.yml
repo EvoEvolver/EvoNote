@@ -1,10 +1,12 @@
 sections:
   first section:
+    - This is some annotation to the first section
     - a
     - b
   second section:
     - c
     - another section:
+      - This is another section
       - d
       - e
 default section: other section
