@@ -1,0 +1,10 @@
+sections:
+  first section:
+    - a
+    - b
+  second section:
+    - c
+    - another section:
+      - d
+      - e
+default section: other section

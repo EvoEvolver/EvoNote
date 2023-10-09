@@ -27,7 +27,7 @@ def analyze_notetree_sparsity(notetree: Tree):
         print("Content:", note.content)
         print("")
 
-def get_children_heavy_notes(notetree: Tree, min_children=10):
+def get_children_heavy_notes(notetree: Tree, min_children=8):
     """
     Return a list of notes with at least min_children children.
     """

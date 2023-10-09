@@ -64,7 +64,7 @@ def extract_module_tree_without_comment(module, root_path):
             member_path = inspect.getfile(member)
         except:
             continue
-        if not member_path.startswith(root_path):
+        if member_path != root_path:
             continue
         true_members.append(member)
         true_member_names.append(name)

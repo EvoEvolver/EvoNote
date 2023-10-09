@@ -1,0 +1,6 @@
+sections:
+  core:
+    - notetree
+    - indexing
+    - file_helper
+    - model
