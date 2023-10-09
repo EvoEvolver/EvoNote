@@ -3,9 +3,9 @@
 
 ![Evomark](./docs/evonote.svg)
 
-<center>
+<div style="text-align: center;">
 <a href="https://evonote.org">Webiste</a> | <a href="https://evonote.org/html/project_tree.html">ProjectTree</a>
-</center>
+</div>
 
 ## Why knowledge base?
 
@@ -61,7 +61,7 @@ EvoNote is build for holding and operating knowledge in the form of `note trees`
 
 ## Installation
 
-Currently, EvoNote is not ready for production usage. Please refer to the Development section for development usage.
+Currently, EvoNote is not ready for production usage. Please refer to the [Development section](https://evonote.org/development) for development usage.
 
 ## Development
 

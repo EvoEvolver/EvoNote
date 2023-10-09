@@ -1,4 +1,21 @@
-# Class
+# Overall
+
+IDE recommendation: PyCharm
+
+Docstring style: rst
+
+## DocInPy
+
+Please use the [DocInPy](https://github.com/EvoEvolver/EvoNote/tree/main/doc_in_py) style for adding sections in the codes. 
+
+## Installation
+
+```bash
+git clone git@github.com:EvoEvolver/EvoNote.git
+pip install -e .
+```
+
+# Classes
 
 ## Knowledge storage
 `Note`: The node of knowledge. It only contains the knowledge itself.

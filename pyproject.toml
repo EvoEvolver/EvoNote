@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "EvoNote"
+description = "Knowledge-centered AI system"
+version = "0.1.0"
+authors = [
+    { name = "Zijian Zhang" }
+]
+
+dependencies = [
+    "plotly==5.16.1",
+    "numpy==1.25.2",
+    "pyyaml~=6.0.1",
+    "openai==0.28.0",
+    "pyhyphen==4.0.3",
+    "dill~=0.3.7",
+    "html2text~=2020.1.16",
+    "markdownify~=0.11.6",
+    "bidict~=0.22.1",
+    "tenacity~=8.2.2"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+
+[tool.setuptools]
+packages = ["evonote", "doc_in_py"]
