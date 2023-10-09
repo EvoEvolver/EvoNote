@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from evonote.notebook.notebook import Notebook
@@ -38,14 +38,20 @@ class Note:
     ## Functions for getting the relation of notes
     """
 
-    def get_note_path(self):
+    def note_path(self):
         return self.notebook.get_note_path(self)
 
-    def get_parent(self):
+    def parent(self):
         return self.notebook.get_parent(self)
 
-    def get_children(self):
+    def children(self) -> Dict[str, Note]:
         return self.notebook.get_children_dict(self)
+
+    def title(self) -> str:
+        note_path = self.note_path()
+        if len(note_path) == 0:
+            return ""
+        return note_path[-1]
 
     def has_child(self, key: str):
         return self.notebook.has_child(self, key)
@@ -100,12 +106,12 @@ class Note:
 
     def __str__(self):
         if len(self.content) == 0:
-            return "Path" + str(self.get_note_path())
+            return "Path" + str(self.note_path())
         return self.content
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}> {str(self.get_note_path())}"
-    
+        return f"<{self.__class__.__name__}> {str(self.note_path())}"
+
 
 class NoteResource:
     def __init__(self):

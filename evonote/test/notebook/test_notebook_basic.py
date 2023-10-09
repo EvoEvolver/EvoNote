@@ -7,14 +7,13 @@ def test_adding_and_parent():
     note1 = notebook.get_new_note_by_path(["a", "b", "c"]).be("test1")
     note2 = notebook.add_note_by_path(["a", "b", "d"], "test2")
     note3 = notebook.get_note_by_path(["a", "b"]).be("test3")
-    a = note2.get_parent()
-    assert note1.get_parent().content == "test3" == note3.content == note2.get_parent().content
+    assert note1.parent().content == "test3" == note3.content == note2.parent().content
 
 
 def test_adding_twice():
     notebook = Notebook("test")
-    note1 = notebook.get_new_note_by_path(["a", "b", "c"]).be("test1")
-    note2 = notebook.add_note_by_path(["a", "b", "c"], "test2")
+    notebook.get_new_note_by_path(["a", "b", "c"]).be("test1")
+    notebook.add_note_by_path(["a", "b", "c"], "test2")
     assert notebook.get_note_by_path(["a", "b", "c"]).content == "test2"
 
 

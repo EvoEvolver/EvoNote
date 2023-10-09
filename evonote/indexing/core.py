@@ -258,7 +258,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
         new_weights = []
 
         for note in notes:
-            keywords_on_path = note.get_note_path()
+            keywords_on_path = note.note_path()
             # keep last 1/3 of the keywords
             n_keywords = min(max(math.ceil(len(keywords_on_path) / 3), 3),
                              len(keywords_on_path))
