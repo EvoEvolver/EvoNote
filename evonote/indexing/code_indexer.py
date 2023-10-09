@@ -2,7 +2,7 @@ import json
 from typing import List
 
 from evonote.indexing.core import AbsEmbeddingIndexer, Indexing
-from evonote.notebook.note import Note
+from evonote.notetree import Note
 
 
 class CodeParameterIndexer(AbsEmbeddingIndexer):

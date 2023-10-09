@@ -5,13 +5,13 @@ from typing import Dict, List, Type, Callable, Tuple
 import dill
 from bidict import bidict
 
-from evonote.gui.notebook import draw_treemap
+from evonote.gui.notetree import draw_treemap
 from evonote.indexing.core import FragmentedEmbeddingIndexer
 from evonote.indexing.core import Indexing, Indexer
-from evonote.notebook.note import Note
+from evonote.notetree.note import Note
 
 
-class Notebook:
+class Tree:
     """
     Store the information of notes contained
     The information is mainly the path of each note
@@ -19,14 +19,14 @@ class Notebook:
 
     :cvar children: The children of each note
     :cvar note_path: The path of each note
-    :cvar indexings: The dict for indexings made for the notebook
+    :cvar indexings: The dict for indexings made for the notetree
         The key is the class of the indexer and the value is the indexing
     """
 
 
     def __init__(self, root_content, rule_of_path: str = None):
         """
-        :param root_content: The content of the root of the notebook
+        :param root_content: The content of the root of the notetree
         :param rule_of_path: The rule for creating paths.
         """
         self.children: Dict[Note, Dict[str, Note]] = {}
@@ -41,7 +41,7 @@ class Notebook:
         self.note_path[root] = tuple()
         root.set_content(root_content)
 
-        # TODO: this can be note, notebook, or string in the future
+        # TODO: this can be note, notetree, or string in the future
         self.rule_of_path = rule_of_path
 
 
@@ -140,7 +140,7 @@ class Notebook:
         return list(self.note_path.keys())
 
     def add_child(self, key: str, parent: Note, child: Note):
-        if child.notebook is not self:
+        if child.notetree is not self:
             child = child.copy_to(self)
         if child not in self.children:
             self.children[child] = {}
@@ -164,8 +164,8 @@ class Notebook:
     def remove_note(self, note: Note):
         """
         Remove a note from the tree
-        This will remove all the indexing data of the notebook
-        It is better to create another notebook that removing a note
+        This will remove all the indexing data of the notetree
+        It is better to create another notetree that removing a note
         :param note:
         :return:
         """
@@ -186,10 +186,10 @@ class Notebook:
             indexing.remove_note(note)
 
     """
-    ## Representation of notebook in prompt
+    ## Representation of notetree in prompt
     """
 
-    def get_notebook_dict(self, add_index=True):
+    def get_notetree_dict(self, add_index=True):
         tree = {
             "subtopics": {},
         }
@@ -212,7 +212,7 @@ class Notebook:
         return tree, note_indexed
 
     def get_dict_for_prompt(self):
-        dict_without_indices, note_indexed = self.get_notebook_dict(add_index=False)
+        dict_without_indices, note_indexed = self.get_notetree_dict(add_index=False)
         delete_extra_keys_for_prompt(dict_without_indices)
         return dict_without_indices
 
@@ -228,22 +228,22 @@ class Notebook:
         return "\n".join(res)
 
     def get_dict_with_indices_for_prompt(self):
-        dict_with_indices, note_indexed = self.get_notebook_dict()
+        dict_with_indices, note_indexed = self.get_notetree_dict()
         delete_extra_keys_for_prompt(dict_with_indices)
         return dict_with_indices, note_indexed
 
     """
-    ## Visualization of notebook
+    ## Visualization of notetree
     """
 
-    def show_notebook_gui(self):
+    def show_notetree_gui(self):
         """
-        Show the notebook in a webpage
+        Show the notetree in a webpage
         """
         draw_treemap(self.root)
 
     """
-    ## Sub-notebook extraction
+    ## Sub-notetree extraction
     """
 
     def get_notes_by_similarity(self, query_list: List[str],
@@ -262,33 +262,33 @@ class Notebook:
 
         return top_k_notes
 
-    def get_sub_notebook_by_similarity(self, query_list: List[str],
+    def get_sub_notetree_by_similarity(self, query_list: List[str],
                                        weights: List[float] | None = None,
                                        top_k: int = 10,
                                        note_filter: Callable[[Note], bool] = None,
                                        indexer_class: Type[Indexer] = None
-                                       ) -> Notebook:
+                                       ) -> Tree:
         top_k_descendants = self.get_notes_by_similarity(query_list, weights, top_k,
                                                          note_filter, indexer_class)
-        new_notebook = new_notebook_from_note_subset(top_k_descendants, self)
-        return new_notebook
+        new_notetree = new_notetree_from_note_subset(top_k_descendants, self)
+        return new_notetree
 
-    def duplicate_notebook_by_note_mapping(self, note_mapping: Callable[
-        [Note, Notebook], Note]) -> Notebook:
+    def duplicate_notetree_by_note_mapping(self, note_mapping: Callable[
+        [Note, Tree], Note]) -> Tree:
         """
-        Duplicate the notebook by mapping each note to a new note
-        It can also be used for creating a copy of the notebook
+        Duplicate the notetree by mapping each note to a new note
+        It can also be used for creating a copy of the notetree
         :param note_mapping: The mapping function for each note
-        :return: A new notebook
+        :return: A new notetree
         """
-        new_notebook = Notebook(self.topic, rule_of_path=self.rule_of_path)
+        new_notetree = Tree(self.topic, rule_of_path=self.rule_of_path)
         for note in self.get_note_list():
             new_path = self.get_note_path(note)
-            new_notebook.add_note_by_path(new_path, note_mapping(note, new_notebook))
-        return new_notebook
+            new_notetree.add_note_by_path(new_path, note_mapping(note, new_notetree))
+        return new_notetree
 
     """
-    ## Persistence of the notebook
+    ## Persistence of the notetree
     """
 
     def save(self, path: str, save_indexing: bool = False):
@@ -306,11 +306,11 @@ class Notebook:
                     self.indexings = indexings
 
     @staticmethod
-    def load(path: str) -> Notebook:
+    def load(path: str) -> Tree:
         # TODO: We need to test this function and make sure it works
         with open(path, "rb") as f:
-            notebook = dill.load(f)
-        return notebook
+            notetree = dill.load(f)
+        return notetree
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.root.content!r}"
@@ -321,11 +321,11 @@ class Notebook:
 """
 
 
-def new_notebook_from_note_subset(notes: List[Note], notebook: Notebook) -> Notebook:
-    new_notebook = Notebook(root_content=notebook.topic)
+def new_notetree_from_note_subset(notes: List[Note], notetree: Tree) -> Tree:
+    new_notetree = Tree(root_content=notetree.topic)
     for note in notes:
-        new_notebook.add_note_by_path(notebook.get_note_path(note), note)
-    return new_notebook
+        new_notetree.add_note_by_path(notetree.get_note_path(note), note)
+    return new_notetree
 
 
 def delete_extra_keys_for_prompt(tree):

@@ -1,11 +1,11 @@
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
 
-def analyze_notebook_sparsity(notebook: Notebook):
+def analyze_notetree_sparsity(notetree: Tree):
     """
     Return the average number of children per note.
     """
-    notes = notebook.get_note_list()
+    notes = notetree.get_note_list()
     max_children = -1
     total_children = 0
     n_non_leaf_notes = 0
@@ -16,7 +16,7 @@ def analyze_notebook_sparsity(notebook: Notebook):
             total_children += n_children
         max_children = max(max_children, n_children)
     average_children = total_children / n_non_leaf_notes
-    heavy_notes = get_children_heavy_notes(notebook)
+    heavy_notes = get_children_heavy_notes(notetree)
     print("Total_notes:", len(notes))
     print("Average children per non-leaf note:", average_children)
     print("Max children per note:", max_children)
@@ -27,11 +27,11 @@ def analyze_notebook_sparsity(notebook: Notebook):
         print("Content:", note.content)
         print("")
 
-def get_children_heavy_notes(notebook: Notebook, min_children=10):
+def get_children_heavy_notes(notetree: Tree, min_children=10):
     """
     Return a list of notes with at least min_children children.
     """
-    notes = notebook.get_note_list()
+    notes = notetree.get_note_list()
     heavy_notes = []
     for note in notes:
         n_children = len(note.children())

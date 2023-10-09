@@ -6,14 +6,14 @@ import concurrent.futures
 from evonote.data_cleaning.document import Document
 from evonote.file_helper.cache_manage import save_cache, cached_function
 from evonote.model.chat import Chat
-from evonote.notebook.note import Note
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Note
+from evonote.notetree import Tree
 
 
-def notebook_from_doc(doc: Document, meta) -> Notebook:
-    notebook = Notebook(meta["title"])
-    build_from_sections(doc, notebook.root)
-    return notebook
+def notetree_from_doc(doc: Document, meta) -> Tree:
+    notetree = Tree(meta["title"])
+    build_from_sections(doc, notetree.root)
+    return notetree
 
 
 def build_from_sections(doc: Document, root: Note):
@@ -22,17 +22,17 @@ def build_from_sections(doc: Document, root: Note):
         build_from_sections(section, root.s(section.title))
 
 
-def move_original_content_to_resource(note, notebook):
-    new_note = Note(notebook)
+def move_original_content_to_resource(note, notetree):
+    new_note = Note(notetree)
     if len(note.content) > 0:
         new_note.resource.add_text(note.content, "original_content")
     return new_note
 
 
-def digest_all_descendants(notebook: Notebook) -> Notebook:
-    notebook = notebook.duplicate_notebook_by_note_mapping(
+def digest_all_descendants(notetree: Tree) -> Tree:
+    notetree = notetree.duplicate_notetree_by_note_mapping(
         move_original_content_to_resource)
-    all_notes = notebook.get_note_list()
+    all_notes = notetree.get_note_list()
     contents = [note.resource.get_resource_by_type("text") for note in all_notes]
     non_empty_contents = []
     non_empty_notes = []
@@ -51,7 +51,7 @@ def digest_all_descendants(notebook: Notebook) -> Notebook:
             print("digest received ", finished, "/", len(all_notes))
             save_cache()
     save_cache()
-    return notebook
+    return notetree
 
 @cached_function("digest_content")
 def digest_content(content):

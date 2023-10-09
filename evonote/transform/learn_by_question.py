@@ -1,5 +1,5 @@
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
 
-def sub_notebook_from_question(question: str, notebook: Notebook):
+def sub_notetree_from_question(question: str, notetree: Tree):
     pass

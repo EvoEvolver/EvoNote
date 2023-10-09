@@ -2,8 +2,8 @@ from typing import List
 
 from evonote.file_helper.cache_manage import cache_manager, cached_function
 from evonote.model.chat import Chat
-from evonote.notebook.note import Note
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Note
+from evonote.notetree import Tree
 from evonote.utils import robust_json_parse
 
 system_message = "Reply everything concisely without explaination as if you are a computer program."
@@ -25,25 +25,25 @@ def generate_possible_keywords(content: str, context: str):
     return res
 
 
-def search_similar_paths(keywords, notebook: Notebook):
-    notes = notebook.get_notes_by_similarity(keywords, top_k=5)
-    similar_paths = [notebook.get_note_path(note) for note in notes]
+def search_similar_paths(keywords, notetree: Tree):
+    notes = notetree.get_notes_by_similarity(keywords, top_k=5)
+    similar_paths = [notetree.get_note_path(note) for note in notes]
     return similar_paths
 
 
 def conceive_path(content: str, context: str, similar_paths: List[List[str]],
-                  notebook: Notebook):
-    prompt = "You are managing a notebook."
-    prompt += "Here is a description of the notebook:" + notebook.topic + "\n\n"
+                  notetree: Tree):
+    prompt = "You are managing a notetree."
+    prompt += "Here is a description of the notetree:" + notetree.topic + "\n\n"
     prompt += "You are trying to find a path to put a new note based on its content and context."
     prompt += f"\nContent: {content}"
     if len(context) > 0:
         prompt += f"\nContext: {context}"
     chat = Chat(user_message=prompt, system_message=system_message)
     path_prompt = []
-    if notebook.rule_of_path is not None:
-        path_prompt.append("The notebook has a rule of path:")
-        path_prompt.append(notebook.rule_of_path)
+    if notetree.rule_of_path is not None:
+        path_prompt.append("The notetree has a rule of path:")
+        path_prompt.append(notetree.rule_of_path)
     if len(similar_paths) > 0:
         path_prompt.append("Here are some related paths to put the note.")
         for i, path in enumerate(similar_paths):
@@ -62,8 +62,8 @@ def conceive_path(content: str, context: str, similar_paths: List[List[str]],
     return res
 
 
-def put_content_to_notebook_1(content: str, context: str, path_to_put,
-                              notebook: Notebook):
+def put_content_to_notetree_1(content: str, context: str, path_to_put,
+                              notetree: Tree):
     chat = Chat(system_message=system_message)
 
     prompt = "You are managing a database of notes."
@@ -75,13 +75,13 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put,
 
     prompt_adding = "You want to add the above note to the following path."
     prompt_adding += f"\nCurrent Path: {path_to_put.join('/')}"
-    note_in_path = notebook.get_note_by_path(path_to_put)
+    note_in_path = notetree.get_note_by_path(path_to_put)
 
     if len(note_in_path.content) > 0:
         prompt_adding += f"\nContent in current path: {note_in_path.content}"
 
     # Also show the content in parent path if it is not empty
-    note_in_parent_path = notebook.get_note_by_path(path_to_put[:-1])
+    note_in_parent_path = notetree.get_note_by_path(path_to_put[:-1])
     if len(note_in_parent_path.content) > 0:
         prompt_adding += f"\nParent path: {path_to_put[:-1].join('/')}"
         prompt_adding += f"\nContent in parent path: {note_in_parent_path.content}"
@@ -97,14 +97,14 @@ def put_content_to_notebook_1(content: str, context: str, path_to_put,
     # TODO not finished
 
 
-def put_content_to_notebook(content: str, context: str, conceived_path,
-                            notebook: Notebook):
+def put_content_to_notetree(content: str, context: str, conceived_path,
+                            notetree: Tree):
     chat = Chat(system_message=system_message)
 
     prompt_adding = "You are managing a database of notes."
     prompt_adding += "\nYou want to add the a note to the following path."
     prompt_adding += f"\nCurrent Path: {'/'.join(conceived_path)}"
-    note_in_path = notebook.get_note_by_path(conceived_path)
+    note_in_path = notetree.get_note_by_path(conceived_path)
 
     if note_in_path is not None and len(note_in_path.content) > 0:
         prompt_adding += f"\nContent in current path: {note_in_path.content}"
@@ -131,22 +131,22 @@ def put_content_to_notebook(content: str, context: str, conceived_path,
     filename = res["title"]
     new_content = res["new_content"]
     path_for_new_note = conceived_path + [filename]
-    new_note = Note(notebook)
+    new_note = Note(notetree)
     new_note.content = new_content
     print(filename, new_content, path_for_new_note)
 
-    notebook.add_note_by_path(path_for_new_note, new_note)
+    notetree.add_note_by_path(path_for_new_note, new_note)
 
 
-def add_content_to_notebook(content: str, context: str, notebook: Notebook):
+def add_content_to_notetree(content: str, context: str, notetree: Tree):
     # step 1: generate possible keywords
     # step 2: search related paths / notes
     # step 3: decide a path to put content
     keywords = generate_possible_keywords(content, context)
-    similar_paths = search_similar_paths(keywords, notebook)
-    conceived_path = conceive_path(content, context, similar_paths, notebook)
+    similar_paths = search_similar_paths(keywords, notetree)
+    conceived_path = conceive_path(content, context, similar_paths, notetree)
     print(conceived_path)
-    put_content_to_notebook(content, context, conceived_path, notebook)
+    put_content_to_notetree(content, context, conceived_path, notetree)
 
 
 if __name__ == "__main__":

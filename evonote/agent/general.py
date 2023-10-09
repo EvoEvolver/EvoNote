@@ -1,9 +1,9 @@
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
 
 class AgentState:
     def __init__(self):
-        self.root_notebook = Notebook(
-            "root notebook that indexes all available notebooks")
+        self.root_notetree = Tree(
+            "root notetree that indexes all available notetrees")
         self.objective_stack = []
         self.logs = []

@@ -1,9 +1,9 @@
 from evonote.indexing.code_indexer import CodeDocsIndexer
 from evonote.model.chat import Chat
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
 """
-This module contains functions for searching in notebooks of python functions.
+This module contains functions for searching in notetrees of python functions.
 The python functions can be indexed by their docstrings, function names, parameter names, return values, etc.
 """
 
@@ -35,18 +35,18 @@ def possible_docstring(description: str):
     return res
 
 
-def search_function(description: str, notebook: Notebook, top_k=10):
+def search_function(description: str, notetree: Tree, top_k=10):
     """
     Plan: TODO
     1. Imagine the docstring of the function by the description
     2. Imagine the function name by the description
     3. Imagine the parameter names by the description
     4. Imagine the return value by the description
-    5. Search the notebook by the above 4 things with CodeDocsIndexer, CodeParamIndexer, CodeReturnIndexer
+    5. Search the notetree by the above 4 things with CodeDocsIndexer, CodeParamIndexer, CodeReturnIndexer
     """
 
     names = possible_function_names(description)
     docstring = possible_docstring(description)
     query_keys = names + [docstring]
-    return notebook.get_sub_notebook_by_similarity(query_keys, top_k=top_k,
+    return notetree.get_sub_notetree_by_similarity(query_keys, top_k=top_k,
                                             indexer_class=CodeDocsIndexer)

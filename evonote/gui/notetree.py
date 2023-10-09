@@ -8,8 +8,7 @@ from hyphen import Hyphenator
 from evonote.gui.utlis import hypenate_texts
 
 if TYPE_CHECKING:
-    from evonote.notebook.note import Note
-    from evonote.notebook.notebook import Notebook
+    from evonote.notetree import Note, Tree
 
 h_en = Hyphenator('en_US')
 
@@ -53,12 +52,12 @@ def get_json_for_treemap(root: Note):
 
 
 def prepare_tree_parameters(root):
-    notebook = root.notebook
+    notetree = root.notetree
     labels = []
     parents = []
     texts = []
     ids = []
-    add_note_to_list(labels, parents, texts, ids, root, notebook)
+    add_note_to_list(labels, parents, texts, ids, root, notetree)
     line_width = 40
     for i in range(len(texts)):
         if len(texts[i].strip()) == 0:
@@ -68,15 +67,15 @@ def prepare_tree_parameters(root):
     return ids, labels, parents, texts
 
 
-def add_note_to_list(labels, parents, values, ids, note: Note, notebook: Notebook):
+def add_note_to_list(labels, parents, values, ids, note: Note, notetree: Tree):
     i = 1
-    children = notebook.get_children_dict(note)
+    children = notetree.get_children_dict(note)
     for key, child in children.items():
-        notepath = notebook.get_note_path(child)
+        notepath = notetree.get_note_path(child)
         label = str(i) + ". " + key if len(children) > 1 else key
         labels.append(label)
         parents.append("/".join(notepath[:-1]))
         values.append(child.content)
         ids.append("/".join(notepath))
-        add_note_to_list(labels, parents, values, ids, child, notebook)
+        add_note_to_list(labels, parents, values, ids, child, notetree)
         i += 1

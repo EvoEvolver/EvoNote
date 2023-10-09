@@ -1,9 +1,9 @@
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
-notebook = Notebook.load("AI4Science.enb")
+notetree = Tree.load("AI4Science.enb")
 
 keyword = "quantum computing"
 
-notebook = notebook.get_sub_notebook_by_similarity([keyword], top_k=10)
+notetree = notetree.get_sub_notetree_by_similarity([keyword], top_k=10)
 
-notebook.show_notebook_gui()
+notetree.show_notetree_gui()

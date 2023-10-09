@@ -1,6 +1,6 @@
 import evonote.debug as debug
 from evonote.model.chat import Chat
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
 
 def some_function():
@@ -13,21 +13,21 @@ def some_function():
 with debug.display_chats():
     some_function()
 
-def example_notebook():
-    notebook = Notebook("notebook for testing")
-    notebook.get_new_note_by_path(["People", "Mike"]).be("Mike lives in Los Santos")
-    notebook.get_new_note_by_path(["Fruit", "Apple"]).be("Apple is a fruit")
-    return notebook
+def example_notetree():
+    notetree = Tree("notetree for testing")
+    notetree.get_new_note_by_path(["People", "Mike"]).be("Mike lives in Los Santos")
+    notetree.get_new_note_by_path(["Fruit", "Apple"]).be("Apple is a fruit")
+    return notetree
 
 
 # <- Set a break point here
-notebook = example_notebook()
-notebook.show_notebook_gui()
+notetree = example_notetree()
+notetree.show_notetree_gui()
 
 # <- Set a break point here
 with debug.display_embedding_search():
     with debug.display_chats():
         with debug.refresh_cache():
-            sub_notebook = notebook.get_sub_notebook_by_similarity(
+            sub_notetree = notetree.get_sub_notetree_by_similarity(
                 ["Franklin lives in Los Santos"], top_k=1)
-            sub_notebook.show_notebook_gui()
+            sub_notetree.show_notetree_gui()

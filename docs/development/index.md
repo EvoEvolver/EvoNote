@@ -3,7 +3,7 @@
 ## Knowledge storage
 `Note`: The node of knowledge. It only contains the knowledge itself.
 
-`Notebook`: The collection of the references to `Note` objects. It contains **the relationship among knowledge**. It includes parents, children and path in the tree structure. It also contains the indexings of the notes.
+`Tree`: The collection of the references to `Note` objects. It contains **the relationship among knowledge**. It includes parents, children and path in the tree structure. It also contains the indexings of the notes.
 
 ## Indexing
 `Indexing`: The class for storing the data of one indexing. It can return related notes when provided with queries. It must be interpreted by the `Indexer` class.

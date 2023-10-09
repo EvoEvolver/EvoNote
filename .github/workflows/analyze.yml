@@ -29,7 +29,7 @@ jobs:
       - name: build project tree📦
         run:  |
           mkdir output
-          python -c "import evonote, json;from evonote.gui.notebook import get_json_for_treemap;from evonote.transform.module_to_notebook import get_notebook_for_module;notebook = get_notebook_for_module(evonote);tree = get_json_for_treemap(notebook.root);f = open('output/project_tree.json', 'w');json.dump(tree, f)"
+          python ./.github/workflows/gen_project_tree.py
 
       - name: Deploy to image-data branch
         uses: peaceiris/actions-gh-pages@v3

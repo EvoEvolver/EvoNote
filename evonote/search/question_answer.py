@@ -1,8 +1,8 @@
 from typing import List
 
 from evonote.model.chat import Chat
-from evonote.notebook.notebook import Notebook
-from evonote.search.fine_searcher import filter_notebook_in_group
+from evonote.notetree import Tree
+from evonote.search.fine_searcher import filter_notetree_in_group
 from evonote.utils import robust_json_parse, multi_attempts
 
 
@@ -20,13 +20,13 @@ class Plan:
 
 
 @multi_attempts
-def single_notebook_qa_agent(question: str, knowledge_base: Notebook):
+def single_notetree_qa_agent(question: str, knowledge_base: Tree):
     """
     :param question: The question
-    :param knowledge_base: The notebook to search
+    :param knowledge_base: The notetree to search
     :return: The answer
     """
-    working_memory = Notebook("Working Notebook")
+    working_memory = Tree("Working Tree")
     working_memory.root.be("")
     old_plan = None
     exit_flag = False
@@ -136,19 +136,19 @@ def imagine_answer(query: str, n_fragments=3):
     return res
 
 
-def search(query: str, notebook: Notebook):
+def search(query: str, notetree: Tree):
     imagined_answer = imagine_answer(query)["fragments"]
-    sub_notebook = notebook.get_sub_notebook_by_similarity(imagined_answer, top_k=10)
-    sub_notebook = filter_notebook_in_group(sub_notebook,
+    sub_notetree = notetree.get_sub_notetree_by_similarity(imagined_answer, top_k=10)
+    sub_notetree = filter_notetree_in_group(sub_notetree,
                                             "The note answers the search query:" + query)
-    return sub_notebook
+    return sub_notetree
 
 
 @multi_attempts
-def answer(question: str, notebook: Notebook):
-    sub_notebook = search(question, notebook)
+def answer(question: str, notetree: Tree):
+    sub_notetree = search(question, notetree)
     prompt = f"""Here is some items obtained from a knowledge base. The context of the items are implied by their path.
-{sub_notebook.get_path_content_str_for_prompt()}"""
+{sub_notetree.get_path_content_str_for_prompt()}"""
     chat = Chat(user_message=prompt)
     chat.add_user_message(f"""Please analyze and give an answer to the question: 
 {question}
@@ -163,9 +163,9 @@ If the items is irrelevant to the question, give a JSON string with the a single
 
 if __name__ == "__main__":
     import evonote.debug as debug
-    from evonote.testing.testing_notebooks.loader import load_sample_notebook
+    from evonote.testing.testing_trees.loader import load_sample_notetree
 
-    dingzhen_world = load_sample_notebook("dingzhen_world")
+    dingzhen_world = load_sample_notetree("dingzhen_world")
     # question = "Who is the pet of the president of the republic of Ganzi?"
     question = "What is the relation between Dingzhen and Zhenzhu the horse?"
-    single_notebook_qa_agent(question, dingzhen_world)
+    single_notetree_qa_agent(question, dingzhen_world)

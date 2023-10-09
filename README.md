@@ -41,7 +41,7 @@ Typically, these tasks requires
 
 ## Why EvoNote
 
-EvoNote is build for holding and operating knowledge bases (notebooks). EvoNote offers
+EvoNote is build for holding and operating knowledge in the form of `note trees`. EvoNote offers
 
 - A tree-based knowledge base framework
 - Convenient tools for 

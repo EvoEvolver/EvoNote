@@ -11,15 +11,15 @@ Satisfied?
 
 Atomic operations:
 
-1. Search in notebook
+1. Search in notetree
 2. Execute action in the retrieved note
-3. Ask (and update in-prompt memory and notebook) (I doubt this can be removed from atomic)
+3. Ask (and update in-prompt memory and notetree) (I doubt this can be removed from atomic)
 4. Memo (update in-prompt memory)
 5. Planing: Make a complex objective into atomic operations
 
 Operation arguments:
 
-1. Search in notebook: notebook, indexing, query, query_type: similarity | question
+1. Search in notetree: notetree, indexing, query, query_type: similarity | question
 2. Execute action in the retrieved note: note, action
 3. Ask: question
 4. Memo: content
@@ -44,7 +44,7 @@ Planning:
 
 Search:
 
-1. The search should be done with a special searching agent. The input is the searching objective. A special notebook
+1. The search should be done with a special searching agent. The input is the searching objective. A special notetree
    for how to search might be used.
 2. The searching agent will break down the objective into further sub-objectives. The sub-objectives are finer and more
    specific than the original objective.

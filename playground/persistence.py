@@ -1,5 +1,5 @@
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Tree
 
-notebook = Notebook.load("AI4Science.enb")
+notetree = Tree.load("AI4Science.enb")
 
-notebook.show_notebook_gui()
+notetree.show_notetree_gui()

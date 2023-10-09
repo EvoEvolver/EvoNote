@@ -1,6 +1,6 @@
-from evonote.notebook.analysis import analyze_notebook_sparsity
+from evonote.notetree.analysis import analyze_notetree_sparsity
 import evonote
-from evonote.transform.module_to_notebook import get_notebook_for_module
+from evonote.transform.module_to_notetree import get_notetree_for_module
 
-notebook = get_notebook_for_module(evonote)
-analyze_notebook_sparsity(notebook)
+notetree = get_notetree_for_module(evonote)
+analyze_notetree_sparsity(notetree)

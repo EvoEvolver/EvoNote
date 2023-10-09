@@ -5,22 +5,22 @@ import json
 
 from doc_in_py.core import get_module_members
 from doc_in_py import Struct
-from evonote.notebook.note import Note
-from evonote.notebook.notebook import Notebook
+from evonote.notetree import Note
+from evonote.notetree import Tree
 from doc_in_py.docs_parser import \
     parse_rst_docstring, \
     parse_google_docstring, Doc_parser
 
 """
-This modules is for extract the information from python modules and build a notebook for it.
+This modules is for extract the information from python modules and build a notetree for it.
 
 
-## Get notebook for module
+## Get notetree for module
 
 """
 
 
-def get_notebook_for_module(module, docs_parser_type="rst"):
+def get_notetree_for_module(module, docs_parser_type="rst"):
     if docs_parser_type == "rst":
         docs_parser = parse_rst_docstring
     elif docs_parser_type == "google":
@@ -28,14 +28,14 @@ def get_notebook_for_module(module, docs_parser_type="rst"):
     else:
         raise ValueError("docs_parser_type should be pycharm or vscode")
     module_name = module.__name__
-    notebook = Notebook(
-        "Notebook of module: " + module_name)
+    notetree = Tree(
+        "Tree of module: " + module_name)
     module_struct = get_module_members(module)
-    build_notebook_for_struct(module_struct, notebook.root, docs_parser)
-    return notebook
+    build_notetree_for_struct(module_struct, notetree.root, docs_parser)
+    return notetree
 
 
-def build_notebook_for_struct(curr_struct: Struct, root_note: Note,
+def build_notetree_for_struct(curr_struct: Struct, root_note: Note,
                               docs_parser: Doc_parser):
     """
     :param curr_struct: The struct to be added to the child of the root_note
@@ -55,17 +55,17 @@ def build_notebook_for_struct(curr_struct: Struct, root_note: Note,
             case "function":
                 process_function_struct(child_struct, curr_note, docs_parser)
             case "module":
-                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+                build_notetree_for_struct(child_struct, curr_note, docs_parser)
             case "class":
-                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+                build_notetree_for_struct(child_struct, curr_note, docs_parser)
             case "comment":
                 curr_note.be(curr_note.content + "\n" + child_struct.obj)
             case "section":
-                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+                build_notetree_for_struct(child_struct, curr_note, docs_parser)
             case "todo":
-                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+                build_notetree_for_struct(child_struct, curr_note, docs_parser)
             case "example":
-                build_notebook_for_struct(child_struct, curr_note, docs_parser)
+                build_notetree_for_struct(child_struct, curr_note, docs_parser)
 
 
 
@@ -121,5 +121,5 @@ def get_docs_in_prompt(doc_tuple):
 if __name__ == "__main__":
     from evonote.testing.testing_modules import v_lab
 
-    notebook = get_notebook_for_module(v_lab)
-    notebook.show_notebook_gui()
+    notetree = get_notetree_for_module(v_lab)
+    notetree.show_notetree_gui()
