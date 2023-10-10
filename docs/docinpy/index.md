@@ -13,7 +13,7 @@ codebase. It is also important for AI-based agents to understand the codebase an
 ## EvoNote
 
 EvoNote is using DocInPy to document its codebase. You can have a good visualization of EvoNote's codebase by
-running [EvoNote visualization](/html/project_tree.html).
+running [EvoNote visualization](https://evonote.org/html/project_tree.html).
 
 ## How to use
 
