@@ -8,6 +8,7 @@ on:
     # trigger deployment on every push to docs folder
     paths:
       - docs/**
+      - .github/workflows/deploy.yml
 
 jobs:
   docs:

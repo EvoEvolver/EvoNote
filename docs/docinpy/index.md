@@ -95,11 +95,13 @@ a_folder
 ```
 You can put `a`,`b` in a section by putting
 ```yaml
-sections
+sections:
+ your section title:
+   - a
+   - b
+default section: you default section title
 ```
-
-
-
+Then `a` and `b` will be in the section `your section title` and `c` will be in the section `you default section title`.
 
 ### Mark examples
 

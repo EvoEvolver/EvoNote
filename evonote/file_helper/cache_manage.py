@@ -76,6 +76,8 @@ class CacheManager:
 
     def save_all_cache_to_file(self):
         self.apply_cache_update()
+        if len(self.cache_table) == 0:
+            return
         with open(self.cache_path, "w") as f:
             f.write(serialize_cache_table(self.cache_table))
 
@@ -125,9 +127,6 @@ class CacheManager:
 
     def load_cache_table(self) -> CacheTable:
         if not os.path.exists(self.cache_path):
-            # Create file if not exists
-            with open(self.cache_path, "w") as f:
-                f.write("[]")
             return {}
         with open(self.cache_path, "r") as f:
             cache_list = json.load(f)

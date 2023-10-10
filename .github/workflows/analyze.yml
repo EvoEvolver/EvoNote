@@ -5,6 +5,7 @@ on:
     paths:
       - evonote/**
       - docinpy/**
+      - .github/workflows/analyze.yml
 
 env:
   OPENAI_API_KEY: NAN
