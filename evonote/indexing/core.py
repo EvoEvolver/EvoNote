@@ -10,8 +10,8 @@ from evonote.file_helper.logger import Logger
 from evonote.model.chat import Chat
 
 if TYPE_CHECKING:
-    from evonote.notetree import Note
-    from evonote.notetree import Tree
+    from evonote.mindtree import Note
+    from evonote.mindtree import Tree
 
 from evonote.file_helper.cache_manage import save_cache, cached_function
 from evonote.model.openai import get_embeddings
@@ -41,11 +41,11 @@ class Indexer:
 
 class Indexing:
     def __init__(self, notes: List[Note], indexer: Type[Indexer],
-                 notetree: Tree):
+                 tree: Tree):
         self.notes_without_indexer: List[Note] = notes[:]
         self.indexer: Type[Indexer] = indexer
         self.data: Any = None
-        self.notetree = notetree
+        self.tree = tree
 
     def add_new_note(self, note: Note):
         self.notes_without_indexer.append(note)
@@ -223,7 +223,7 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     def process_note_with_content(cls, notes: List[Note], indexing: Indexing,
                                   ):
         notes_content = [note.content for note in notes]
-        notetree = indexing.notetree
+        tree = indexing.tree
 
         new_src_list = []
         new_weights = []
@@ -233,9 +233,9 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
                                    executor.map(process_sent_into_frags, notes_content)):
                 new_src = []
                 new_src.extend(frags)
-                note_path = notetree.get_note_path(note)
+                note_path = tree.get_note_path(note)
                 if len(note_path) > 0:
-                    new_src.append(notetree.get_note_path(note)[-1])
+                    new_src.append(tree.get_note_path(note)[-1])
                 new_src.append(note.content)
 
                 new_src_list.append(new_src)
@@ -274,13 +274,13 @@ class FragmentedEmbeddingIndexer(AbsEmbeddingIndexer):
     def prepare_src_weight_list(cls, new_notes: List[Note], indexing: Indexing,
                                 ):
 
-        notetree = indexing.notetree
+        tree = indexing.tree
         notes_with_content = []
         notes_content = []
         notes_without_content = []
         for note in new_notes:
             if len(note.content) == 0:
-                keywords_on_path = notetree.get_note_path(note)
+                keywords_on_path = tree.get_note_path(note)
                 if len(keywords_on_path) != 0:
                     notes_without_content.append(note)
                 continue

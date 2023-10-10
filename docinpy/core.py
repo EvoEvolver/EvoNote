@@ -9,8 +9,8 @@ from typing import List, Dict
 
 import yaml
 
-from doc_in_py import Struct
-from doc_in_py.comment_parser import prepare_raw_comment_struct, parse_raw_comments
+from docinpy import Struct
+from docinpy.comment_parser import prepare_raw_comment_struct, parse_raw_comments
 
 
 def get_module_members(module) -> Struct:

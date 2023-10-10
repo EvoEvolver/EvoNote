@@ -1,5 +1,5 @@
 import evonote
-from evonote.transform.module_to_notetree import get_notetree_for_module
+from evonote.transform.module_to_tree import get_tree_for_module
 
-notetree = get_notetree_for_module(evonote)
-notetree.show_notetree_gui()
+tree = get_tree_for_module(evonote)
+tree.show_tree_gui()

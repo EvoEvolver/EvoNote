@@ -1,5 +1,5 @@
-from evonote.notetree import Tree
+from evonote.mindtree import Tree
 
-notetree = Tree.load("AI4Science.enb")
+tree = Tree.load("AI4Science.enb")
 
-notetree.show_notetree_gui()
+tree.show_tree_gui()

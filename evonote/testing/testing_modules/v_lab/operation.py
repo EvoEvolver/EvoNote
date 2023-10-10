@@ -1,4 +1,4 @@
-from doc_in_py.decorator import example, todo
+from docinpy.decorator import example, todo
 from evonote.testing.testing_modules.v_lab.beaker import Beaker
 
 """

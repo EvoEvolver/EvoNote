@@ -1,20 +1,20 @@
 from evonote import debug
 from evonote.transform.build_from_sections import digest_all_descendants
-from evonote.transform.notetree_to_paragraph import notetree_to_paragraph
-from evonote.notetree import Tree
+from evonote.transform.tree_to_paragraph import tree_to_paragraph
+from evonote.mindtree import Tree
 
 
 with debug.display_chats():
-    notetree = Tree.load("AI4Science.enb")
+    tree = Tree.load("AI4Science.enb")
     keyword = "quantum computing"
-    notetree = notetree.get_sub_notetree_by_similarity([keyword], top_k=6)
-    res = notetree_to_paragraph(notetree,
+    tree = tree.get_sub_tree_by_similarity([keyword], top_k=6)
+    res = tree_to_paragraph(tree,
                                 f"You should focus on writing about {keyword}")
 
-    # Refactor the notetree
+    # Refactor the tree
 
-    new_notetree = Tree(keyword)
-    note = new_notetree.get_new_note_by_path([keyword])
+    new_tree = Tree(keyword)
+    note = new_tree.get_new_note_by_path([keyword])
     note.be(res)
-    new_notetree = digest_all_descendants(new_notetree)
-    new_notetree.show_notetree_gui()
+    new_tree = digest_all_descendants(new_tree)
+    new_tree.show_tree_gui()

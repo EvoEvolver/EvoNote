@@ -1,4 +1,4 @@
-from doc_in_py.decorator import todo, example
+from docinpy.decorator import todo, example
 
 """
 # Todo for the function

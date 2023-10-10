@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import List
 
-from doc_in_py import Struct
+from docinpy import Struct
 
 """
 This module is for parse and extract comments

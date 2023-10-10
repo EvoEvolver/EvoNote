@@ -1,6 +1,13 @@
 sections:
-  core:
-    - notetree
+  Core:
+    - mindtree
     - indexing
+  Auxiliary:
     - file_helper
     - model
+    - gui
+    - testing
+  Applications:
+    - agent
+    - transform
+    - data_cleaning

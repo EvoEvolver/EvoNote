@@ -4,12 +4,12 @@ from copy import copy
 from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
-    from evonote.notetree import Tree
+    from evonote.mindtree import Tree
 
 
 class Note:
     """
-    A tree-like data structure that stores notetree
+    A tree-like data structure that stores tree
     usually for the direct summary of paragraphs
 
     The relation of the items are mainly represented by the tree structure
@@ -18,18 +18,18 @@ class Note:
     Notice that Note object can be indexed by embedding vectors because its
     """
 
-    def __init__(self, notetree: Tree):
+    def __init__(self, tree: Tree):
         super().__init__()
 
         # content is string no matter what _content_type is
         self.content: str = ""
-        # The root note helps merge two notetree bases
-        self.notetree: Tree = notetree
+        # The root note helps merge two tree bases
+        self.tree: Tree = tree
         # The resource is the data that is indicated by the note
         self.resource: NoteResource = NoteResource()
 
-    def copy_to(self, notetree: Tree):
-        new_note = Note(notetree)
+    def copy_to(self, tree: Tree):
+        new_note = Note(tree)
         new_note.content = copy(self.content)
         new_note.resource = copy(self.resource)
         return new_note
@@ -39,13 +39,13 @@ class Note:
     """
 
     def note_path(self):
-        return self.notetree.get_note_path(self)
+        return self.tree.get_note_path(self)
 
     def parent(self):
-        return self.notetree.get_parent(self)
+        return self.tree.get_parent(self)
 
     def children(self) -> Dict[str, Note]:
-        return self.notetree.get_children_dict(self)
+        return self.tree.get_children_dict(self)
 
     def title(self) -> str:
         note_path = self.note_path()
@@ -54,19 +54,19 @@ class Note:
         return note_path[-1]
 
     def has_child(self, key: str):
-        return self.notetree.has_child(self, key)
+        return self.tree.has_child(self, key)
 
     """
     ## Functions for adding children of note
     """
 
     def add_child(self, key: str, note) -> Note:
-        self.notetree.add_child(key, self, note)
+        self.tree.add_child(key, self, note)
         return note
 
     def new_child(self, key: str) -> Note:
-        note = Note(self.notetree)
-        self.notetree.add_child(key, self, note)
+        note = Note(self.tree)
+        self.tree.add_child(key, self, note)
         return note
 
     """
@@ -79,12 +79,12 @@ class Note:
         :param key: the key of the child note
         :return:
         """
-        notetree = self.notetree
+        tree = self.tree
         if isinstance(key, int) or isinstance(key, str):
-            children = notetree.get_children_dict(self)
+            children = tree.get_children_dict(self)
             if key not in children:
-                note = Note(notetree)
-                notetree.add_child(key, self, note)
+                note = Note(tree)
+                tree.add_child(key, self, note)
                 return note
             return children[key]
         else:
@@ -158,8 +158,8 @@ class NoteResource:
     def add_text(self, text, key: str):
         self.add_resource(text, "text", key)
 
-    def add_notetree(self, notetree, key: str):
-        self.add_resource(notetree, "notetree", key)
+    def add_tree(self, tree, key: str):
+        self.add_resource(tree, "tree", key)
 
     def add_function(self, function, key: str):
         self.add_resource(function, "function", key)

@@ -6,7 +6,7 @@ Docstring style: rst
 
 ## DocInPy
 
-Please use the [DocInPy](https://github.com/EvoEvolver/EvoNote/tree/main/doc_in_py) style for adding sections in the codes. 
+Please use the [DocInPy](https://github.com/EvoEvolver/EvoNote/tree/main/docinpy) style for adding sections in the codes. 
 
 ## Installation
 

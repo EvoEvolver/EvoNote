@@ -4,7 +4,7 @@ on:
       - main
     paths:
       - evonote/**
-      - doc_in_py/**
+      - docinpy/**
 
 env:
   OPENAI_API_KEY: NAN

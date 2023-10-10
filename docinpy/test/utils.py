@@ -1,4 +1,4 @@
-from doc_in_py import Struct
+from docinpy import Struct
 
 
 def to_dict(struct: Struct):

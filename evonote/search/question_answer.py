@@ -1,8 +1,8 @@
 from typing import List
 
 from evonote.model.chat import Chat
-from evonote.notetree import Tree
-from evonote.search.fine_searcher import filter_notetree_in_group
+from evonote.mindtree import Tree
+from evonote.search.fine_searcher import filter_tree_in_group
 from evonote.utils import robust_json_parse, multi_attempts
 
 
@@ -20,10 +20,10 @@ class Plan:
 
 
 @multi_attempts
-def single_notetree_qa_agent(question: str, knowledge_base: Tree):
+def single_tree_qa_agent(question: str, knowledge_base: Tree):
     """
     :param question: The question
-    :param knowledge_base: The notetree to search
+    :param knowledge_base: The tree to search
     :return: The answer
     """
     working_memory = Tree("Working Tree")
@@ -136,19 +136,19 @@ def imagine_answer(query: str, n_fragments=3):
     return res
 
 
-def search(query: str, notetree: Tree):
+def search(query: str, tree: Tree):
     imagined_answer = imagine_answer(query)["fragments"]
-    sub_notetree = notetree.get_sub_notetree_by_similarity(imagined_answer, top_k=10)
-    sub_notetree = filter_notetree_in_group(sub_notetree,
+    sub_tree = tree.get_sub_tree_by_similarity(imagined_answer, top_k=10)
+    sub_tree = filter_tree_in_group(sub_tree,
                                             "The note answers the search query:" + query)
-    return sub_notetree
+    return sub_tree
 
 
 @multi_attempts
-def answer(question: str, notetree: Tree):
-    sub_notetree = search(question, notetree)
+def answer(question: str, tree: Tree):
+    sub_tree = search(question, tree)
     prompt = f"""Here is some items obtained from a knowledge base. The context of the items are implied by their path.
-{sub_notetree.get_path_content_str_for_prompt()}"""
+{sub_tree.get_path_content_str_for_prompt()}"""
     chat = Chat(user_message=prompt)
     chat.add_user_message(f"""Please analyze and give an answer to the question: 
 {question}
@@ -163,9 +163,9 @@ If the items is irrelevant to the question, give a JSON string with the a single
 
 if __name__ == "__main__":
     import evonote.debug as debug
-    from evonote.testing.testing_trees.loader import load_sample_notetree
+    from evonote.testing.testing_trees.loader import load_sample_tree
 
-    dingzhen_world = load_sample_notetree("dingzhen_world")
+    dingzhen_world = load_sample_tree("dingzhen_world")
     # question = "Who is the pet of the president of the republic of Ganzi?"
     question = "What is the relation between Dingzhen and Zhenzhu the horse?"
-    single_notetree_qa_agent(question, dingzhen_world)
+    single_tree_qa_agent(question, dingzhen_world)

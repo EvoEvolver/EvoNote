@@ -13,7 +13,7 @@ codebase. It is also important for AI-based agents to understand the codebase an
 ## EvoNote
 
 EvoNote is using DocInPy to document its codebase. You can have a good visualization of EvoNote's codebase by
-running [EvoNote visualization](https://github.com/EvoEvolver/EvoNote/blob/main/playground/visualize_paper.py).
+running [EvoNote visualization](/html/project_tree.html).
 
 ## How to use
 
@@ -82,12 +82,31 @@ def baz():
     pass
 ```
 
+### Section in folder
+
+You add `.tree.yml` file in a folder to add sections in it. For example, in the following folder
+```
+a_folder
+- __init__.py
+- a.py
+- b.py
+- c.py
+- .tree.yml
+```
+You can put `a`,`b` in a section by putting
+```yaml
+sections
+```
+
+
+
+
 ### Mark examples
 
 You can also add examples to your functions and classes. Just use the `@example` decorator. For example,
 
 ```python
-from doc_in_py.decorator import example
+from docinpy.decorator import example
 
 
 @example
@@ -104,7 +123,7 @@ def how_to_use_foo():
 In a similar way, you can also mark todos in your code. Just use the `@todo` decorator. For example,
 
 ```python
-from doc_in_py.decorator import todo
+from docinpy.decorator import todo
 
 @todo
 def todo_foo():
@@ -119,14 +138,6 @@ def buggy_foo():
     foo(a=b)
 ```
 
-## Project todos
-
-- Extract variables from module and classes
-- Extract comments for class variables (What should be the format of the comments?)
-- Process code of function and extract comments
-- TODO decorator for functions
-
-- Serialization from structs to Python code
 
 ## Philosophy behind DocInPy
 
@@ -143,4 +154,4 @@ structure.
 
 DocInPy helps this by adding a zero-cost way to add sections to your functions and classes. It makes another step
 towards a more tree-like structure of the codebase. We believe this will help the programmers to understand the codebase
-better. See [Method of Loci](docs/introduction/2.1 Method of Loci.md) for more details.
+better. See [Method of Loci](/writings/2.1%20Method%20of%20Loci%20and%20sparsity.html) for more details.

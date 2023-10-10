@@ -1,4 +1,4 @@
-from doc_in_py.core import get_module_members
+from docinpy.core import get_module_members
 from utils import to_dict
 
 

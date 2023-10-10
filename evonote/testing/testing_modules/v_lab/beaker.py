@@ -1,4 +1,4 @@
-from doc_in_py.decorator import example
+from docinpy.decorator import example
 
 
 class Beaker:

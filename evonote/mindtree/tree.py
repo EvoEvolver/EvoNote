@@ -5,10 +5,10 @@ from typing import Dict, List, Type, Callable, Tuple
 import dill
 from bidict import bidict
 
-from evonote.gui.notetree import draw_treemap
+from evonote.gui.mindtree import draw_treemap
 from evonote.indexing.core import FragmentedEmbeddingIndexer
 from evonote.indexing.core import Indexing, Indexer
-from evonote.notetree.note import Note
+from evonote.mindtree.note import Note
 
 
 class Tree:
@@ -19,14 +19,14 @@ class Tree:
 
     :cvar children: The children of each note
     :cvar note_path: The path of each note
-    :cvar indexings: The dict for indexings made for the notetree
+    :cvar indexings: The dict for indexings made for the tree
         The key is the class of the indexer and the value is the indexing
     """
 
 
     def __init__(self, root_content, rule_of_path: str = None):
         """
-        :param root_content: The content of the root of the notetree
+        :param root_content: The content of the root of the tree
         :param rule_of_path: The rule for creating paths.
         """
         self.children: Dict[Note, Dict[str, Note]] = {}
@@ -41,7 +41,7 @@ class Tree:
         self.note_path[root] = tuple()
         root.set_content(root_content)
 
-        # TODO: this can be note, notetree, or string in the future
+        # TODO: this can be note, tree, or string in the future
         self.rule_of_path = rule_of_path
 
 
@@ -140,7 +140,7 @@ class Tree:
         return list(self.note_path.keys())
 
     def add_child(self, key: str, parent: Note, child: Note):
-        if child.notetree is not self:
+        if child.tree is not self:
             child = child.copy_to(self)
         if child not in self.children:
             self.children[child] = {}
@@ -164,8 +164,8 @@ class Tree:
     def remove_note(self, note: Note):
         """
         Remove a note from the tree
-        This will remove all the indexing data of the notetree
-        It is better to create another notetree that removing a note
+        This will remove all the indexing data of the tree
+        It is better to create another tree that removing a note
         :param note:
         :return:
         """
@@ -186,10 +186,10 @@ class Tree:
             indexing.remove_note(note)
 
     """
-    ## Representation of notetree in prompt
+    ## Representation of tree in prompt
     """
 
-    def get_notetree_dict(self, add_index=True):
+    def get_tree_dict(self, add_index=True):
         tree = {
             "subtopics": {},
         }
@@ -212,7 +212,7 @@ class Tree:
         return tree, note_indexed
 
     def get_dict_for_prompt(self):
-        dict_without_indices, note_indexed = self.get_notetree_dict(add_index=False)
+        dict_without_indices, note_indexed = self.get_tree_dict(add_index=False)
         delete_extra_keys_for_prompt(dict_without_indices)
         return dict_without_indices
 
@@ -228,22 +228,22 @@ class Tree:
         return "\n".join(res)
 
     def get_dict_with_indices_for_prompt(self):
-        dict_with_indices, note_indexed = self.get_notetree_dict()
+        dict_with_indices, note_indexed = self.get_tree_dict()
         delete_extra_keys_for_prompt(dict_with_indices)
         return dict_with_indices, note_indexed
 
     """
-    ## Visualization of notetree
+    ## Visualization of tree
     """
 
-    def show_notetree_gui(self):
+    def show_tree_gui(self):
         """
-        Show the notetree in a webpage
+        Show the tree in a webpage
         """
         draw_treemap(self.root)
 
     """
-    ## Sub-notetree extraction
+    ## Sub-tree extraction
     """
 
     def get_notes_by_similarity(self, query_list: List[str],
@@ -262,33 +262,33 @@ class Tree:
 
         return top_k_notes
 
-    def get_sub_notetree_by_similarity(self, query_list: List[str],
-                                       weights: List[float] | None = None,
-                                       top_k: int = 10,
-                                       note_filter: Callable[[Note], bool] = None,
-                                       indexer_class: Type[Indexer] = None
-                                       ) -> Tree:
+    def get_sub_tree_by_similarity(self, query_list: List[str],
+                                   weights: List[float] | None = None,
+                                   top_k: int = 10,
+                                   note_filter: Callable[[Note], bool] = None,
+                                   indexer_class: Type[Indexer] = None
+                                   ) -> Tree:
         top_k_descendants = self.get_notes_by_similarity(query_list, weights, top_k,
                                                          note_filter, indexer_class)
-        new_notetree = new_notetree_from_note_subset(top_k_descendants, self)
-        return new_notetree
+        new_tree = new_tree_from_note_subset(top_k_descendants, self)
+        return new_tree
 
-    def duplicate_notetree_by_note_mapping(self, note_mapping: Callable[
+    def duplicate_tree_by_note_mapping(self, note_mapping: Callable[
         [Note, Tree], Note]) -> Tree:
         """
-        Duplicate the notetree by mapping each note to a new note
-        It can also be used for creating a copy of the notetree
+        Duplicate the tree by mapping each note to a new note
+        It can also be used for creating a copy of the tree
         :param note_mapping: The mapping function for each note
-        :return: A new notetree
+        :return: A new tree
         """
-        new_notetree = Tree(self.topic, rule_of_path=self.rule_of_path)
+        new_tree = Tree(self.topic, rule_of_path=self.rule_of_path)
         for note in self.get_note_list():
             new_path = self.get_note_path(note)
-            new_notetree.add_note_by_path(new_path, note_mapping(note, new_notetree))
-        return new_notetree
+            new_tree.add_note_by_path(new_path, note_mapping(note, new_tree))
+        return new_tree
 
     """
-    ## Persistence of the notetree
+    ## Persistence of the tree
     """
 
     def save(self, path: str, save_indexing: bool = False):
@@ -309,8 +309,8 @@ class Tree:
     def load(path: str) -> Tree:
         # TODO: We need to test this function and make sure it works
         with open(path, "rb") as f:
-            notetree = dill.load(f)
-        return notetree
+            tree = dill.load(f)
+        return tree
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.root.content!r}"
@@ -321,11 +321,11 @@ class Tree:
 """
 
 
-def new_notetree_from_note_subset(notes: List[Note], notetree: Tree) -> Tree:
-    new_notetree = Tree(root_content=notetree.topic)
+def new_tree_from_note_subset(notes: List[Note], tree: Tree) -> Tree:
+    new_tree = Tree(root_content=tree.topic)
     for note in notes:
-        new_notetree.add_note_by_path(notetree.get_note_path(note), note)
-    return new_notetree
+        new_tree.add_note_by_path(tree.get_note_path(note), note)
+    return new_tree
 
 
 def delete_extra_keys_for_prompt(tree):

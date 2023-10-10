@@ -29,4 +29,4 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["evonote", "doc_in_py"]
+packages = ["evonote", "docinpy"]

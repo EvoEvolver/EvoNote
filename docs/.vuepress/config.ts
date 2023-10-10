@@ -43,6 +43,10 @@ export default defineUserConfig({
                         link: '/development',
                     },
                     {
+                        text: 'DocInPy',
+                        link: '/docinpy',
+                    },
+                    {
                         text: 'Project tree',
                         link: 'https://evonote.org/html/project_tree.html',
                     }
