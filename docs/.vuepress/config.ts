@@ -16,6 +16,7 @@ export default defineUserConfig({
     head: [['link', { rel: 'icon', href: '/image/favicon.ico' }]],
     // @ts-ignore
     theme: defaultTheme({
+        logo: '/image/logo.png',
         navbar: [
             {
                 text: 'Home',
