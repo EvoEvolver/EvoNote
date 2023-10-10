@@ -6,7 +6,7 @@ from evonote.gui.utlis import hypenate_texts
 
 def show_document_with_key_gui(keys, documents):
     if len(keys) == 0:
-        print("No keys to show")
+        print("Dict viewer: No keys to show")
         return
 
     html_documents = []

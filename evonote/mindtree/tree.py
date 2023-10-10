@@ -24,7 +24,7 @@ class Tree:
     """
 
 
-    def __init__(self, root_content, rule_of_path: str = None):
+    def __init__(self, root_content="", rule_of_path: str = None):
         """
         :param root_content: The content of the root of the tree
         :param rule_of_path: The rule for creating paths.

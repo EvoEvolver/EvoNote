@@ -60,7 +60,7 @@ def digest_content(content):
         system_message="""You are a helpful assistant for arranging knowledge. You should output merely JSON.""")
     chat.add_user_message(content)
     chat.add_user_message(
-        """Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "root_content", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")
+        """Summarize the below paragraphs into a tree. Give the result in JSON with the keys being "topic", "statement", "subtopics". The "statement" entry should be a shortened version of original text.""")
 
     res = chat.complete_chat()
     if res[0] == "`":
@@ -83,9 +83,9 @@ def set_notes_by_digest(note: Note, digest: str):
 
 
 def iter_and_assign(note: Note, tree: dict):
-    if "root_content" not in tree or "statement" not in tree:
+    if "topic" not in tree or "statement" not in tree:
         raise Exception("incomplete tree node")
-    node = note.s(tree["root_content"]).be(tree["statement"])
+    node = note.s(tree["topic"]).be(tree["statement"])
     if "subtopics" not in tree:
         return
     for subtopic in tree["subtopics"]:
