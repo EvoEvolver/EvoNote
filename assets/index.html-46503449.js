@@ -1,0 +1,1 @@
+import{_ as t,o,c as s,a as e}from"./app-1ed94c4d.js";const n="/assets/evonote-8fd48474.svg",c={},_=e("p",null,[e("img",{src:n,alt:""})],-1),a=e("p",null,"Welcome to the EvoNote documentation!",-1),l=[_,a];function r(i,d){return o(),s("div",null,l)}const f=t(c,[["render",r],["__file","index.html.vue"]]);export{f as default};

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="generator" content="VuePress 2.0.0-beta.67">
+    <style>
+      :root {
+        --c-bg: #fff;
+      }
+      html.dark {
+        --c-bg: #22272e;
+      }
+      html, body {
+        background-color: var(--c-bg);
+      }
+    </style>
+    <script>
+      const userMode = localStorage.getItem('vuepress-color-scheme');
+			const systemDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			if (userMode === 'dark' || (userMode !== 'light' && systemDarkMode)) {
+				document.documentElement.classList.toggle('dark', true);
+			}
+    </script>
+    <link rel="icon" href="/image/favicon.ico"><title>DocInPy - Documentation just in your Python code</title><meta name="description" content="">
+    <link rel="preload" href="/assets/style-f8de3c48.css" as="style"><link rel="stylesheet" href="/assets/style-f8de3c48.css">
+    <link rel="modulepreload" href="/assets/app-1ed94c4d.js"><link rel="modulepreload" href="/assets/index.html-e38d5134.js"><link rel="modulepreload" href="/assets/index.html-e733f15c.js"><link rel="prefetch" href="/assets/index.html-5ba6cdc3.js" as="script"><link rel="prefetch" href="/assets/index.html-5ba6cdc3.js" as="script"><link rel="prefetch" href="/assets/index.html-d95fdf8c.js" as="script"><link rel="prefetch" href="/assets/0. TL_DR.html-04cf456a.js" as="script"><link rel="prefetch" href="/assets/1. Indexing is non-trivial.html-de27ef5e.js" as="script"><link rel="prefetch" href="/assets/2. Tree indexing.html-a4e421ab.js" as="script"><link rel="prefetch" href="/assets/2.1 Method of Loci and sparsity.html-042d72fb.js" as="script"><link rel="prefetch" href="/assets/3. Copernicus and indexing.html-9b0fa442.js" as="script"><link rel="prefetch" href="/assets/4. Continuous and discrete knowledge.html-e31de42f.js" as="script"><link rel="prefetch" href="/assets/4.1 Interface of continuous and discrete.html-20711f93.js" as="script"><link rel="prefetch" href="/assets/4.2 Tyranny of science.html-c043c0d4.js" as="script"><link rel="prefetch" href="/assets/Comments on previous work.html-e69171fc.js" as="script"><link rel="prefetch" href="/assets/index.html-2bf63421.js" as="script"><link rel="prefetch" href="/assets/404.html-60b35caa.js" as="script"><link rel="prefetch" href="/assets/index.html-46503449.js" as="script"><link rel="prefetch" href="/assets/index.html-46503449.js" as="script"><link rel="prefetch" href="/assets/index.html-c744da5c.js" as="script"><link rel="prefetch" href="/assets/0. TL_DR.html-46152a18.js" as="script"><link rel="prefetch" href="/assets/1. Indexing is non-trivial.html-d3e540bd.js" as="script"><link rel="prefetch" href="/assets/2. Tree indexing.html-0edd65fc.js" as="script"><link rel="prefetch" href="/assets/2.1 Method of Loci and sparsity.html-c46dd2f7.js" as="script"><link rel="prefetch" href="/assets/3. Copernicus and indexing.html-ecb22cc2.js" as="script"><link rel="prefetch" href="/assets/4. Continuous and discrete knowledge.html-cd299de8.js" as="script"><link rel="prefetch" href="/assets/4.1 Interface of continuous and discrete.html-effb1b18.js" as="script"><link rel="prefetch" href="/assets/4.2 Tyranny of science.html-eb11251e.js" as="script"><link rel="prefetch" href="/assets/Comments on previous work.html-d67d0a28.js" as="script"><link rel="prefetch" href="/assets/index.html-71be8ada.js" as="script"><link rel="prefetch" href="/assets/404.html-4914507a.js" as="script">
+  </head>
+  <body>
+    <div id="app"><!--[--><div class="theme-container"><!--[--><header class="navbar"><div class="toggle-sidebar-button" title="toggle sidebar" aria-expanded="false" role="button" tabindex="0"><div class="icon" aria-hidden="true"><span></span><span></span><span></span></div></div><span><a href="/" class=""><img class="logo" src="/image/logo.png" alt><!--v-if--></a></span><div class="navbar-items-wrapper" style=""><!--[--><!--]--><nav class="navbar-items can-hide"><!--[--><div class="navbar-item"><a href="/" class="" aria-label="Home"><!--[--><!--]--> Home <!--[--><!--]--></a></div><div class="navbar-item"><a class="external-link" href="https://github.com/EvoEvolver/EvoNote" rel="noopener noreferrer" target="_blank" aria-label="GitHub"><!--[--><!--]--> GitHub <span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span><!--[--><!--]--></a></div><!--]--></nav><!--[--><!--]--><button class="toggle-color-mode-button" title="toggle color mode"><svg style="" class="icon" focusable="false" viewBox="0 0 32 32"><path d="M16 12.005a4 4 0 1 1-4 4a4.005 4.005 0 0 1 4-4m0-2a6 6 0 1 0 6 6a6 6 0 0 0-6-6z" fill="currentColor"></path><path d="M5.394 6.813l1.414-1.415l3.506 3.506L8.9 10.318z" fill="currentColor"></path><path d="M2 15.005h5v2H2z" fill="currentColor"></path><path d="M5.394 25.197L8.9 21.691l1.414 1.415l-3.506 3.505z" fill="currentColor"></path><path d="M15 25.005h2v5h-2z" fill="currentColor"></path><path d="M21.687 23.106l1.414-1.415l3.506 3.506l-1.414 1.414z" fill="currentColor"></path><path d="M25 15.005h5v2h-5z" fill="currentColor"></path><path d="M21.687 8.904l3.506-3.506l1.414 1.415l-3.506 3.505z" fill="currentColor"></path><path d="M15 2.005h2v5h-2z" fill="currentColor"></path></svg><svg style="display:none;" class="icon" focusable="false" viewBox="0 0 32 32"><path d="M13.502 5.414a15.075 15.075 0 0 0 11.594 18.194a11.113 11.113 0 0 1-7.975 3.39c-.138 0-.278.005-.418 0a11.094 11.094 0 0 1-3.2-21.584M14.98 3a1.002 1.002 0 0 0-.175.016a13.096 13.096 0 0 0 1.825 25.981c.164.006.328 0 .49 0a13.072 13.072 0 0 0 10.703-5.555a1.01 1.01 0 0 0-.783-1.565A13.08 13.08 0 0 1 15.89 4.38A1.015 1.015 0 0 0 14.98 3z" fill="currentColor"></path></svg></button><!----></div></header><!--]--><div class="sidebar-mask"></div><!--[--><aside class="sidebar"><nav class="navbar-items"><!--[--><div class="navbar-item"><a href="/" class="" aria-label="Home"><!--[--><!--]--> Home <!--[--><!--]--></a></div><div class="navbar-item"><a class="external-link" href="https://github.com/EvoEvolver/EvoNote" rel="noopener noreferrer" target="_blank" aria-label="GitHub"><!--[--><!--]--> GitHub <span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span><!--[--><!--]--></a></div><!--]--></nav><!--[--><!--]--><ul class="sidebar-items"><!--[--><li><p tabindex="0" class="sidebar-item sidebar-heading">EvoNote Docs <!----></p><ul style="" class="sidebar-item-children"><!--[--><li><a href="/" class="sidebar-item" aria-label="Home"><!--[--><!--]--> Home <!--[--><!--]--></a><!----></li><li><a href="/writings" class="sidebar-item" aria-label="Writings"><!--[--><!--]--> Writings <!--[--><!--]--></a><!----></li><li><a href="/development" class="sidebar-item" aria-label="Development"><!--[--><!--]--> Development <!--[--><!--]--></a><!----></li><li><a aria-current="page" href="/docinpy" class="router-link-active router-link-exact-active router-link-active sidebar-item" aria-label="DocInPy"><!--[--><!--]--> DocInPy <!--[--><!--]--></a><!----></li><li><a class="external-link sidebar-item" href="https://evonote.org/html/project_tree.html" rel="noopener noreferrer" target="_blank" aria-label="Project tree"><!--[--><!--]--> Project tree <span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span><!--[--><!--]--></a><!----></li><!--]--></ul></li><!--]--></ul><!--[--><!--]--></aside><!--]--><!--[--><main class="page"><!--[--><!--]--><div class="theme-default-content"><!--[--><!--]--><div><h1 id="docinpy-documentation-just-in-your-python-code" tabindex="-1"><a class="header-anchor" href="#docinpy-documentation-just-in-your-python-code" aria-hidden="true">#</a> DocInPy - Documentation just in your Python code</h1><p>DocInPy is a standard for putting documentation just in your Python code. It is proposed to provide another option other than the current standard of putting documentation in a separate file. Though it is not new to mix documentation with code, in DocInPy, you can also do</p><ul><li>Adding sections to your functions and classes</li><li>Adding examples to your functions and classes</li></ul><p>We believe in this way we can provide much more context information to new contributors who are not familiar with the codebase. It is also important for AI-based agents to understand the codebase and develop it.</p><h2 id="evonote" tabindex="-1"><a class="header-anchor" href="#evonote" aria-hidden="true">#</a> EvoNote</h2><p>EvoNote is using DocInPy to document its codebase. You can have a good visualization of EvoNote&#39;s codebase by running <a href="https://evonote.org/html/project_tree.html" target="_blank" rel="noopener noreferrer">EvoNote visualization<span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span></a>.</p><h2 id="how-to-use" tabindex="-1"><a class="header-anchor" href="#how-to-use" aria-hidden="true">#</a> How to use</h2><h3 id="sections" tabindex="-1"><a class="header-anchor" href="#sections" aria-hidden="true">#</a> Sections</h3><p>Putting sections in DocInPy is as easy as putting sections in Markdown. You just need to put a <code>#</code> before your section title in a comment environment starting with <code>&quot;&quot;&quot;</code>. For example,</p><div class="language-python line-numbers-mode" data-ext="py"><pre class="language-python"><code><span class="token triple-quoted-string string">&quot;&quot;&quot;
+# Section 1
+The following is a function.
+&quot;&quot;&quot;</span>
+
+
+<span class="token keyword">def</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">pass</span>
+
+
+<span class="token triple-quoted-string string">&quot;&quot;&quot;
+# Section 2
+The following is another function.
+&quot;&quot;&quot;</span>
+
+
+<span class="token keyword">def</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">pass</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>In this way, <code>foo()</code> and <code>bar()</code> will have sections <code>Section 1</code> and <code>Section 2</code> respectively. The sections will also contain the comments under them.</p><p>Your section can also contain classes add levels. For example,</p><div class="language-python line-numbers-mode" data-ext="py"><pre class="language-python"><code><span class="token triple-quoted-string string">&quot;&quot;&quot;
+# Top Section
+## Section 1
+&quot;&quot;&quot;</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">Foo</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">&quot;&quot;&quot;
+    # Section 1
+    The following is a function.
+    &quot;&quot;&quot;</span>
+
+    <span class="token keyword">def</span> <span class="token function">foo</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">pass</span>
+
+    <span class="token triple-quoted-string string">&quot;&quot;&quot;
+    # Section 2
+    The following is another function.
+    &quot;&quot;&quot;</span>
+
+    <span class="token keyword">def</span> <span class="token function">bar</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">pass</span>
+
+
+<span class="token triple-quoted-string string">&quot;&quot;&quot;
+## Section 2
+&quot;&quot;&quot;</span>
+
+
+<span class="token keyword">def</span> <span class="token function">baz</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">pass</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="section-in-folder" tabindex="-1"><a class="header-anchor" href="#section-in-folder" aria-hidden="true">#</a> Section in folder</h3><p>You add <code>.tree.yml</code> file in a folder to add sections in it. For example, in the following folder</p><div class="language-text line-numbers-mode" data-ext="text"><pre class="language-text"><code>a_folder
+- __init__.py
+- a.py
+- b.py
+- c.py
+- .tree.yml
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>You can put <code>a</code>,<code>b</code> in a section by putting</p><div class="language-yaml line-numbers-mode" data-ext="yml"><pre class="language-yaml"><code><span class="token key atrule">sections</span><span class="token punctuation">:</span>
+ <span class="token key atrule">your section title</span><span class="token punctuation">:</span>
+   <span class="token punctuation">-</span> a
+   <span class="token punctuation">-</span> b
+<span class="token key atrule">default section</span><span class="token punctuation">:</span> you default section title
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>Then <code>a</code> and <code>b</code> will be in the section <code>your section title</code> and <code>c</code> will be in the section <code>you default section title</code>.</p><h3 id="mark-examples" tabindex="-1"><a class="header-anchor" href="#mark-examples" aria-hidden="true">#</a> Mark examples</h3><p>You can also add examples to your functions and classes. Just use the <code>@example</code> decorator. For example,</p><div class="language-python line-numbers-mode" data-ext="py"><pre class="language-python"><code><span class="token keyword">from</span> docinpy<span class="token punctuation">.</span>decorator <span class="token keyword">import</span> example
+
+
+<span class="token decorator annotation punctuation">@example</span>
+<span class="token keyword">def</span> <span class="token function">how_to_use_foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">&quot;&quot;&quot;
+    # Example
+    The following is an example of using `foo()`.
+    &quot;&quot;&quot;</span>
+    foo<span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="mark-todos" tabindex="-1"><a class="header-anchor" href="#mark-todos" aria-hidden="true">#</a> Mark todos</h3><p>In a similar way, you can also mark todos in your code. Just use the <code>@todo</code> decorator. For example,</p><div class="language-python line-numbers-mode" data-ext="py"><pre class="language-python"><code><span class="token keyword">from</span> docinpy<span class="token punctuation">.</span>decorator <span class="token keyword">import</span> todo
+
+<span class="token decorator annotation punctuation">@todo</span>
+<span class="token keyword">def</span> <span class="token function">todo_foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">&quot;&quot;&quot;
+    # Todo
+    The following is a todo.
+    &quot;&quot;&quot;</span>
+    foo<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token decorator annotation punctuation">@todo</span><span class="token punctuation">(</span><span class="token string">&quot;This function is buggy. Fix it.&quot;</span><span class="token punctuation">)</span>
+<span class="token keyword">def</span> <span class="token function">buggy_foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    foo<span class="token punctuation">(</span>a<span class="token operator">=</span>b<span class="token punctuation">)</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="philosophy-behind-docinpy" tabindex="-1"><a class="header-anchor" href="#philosophy-behind-docinpy" aria-hidden="true">#</a> Philosophy behind DocInPy</h2><h3 id="literate-programming" tabindex="-1"><a class="header-anchor" href="#literate-programming" aria-hidden="true">#</a> Literate programming</h3><p>DocInPy can be regarded as an effort toward the idea - <a href="https://guides.nyu.edu/datascience/literate-prog" target="_blank" rel="noopener noreferrer">literate programming<span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span></a>. We think literate programming gets even more important in the era of AI for it provides more context information for AI-based agents to understand the codebase.</p><h3 id="sparse-tree-structure" tabindex="-1"><a class="header-anchor" href="#sparse-tree-structure" aria-hidden="true">#</a> Sparse tree structure</h3><p>All the programming languages encourage the programmers to put their code in the tree structure. For example, you can put your functions in difference classes, in different files and put the files in different folders. However, it is still very common to put a lot of functions in a single file, in which the codes are arranged in an almost flat structure.</p><p>DocInPy helps this by adding a zero-cost way to add sections to your functions and classes. It makes another step towards a more tree-like structure of the codebase. We believe this will help the programmers to understand the codebase better. See <a href="/writings/2.1%20Method%20of%20Loci%20and%20sparsity.html" class="">Method of Loci</a> for more details.</p></div><!--[--><!--]--></div><footer class="page-meta"><!----><div class="meta-item last-updated"><span class="meta-item-label">Last Updated: </span><!----></div><div class="meta-item contributors"><span class="meta-item-label">Contributors: </span><span class="meta-item-info"><!--[--><!--[--><span class="contributor" title="email: doomspec@outlook.com">Zijian Zhang</span><!----><!--]--><!--]--></span></div></footer><!----><!--[--><!--]--></main><!--]--></div><!----><!--]--></div>
+    <script type="module" src="/assets/app-1ed94c4d.js" defer></script>
+  </body>
+</html>

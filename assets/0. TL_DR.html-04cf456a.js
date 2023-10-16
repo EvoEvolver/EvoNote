@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-6d91ab6a","path":"/writings/0.%20TL_DR.html","title":"TL;DR","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1696131659000,"contributors":[{"name":"Zijian Zhang","email":"doomspec@outlook.com","commits":1}]},"filePathRelative":"writings/0. TL;DR.md"}');export{t as data};
